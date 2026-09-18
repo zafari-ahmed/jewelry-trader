@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous" />
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,300;8..60,400;8..60,600&family=Source+Sans+3:wght@400;500;600&display=swap" rel="stylesheet" />
+<style>
+  body { margin: 0; background: #F7F4EE; -webkit-font-smoothing: antialiased; }
+  * { box-sizing: border-box; }
+  a { color: #1C1F2E; text-decoration: none; }
+  a:hover { color: #C9A24B; }
+  input, select, textarea, button { font: inherit; }
+</style>
+</helmet>
+<div style="min-height:100vh; background:#F7F4EE; font-family:'Source Sans 3',Calibri,sans-serif; color:#24242A">
+
+  <div style="background:#1C1F2E; color:#E4CE8C; text-align:center; font-size:11.5px; letter-spacing:.14em; text-transform:uppercase; padding:8px">Complimentary insured shipping · Every piece independently appraised</div>
+
+  <header style="background:#F7F4EE; border-bottom:1px solid rgba(201,162,75,.45); position:sticky; top:0; z-index:6">
+    <div style="max-width:1240px; margin:0 auto; padding:18px 28px; display:flex; align-items:center; gap:24px">
+      <div style="font-family:'Source Serif 4',Cambria,serif; font-size:19px; letter-spacing:.2em; text-transform:uppercase">Jewelry<span style="color:#C9A24B"> Trader</span></div>
+      <nav style="display:flex; gap:22px; margin-left:18px; font-size:13.5px; letter-spacing:.06em">
+        <span onClick="{{ goCatalog }}" style="cursor:pointer; padding-bottom:2px; border-bottom:1px solid transparent" style-hover="border-bottom-color:#C9A24B">Rings</span>
+        <span onClick="{{ goCatalog }}" style="cursor:pointer; padding-bottom:2px; border-bottom:1px solid transparent" style-hover="border-bottom-color:#C9A24B">Necklaces</span>
+        <span onClick="{{ goCatalog }}" style="cursor:pointer; padding-bottom:2px; border-bottom:1px solid transparent" style-hover="border-bottom-color:#C9A24B">Bracelets</span>
+        <span onClick="{{ goCatalog }}" style="cursor:pointer; padding-bottom:2px; border-bottom:1px solid transparent" style-hover="border-bottom-color:#C9A24B">By Period</span>
+        <span onClick="{{ goCatalog }}" style="cursor:pointer; padding-bottom:2px; border-bottom:1px solid transparent" style-hover="border-bottom-color:#C9A24B">Appraisals</span>
+      </nav>
+      <div style="margin-left:auto; display:flex; align-items:center; gap:18px; font-size:13.5px">
+        <span onClick="{{ goHome }}" style="cursor:pointer">Search</span>
+        <span onClick="{{ goAccount }}" style="cursor:pointer">Account</span>
+        <span onClick="{{ goCart }}" style="cursor:pointer; display:flex; align-items:center; gap:7px">Cart<span style="min-width:19px; height:19px; border-radius:50%; border:1px solid #C9A24B; color:#8A6A0B; font-size:11px; display:inline-flex; align-items:center; justify-content:center">1</span></span>
+      </div>
+    </div>
+  </header>
+
+  <sc-if value="{{ isHome }}" hint-placeholder-val="{{ true }}">
+    <div>
+      <section style="max-width:1240px; margin:0 auto; padding:36px 28px 0">
+        <div style="position:relative; aspect-ratio:21/9; min-height:340px; border:1px solid rgba(201,162,75,.5); border-radius:2px; background:repeating-linear-gradient(135deg,#EFEAE0 0 8px,#E6E0D2 8px 16px); display:flex; align-items:center">
+          <div style="position:absolute; inset:auto auto 14px 14px; font-family:ui-monospace,Menlo,monospace; font-size:10.5px; color:#6B6B72; background:#FFFFFFCC; padding:3px 7px; border-radius:2px">hero image · 2400×1030 · styled estate ring on linen</div>
+          <div style="max-width:520px; margin-left:clamp(24px,6vw,80px); background:#F7F4EEEE; border:1px solid rgba(201,162,75,.5); border-radius:2px; padding:34px 34px 30px">
+            <div style="font-size:11px; letter-spacing:.2em; text-transform:uppercase; color:#8A6A0B">Est. 1978 · New York</div>
+            <h1 style="margin:12px 0 0; font-family:'Source Serif 4',Cambria,serif; font-size:clamp(30px,3.4vw,44px); font-weight:400; line-height:1.14; letter-spacing:-.01em">Jewelry with a history worth keeping</h1>
+            <p style="margin:14px 0 0; font-size:15.5px; line-height:1.6; color:#45454C; max-width:42ch; text-wrap:pretty">Antique, estate and fine pieces, each examined, documented and appraised in our workshop before it reaches you.</p>
+            <button onClick="{{ goCatalog }}" style="margin-top:22px; padding:13px 26px; border:1px solid #1C1F2E; background:#1C1F2E; color:#F7F4EE; border-radius:2px; font-size:14px; letter-spacing:.08em; text-transform:uppercase; cursor:pointer" style-hover="background:#C9A24B; border-color:#C9A24B; color:#1C1F2E">Browse the collection</button>
+          </div>
+        </div>
+      </section>
+
+      <section style="max-width:1240px; margin:0 auto; padding:52px 28px 0">
+        <div style="display:flex; align-items:baseline; gap:16px; padding-bottom:14px; border-bottom:1px solid rgba(201,162,75,.45)">
+          <h2 style="margin:0; font-family:'Source Serif 4',Cambria,serif; font-size:26px; font-weight:400">Shop by period</h2>
+          <a href="#" style="margin-left:auto; font-size:13px; color:#6B6B72">All periods</a>
+        </div>
+        <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:18px; margin-top:22px">
+          <div onClick="{{ goCatalog }}" style="cursor:pointer">
+            <div style="aspect-ratio:3/4; border:1px solid #E3DCCE; border-radius:2px; background:repeating-linear-gradient(135deg,#EFEAE0 0 6px,#E6E0D2 6px 12px); display:flex; align-items:flex-end; padding:10px" style-hover="border-color:#C9A24B"><span style="font-family:ui-monospace,Menlo,monospace; font-size:10px; color:#6B6B72; background:#FFFFFFCC; padding:2px 6px; border-radius:2px">georgian</span></div>
+            <div style="margin-top:11px; font-family:'Source Serif 4',Cambria,serif; font-size:18px">Georgian</div>
+            <div style="font-size:12.5px; color:#6B6B72">1714–1837 · 24 pieces</div>
+          </div>
+          <div onClick="{{ goCatalog }}" style="cursor:pointer">
+            <div style="aspect-ratio:3/4; border:1px solid #E3DCCE; border-radius:2px; background:repeating-linear-gradient(135deg,#EFEAE0 0 6px,#E6E0D2 6px 12px); display:flex; align-items:flex-end; padding:10px" style-hover="border-color:#C9A24B"><span style="font-family:ui-monospace,Menlo,monospace; font-size:10px; color:#6B6B72; background:#FFFFFFCC; padding:2px 6px; border-radius:2px">victorian</span></div>
+            <div style="margin-top:11px; font-family:'Source Serif 4',Cambria,serif; font-size:18px">Victorian</div>
+            <div style="font-size:12.5px; color:#6B6B72">1837–1901 · 118 pieces</div>
+          </div>
+          <div onClick="{{ goCatalog }}" style="cursor:pointer">
+            <div style="aspect-ratio:3/4; border:1px solid #E3DCCE; border-radius:2px; background:repeating-linear-gradient(135deg,#EFEAE0 0 6px,#E6E0D2 6px 12px); display:flex; align-items:flex-end; padding:10px" style-hover="border-color:#C9A24B"><span style="font-family:ui-monospace,Menlo,monospace; font-size:10px; color:#6B6B72; background:#FFFFFFCC; padding:2px 6px; border-radius:2px">edwardian</span></div>
+            <div style="margin-top:11px; font-family:'Source Serif 4',Cambria,serif; font-size:18px">Edwardian</div>
+            <div style="font-size:12.5px; color:#6B6B72">1901–1915 · 63 pieces</div>
+          </div>
+          <div onClick="{{ goCatalog }}" style="cursor:pointer">
+            <div style="aspect-ratio:3/4; border:1px solid #E3DCCE; border-radius:2px; background:repeating-linear-gradient(135deg,#EFEAE0 0 6px,#E6E0D2 6px 12px); display:flex; align-items:flex-end; padding:10px" style-hover="border-color:#C9A24B"><span style="font-family:ui-monospace,Menlo,monospace; font-size:10px; color:#6B6B72; background:#FFFFFFCC; padding:2px 6px; border-radius:2px">art deco</span></div>
+            <div style="margin-top:11px; font-family:'Source Serif 4',Cambria,serif; font-size:18px">Art Deco</div>
+            <div style="font-size:12.5px; color:#6B6B72">1920–1935 · 91 pieces</div>
+          </div>
+        </div>
+      </section>
+
+      <section style="max-width:1240px; margin:0 auto; padding:52px 28px 0">
+        <div style="display:flex; align-items:baseline; gap:16px; padding-bottom:14px; border-bottom:1px solid rgba(201,162,75,.45)">
+          <h2 style="margin:0; font-family:'Source Serif 4',Cambria,serif; font-size:26px; font-weight:400">Recently acquired</h2>
+          <a href="#" onClick="{{ goCatalog }}" style="margin-left:auto; font-size:13px; color:#6B6B72; cursor:pointer">View all</a>
+        </div>
+        <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(230px,1fr)); gap:20px; margin-top:22px">
+          <div onClick="{{ goProduct }}" style="background:#FFFFFF; border:1px solid #E3DCCE; border-radius:2px; overflow:hidden; cursor:pointer" style-hover="border-color:#C9A24B">
+            <div style="aspect-ratio:1; background:repeating-linear-gradient(135deg,#EFEAE0 0 6px,#E6E0D2 6px 12px)"></div>
+            <div style="padding:14px 16px 16px; border-top:1px solid rgba(201,162,75,.4)">
+              <div style="font-family:'Source Serif 4',Cambria,serif; font-size:17px; line-height:1.3">Edwardian Diamond Cluster Ring</div>
+              <div style="font-size:12.5px; color:#6B6B72; margin-top:4px">Platinum · c. 1905 · 1.42 ctw</div>
+              <div style="font-size:17px; font-weight:600; margin-top:9px">$6,800</div>
+            </div>
+          </div>
+          <div onClick="{{ goProduct }}" style="background:#FFFFFF; border:1px solid #E3DCCE; border-radius:2px; overflow:hidden; cursor:pointer" style-hover="border-color:#C9A24B">
+            <div style="aspect-ratio:1; background:repeating-linear-gradient(135deg,#EFEAE0 0 6px,#E6E0D2 6px 12px)"></div>
+            <div style="padding:14px 16px 16px; border-top:1px solid rgba(201,162,75,.4)">
+              <div style="font-family:'Source Serif 4',Cambria,serif; font-size:17px; line-height:1.3">Art Deco Sapphire Line Bracelet</div>
+              <div style="font-size:12.5px; color:#6B6B72; margin-top:4px">Platinum · c. 1928 · 8.10 ctw</div>
+              <div style="font-size:17px; font-weight:600; margin-top:9px">$12,400</div>
+            </div>
+          </div>
+          <div onClick="{{ goProduct }}" style="background:#FFFFFF; border:1px solid #E3DCCE; border-radius:2px; overflow:hidden; cursor:pointer" style-hover="border-color:#C9A24B">
+            <div style="aspect-ratio:1; background:repeating-linear-gradient(135deg,#EFEAE0 0 6px,#E6E0D2 6px 12px)"></div>
+            <div style="padding:14px 16px 16px; border-top:1px solid rgba(201,162,75,.4)">
+              <div style="font-family:'Source Serif 4',Cambria,serif; font-size:17px; line-height:1.3">Victorian Etruscan Revival Locket</div>
+              <div style="font-size:12.5px; color:#6B6B72; margin-top:4px">18k gold · c. 1875</div>
+              <div style="font-size:17px; font-weight:600; margin-top:9px">$2,950</div>
+            </div>
+          </div>
+          <div onClick="{{ goProduct }}" style="background:#FFFFFF; border:1px solid #E3DCCE; border-radius:2px; overflow:hidden; cursor:pointer" style-hover="border-color:#C9A24B">
+            <div style="aspect-ratio:1; background:repeating-linear-gradient(135deg,#EFEAE0 0 6px,#E6E0D2 6px 12px)"></div>
+            <div style="padding:14px 16px 16px; border-top:1px solid rgba(201,162,75,.4)">
+              <div style="font-family:'Source Serif 4',Cambria,serif; font-size:17px; line-height:1.3">Retro Ruby &amp; Rose Gold Cocktail Ring</div>
+              <div style="font-size:12.5px; color:#6B6B72; margin-top:4px">14k rose gold · c. 1945</div>
+              <div style="font-size:17px; font-weight:600; margin-top:9px">$3,975</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section style="margin-top:60px; background:#1C1F2E; color:#F7F4EE">
+        <div style="max-width:1240px; margin:0 auto; padding:52px 28px; display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:34px">
+          <div>
+            <div style="width:36px; height:36px; border:1px solid #C9A24B; border-radius:50%"></div>
+            <h3 style="margin:14px 0 0; font-family:'Source Serif 4',Cambria,serif; font-size:20px; font-weight:400">Examined in-house</h3>
+            <p style="margin:7px 0 0; font-size:14px; line-height:1.6; color:#B9BDCB">Every piece is inspected by a GIA-trained gemologist before listing.</p>
+          </div>
+          <div>
+            <div style="width:36px; height:36px; border:1px solid #C9A24B; border-radius:50%"></div>
+            <h3 style="margin:14px 0 0; font-family:'Source Serif 4',Cambria,serif; font-size:20px; font-weight:400">Documented provenance</h3>
+            <p style="margin:7px 0 0; font-size:14px; line-height:1.6; color:#B9BDCB">Condition notes, restoration history and hallmark records travel with the piece.</p>
+          </div>
+          <div>
+            <div style="width:36px; height:36px; border:1px solid #C9A24B; border-radius:50%"></div>
+            <h3 style="margin:14px 0 0; font-family:'Source Serif 4',Cambria,serif; font-size:20px; font-weight:400">Fourteen-day return</h3>
+            <p style="margin:7px 0 0; font-size:14px; line-height:1.6; color:#B9BDCB">Insured both ways. Independent appraisal welcome within the window.</p>
+          </div>
+        </div>
+      </section>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ isCatalog }}" hint-placeholder-val="{{ false }}">
+    <div style="max-width:1240px; margin:0 auto; padding:30px 28px 60px; display:grid; grid-template-columns:236px minmax(0,1fr); gap:34px; align-items:start">
+      <aside style="display:flex; flex-direction:column; gap:26px; position:sticky; top:96px">
+        <div>
+          <div style="font-size:11px; letter-spacing:.16em; text-transform:uppercase; color:#6B6B72; padding-bottom:9px; border-bottom:1px solid rgba(201,162,75,.45)">Category</div>
+          <div style="display:flex; flex-direction:column; gap:9px; margin-top:12px; font-size:14px">
+            <label style="display:flex; align-items:center; gap:9px; cursor:pointer"><span style="width:14px; height:14px; border:1px solid #C9A24B; border-radius:2px; background:#C9A24B"></span>Rings (204)</label>
+            <label style="display:flex; align-items:center; gap:9px; cursor:pointer"><span style="width:14px; height:14px; border:1px solid #C4BCA9; border-radius:2px"></span>Necklaces (146)</label>
+            <label style="display:flex; align-items:center; gap:9px; cursor:pointer"><span style="width:14px; height:14px; border:1px solid #C4BCA9; border-radius:2px"></span>Bracelets (88)</label>
+            <label style="display:flex; align-items:center; gap:9px; cursor:pointer"><span style="width:14px; height:14px; border:1px solid #C4BCA9; border-radius:2px"></span>Brooches (61)</label>
+          </div>
+        </div>
+        <div>
+          <div style="font-size:11px; letter-spacing:.16em; text-transform:uppercase; color:#6B6B72; padding-bottom:9px; border-bottom:1px solid rgba(201,162,75,.45)">Period</div>
+          <div style="display:flex; flex-direction:column; gap:9px; margin-top:12px; font-size:14px">
+            <label style="display:flex; align-items:center; gap:9px; cursor:pointer"><span style="width:14px; height:14px; border:1px solid #C4BCA9; border-radius:2px"></span>Georgian</label>
+            <label style="display:flex; align-items:center; gap:9px; cursor:pointer"><span style="width:14px; height:14px; border:1px solid #C4BCA9; border-radius:2px"></span>Victorian</label>
+            <label style="display:flex; align-items:center; gap:9px; cursor:pointer"><span style="width:14px; height:14px; border:1px solid #C9A24B; border-radius:2px; background:#C9A24B"></span>Edwardian</label>
+            <label style="display:flex; align-items:center; gap:9px; cursor:pointer"><span style="width:14px; height:14px; border:1px solid #C4BCA9; border-radius:2px"></span>Art Deco</label>
+          </div>
+        </div>
+        <div>
+          <div style="font-size:11px; letter-spacing:.16em; text-transform:uppercase; color:#6B6B72; padding-bottom:9px; border-bottom:1px solid rgba(201,162,75,.45)">Metal</div>
+          <div style="display:flex; flex-wrap:wrap; gap:7px; margin-top:12px">
+            <span style="font-size:12.5px; border:1px solid #C4BCA9; border-radius:2px; padding:4px 10px; cursor:pointer" style-hover="border-color:#C9A24B">Platinum</span>
+            <span style="font-size:12.5px; border:1px solid #C4BCA9; border-radius:2px; padding:4px 10px; cursor:pointer" style-hover="border-color:#C9A24B">18k gold</span>
+            <span style="font-size:12.5px; border:1px solid #C4BCA9; border-radius:2px; padding:4px 10px; cursor:pointer" style-hover="border-color:#C9A24B">Rose gold</span>
+            <span style="font-size:12.5px; border:1px solid #C4BCA9; border-radius:2px; padding:4px 10px; cursor:pointer" style-hover="border-color:#C9A24B">Silver</span>
+          </div>
+        </div>
+        <div>
+          <div style="font-size:11px; letter-spacing:.16em; text-transform:uppercase; color:#6B6B72; padding-bottom:9px; border-bottom:1px solid rgba(201,162,75,.45)">Price</div>
+          <div style="display:flex; gap:8px; margin-top:12px">
+            <input placeholder="$ min" style="width:50%; padding:8px 10px; border:1px solid #D9D2C4; border-radius:2px; background:#FFFFFF; font-size:13px; outline:none" style-focus="border-color:#C9A24B" />
+            <input placeholder="$ max" style="width:50%; padding:8px 10px; border:1px solid #D9D2C4; border-radius:2px; background:#FFFFFF; font-size:13px; outline:none" style-focus="border-color:#C9A24B" />
+          </div>
+        </div>
+      </aside>
+
+      <div>
+        <div style="display:flex; align-items:baseline; gap:14px; flex-wrap:wrap; padding-bottom:14px; border-bottom:1px solid rgba(201,162,75,.45)">
+          <h1 style="margin:0; font-family:'Source Serif 4',Cambria,serif; font-size:28px; font-weight:400">Edwardian Rings</h1>
+          <span style="font-size:13px; color:#6B6B72">63 pieces</span>
+          <select style="margin-left:auto; padding:8px 11px; border:1px solid #D9D2C4; border-radius:2px; background:#FFFFFF; font-size:13.5px"><option>Newest first</option><option>Price, low to high</option><option>Price, high to low</option></select>
+        </div>
+        <div style="display:grid; grid-template-columns:repeat(auto-fill,minmax(230px,1fr)); gap:20px; margin-top:22px">
+          <div onClick="{{ goProduct }}" style="background:#FFFFFF; border:1px solid #E3DCCE; border-radius:2px; overflow:hidden; cursor:pointer" style-hover="border-color:#C9A24B">
+            <div style="aspect-ratio:1; background:repeating-linear-gradient(135deg,#EFEAE0 0 6px,#E6E0D2 6px 12px)"></div>
+            <div style="padding:14px 16px 16px; border-top:1px solid rgba(201,162,75,.4)"><div style="font-family:'Source Serif 4',Cambria,serif; font-size:17px; line-height:1.3">Edwardian Diamond Cluster Ring</div><div style="font-size:12.5px; color:#6B6B72; margin-top:4px">Platinum · 1.42 ctw</div><div style="font-size:17px; font-weight:600; margin-top:9px">$6,800</div></div>
+          </div>
+          <div onClick="{{ goProduct }}" style="background:#FFFFFF; border:1px solid #E3DCCE; border-radius:2px; overflow:hidden; cursor:pointer" style-hover="border-color:#C9A24B">
+            <div style="aspect-ratio:1; background:repeating-linear-gradient(135deg,#EFEAE0 0 6px,#E6E0D2 6px 12px)"></div>
+            <div style="padding:14px 16px 16px; border-top:1px solid rgba(201,162,75,.4)"><div style="font-family:'Source Serif 4',Cambria,serif; font-size:17px; line-height:1.3">Filigree Solitaire, Old European Cut</div><div style="font-size:12.5px; color:#6B6B72; margin-top:4px">Platinum · 0.92 ct</div><div style="font-size:17px; font-weight:600; margin-top:9px">$9,200</div></div>
+          </div>
+          <div onClick="{{ goProduct }}" style="background:#FFFFFF; border:1px solid #E3DCCE; border-radius:2px; overflow:hidden; cursor:pointer" style-hover="border-color:#C9A24B">
+            <div style="aspect-ratio:1; background:repeating-linear-gradient(135deg,#EFEAE0 0 6px,#E6E0D2 6px 12px)"></div>
+            <div style="padding:14px 16px 16px; border-top:1px solid rgba(201,162,75,.4)"><div style="font-family:'Source Serif 4',Cambria,serif; font-size:17px; line-height:1.3">Sapphire &amp; Diamond Three-Stone</div><div style="font-size:12.5px; color:#6B6B72; margin-top:4px">Platinum · Ceylon sapphire</div><div style="font-size:17px; font-weight:600; margin-top:9px">$7,450</div></div>
+          </div>
+          <div onClick="{{ goProduct }}" style="background:#FFFFFF; border:1px solid #E3DCCE; border-radius:2px; overflow:hidden; cursor:pointer" style-hover="border-color:#C9A24B">
+            <div style="aspect-ratio:1; background:repeating-linear-gradient(135deg,#EFEAE0 0 6px,#E6E0D2 6px 12px)"></div>
+            <div style="padding:14px 16px 16px; border-top:1px solid rgba(201,162,75,.4)"><div style="font-family:'Source Serif 4',Cambria,serif; font-size:17px; line-height:1.3">Pearl &amp; Rose-Cut Diamond Band</div><div style="font-size:12.5px; color:#6B6B72; margin-top:4px">18k gold · natural pearl</div><div style="font-size:17px; font-weight:600; margin-top:9px">$2,180</div></div>
+          </div>
+          <div onClick="{{ goProduct }}" style="background:#FFFFFF; border:1px solid #E3DCCE; border-radius:2px; overflow:hidden; cursor:pointer" style-hover="border-color:#C9A24B">
+            <div style="aspect-ratio:1; background:repeating-linear-gradient(135deg,#EFEAE0 0 6px,#E6E0D2 6px 12px)"></div>
+            <div style="padding:14px 16px 16px; border-top:1px solid rgba(201,162,75,.4)"><div style="font-family:'Source Serif 4',Cambria,serif; font-size:17px; line-height:1.3">Emerald Navette Cluster</div><div style="font-size:12.5px; color:#6B6B72; margin-top:4px">Platinum · Colombian emerald</div><div style="font-size:17px; font-weight:600; margin-top:9px">$11,600</div></div>
+          </div>
+          <div onClick="{{ goProduct }}" style="background:#FFFFFF; border:1px solid #E3DCCE; border-radius:2px; overflow:hidden; cursor:pointer" style-hover="border-color:#C9A24B">
+            <div style="aspect-ratio:1; background:repeating-linear-gradient(135deg,#EFEAE0 0 6px,#E6E0D2 6px 12px)"></div>
+            <div style="padding:14px 16px 16px; border-top:1px solid rgba(201,162,75,.4)"><div style="font-family:'Source Serif 4',Cambria,serif; font-size:17px; line-height:1.3">Milgrain Eternity Band</div><div style="font-size:12.5px; color:#6B6B72; margin-top:4px">Platinum · 0.68 ctw</div><div style="font-size:17px; font-weight:600; margin-top:9px">$3,300</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ isProduct }}" hint-placeholder-val="{{ false }}">
+    <div style="max-width:1240px; margin:0 auto; padding:26px 28px 60px">
+      <div style="font-size:12.5px; color:#6B6B72; margin-bottom:20px"><span onClick="{{ goHome }}" style="cursor:pointer">Home</span> · <span onClick="{{ goCatalog }}" style="cursor:pointer">Edwardian Rings</span> · Diamond Cluster Ring</div>
+      <div style="display:grid; grid-template-columns:minmax(0,1.1fr) minmax(0,1fr); gap:44px; align-items:start">
+        <div>
+          <div style="aspect-ratio:1; border:1px solid #E3DCCE; border-radius:2px; background:repeating-linear-gradient(135deg,#EFEAE0 0 7px,#E6E0D2 7px 14px); display:flex; align-items:flex-end; padding:12px"><span style="font-family:ui-monospace,Menlo,monospace; font-size:10.5px; color:#6B6B72; background:#FFFFFFCC; padding:3px 7px; border-radius:2px">hero · 2000×2000 · white sweep</span></div>
+          <div style="display:grid; grid-template-columns:repeat(5,1fr); gap:10px; margin-top:10px">
+            <div style="aspect-ratio:1; border:1px solid #C9A24B; border-radius:2px; background:repeating-linear-gradient(135deg,#EFEAE0 0 5px,#E6E0D2 5px 10px)"></div>
+            <div style="aspect-ratio:1; border:1px solid #E3DCCE; border-radius:2px; background:repeating-linear-gradient(135deg,#EFEAE0 0 5px,#E6E0D2 5px 10px); cursor:pointer" style-hover="border-color:#C9A24B"></div>
+            <div style="aspect-ratio:1; border:1px solid #E3DCCE; border-radius:2px; background:repeating-linear-gradient(135deg,#EFEAE0 0 5px,#E6E0D2 5px 10px); cursor:pointer" style-hover="border-color:#C9A24B"></div>
+            <div style="aspect-ratio:1; border:1px solid #E3DCCE; border-radius:2px; background:repeating-linear-gradient(135deg,#EFEAE0 0 5px,#E6E0D2 5px 10px); cursor:pointer" style-hover="border-color:#C9A24B"></div>
+            <div style="aspect-ratio:1; border:1px solid #E3DCCE; border-radius:2px; background:repeating-linear-gradient(135deg,#EFEAE0 0 5px,#E6E0D2 5px 10px); cursor:pointer" style-hover="border-color:#C9A24B"></div>
+          </div>
+        </div>
+
+        <div>
+          <div style="font-size:11px; letter-spacing:.2em; text-transform:uppercase; color:#8A6A0B">Edwardian · c. 1905</div>
+          <h1 style="margin:10px 0 0; font-family:'Source Serif 4',Cambria,serif; font-size:34px; font-weight:400; line-height:1.2">Platinum Diamond Cluster Ring</h1>
+          <div style="font-size:13px; color:#6B6B72; margin-top:7px">Reference EST-4412 · One of a kind</div>
+          <div style="font-family:'Source Serif 4',Cambria,serif; font-size:30px; font-weight:600; margin-top:18px">$6,800</div>
+          <p style="margin:16px 0 0; font-size:15.5px; line-height:1.65; color:#45454C; text-wrap:pretty">A finely pierced platinum mount set with an old European cut centre of approximately 0.78 carats, framed by eight rose-cut diamonds. Original millegrain edges are crisp and unworn; the shank retains its French import mark.</p>
+
+          <div style="margin-top:22px; border-top:1px solid rgba(201,162,75,.45)">
+            <div style="display:flex; padding:11px 0; border-bottom:1px solid #E9E3D6; font-size:14px"><span style="width:150px; color:#6B6B72">Metal</span><span>950 platinum</span></div>
+            <div style="display:flex; padding:11px 0; border-bottom:1px solid #E9E3D6; font-size:14px"><span style="width:150px; color:#6B6B72">Total carat weight</span><span>1.42 ctw</span></div>
+            <div style="display:flex; padding:11px 0; border-bottom:1px solid #E9E3D6; font-size:14px"><span style="width:150px; color:#6B6B72">Ring size</span><span>6 ¼ · complimentary resizing</span></div>
+            <div style="display:flex; padding:11px 0; border-bottom:1px solid #E9E3D6; font-size:14px"><span style="width:150px; color:#6B6B72">Condition</span><span>Excellent, original</span></div>
+            <div style="display:flex; padding:11px 0; font-size:14px"><span style="width:150px; color:#6B6B72">Appraisal</span><span>Included · $7,400 replacement</span></div>
+          </div>
+
+          <div style="display:flex; gap:10px; margin-top:24px; flex-wrap:wrap">
+            <button onClick="{{ goCart }}" style="flex:1; min-width:200px; padding:16px 26px; border:1px solid #1C1F2E; background:#1C1F2E; color:#F7F4EE; border-radius:2px; font-size:14.5px; letter-spacing:.08em; text-transform:uppercase; cursor:pointer" style-hover="background:#C9A24B; border-color:#C9A24B; color:#1C1F2E">Add to cart</button>
+            <button style="padding:16px 22px; border:1px solid #C4BCA9; background:transparent; border-radius:2px; font-size:14.5px; cursor:pointer" style-hover="border-color:#C9A24B">Request a viewing</button>
+          </div>
+          <div style="margin-top:14px; font-size:13px; color:#6B6B72">Insured shipping included · 14-day return · Layaway available</div>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ isCart }}" hint-placeholder-val="{{ false }}">
+    <div style="max-width:1100px; margin:0 auto; padding:30px 28px 60px">
+      <h1 style="margin:0 0 22px; font-family:'Source Serif 4',Cambria,serif; font-size:30px; font-weight:400">Checkout</h1>
+      <div style="display:grid; grid-template-columns:minmax(0,1.4fr) minmax(0,1fr); gap:34px; align-items:start">
+        <div style="display:flex; flex-direction:column; gap:18px">
+          <div style="background:#FFFFFF; border:1px solid #E3DCCE; border-radius:2px; padding:20px 22px">
+            <div style="font-size:11px; letter-spacing:.16em; text-transform:uppercase; color:#6B6B72; padding-bottom:11px; border-bottom:1px solid rgba(201,162,75,.45)">1 · Contact &amp; delivery</div>
+            <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(190px,1fr)); gap:12px; margin-top:16px">
+              <input value="a.delacroix@example.com" style="grid-column:1/-1; padding:11px 12px; border:1px solid #D9D2C4; border-radius:2px; background:#FFFFFF; font-size:14px; outline:none" style-focus="border-color:#C9A24B" />
+              <input value="Anne Delacroix" style="padding:11px 12px; border:1px solid #D9D2C4; border-radius:2px; font-size:14px; outline:none" style-focus="border-color:#C9A24B" />
+              <input value="(917) 555-0142" style="padding:11px 12px; border:1px solid #D9D2C4; border-radius:2px; font-size:14px; outline:none" style-focus="border-color:#C9A24B" />
+              <input value="88 Wooster Street, Apt 4R" style="grid-column:1/-1; padding:11px 12px; border:1px solid #D9D2C4; border-radius:2px; font-size:14px; outline:none" style-focus="border-color:#C9A24B" />
+              <input value="New York" style="padding:11px 12px; border:1px solid #D9D2C4; border-radius:2px; font-size:14px; outline:none" style-focus="border-color:#C9A24B" />
+              <input value="10012" style="padding:11px 12px; border:1px solid #D9D2C4; border-radius:2px; font-size:14px; outline:none" style-focus="border-color:#C9A24B" />
+            </div>
+          </div>
+
+          <div style="background:#FFFFFF; border:1px solid #E3DCCE; border-radius:2px; padding:20px 22px">
+            <div style="font-size:11px; letter-spacing:.16em; text-transform:uppercase; color:#6B6B72; padding-bottom:11px; border-bottom:1px solid rgba(201,162,75,.45)">2 · Payment</div>
+            <div style="margin-top:16px; border:1px solid #D9D2C4; border-radius:2px; padding:16px 16px 18px; background:#FBFAF7">
+              <div style="display:flex; align-items:center; gap:9px; font-size:12px; color:#6B6B72; margin-bottom:13px"><span style="width:8px; height:8px; border-radius:50%; background:#2E7D32"></span>Secure payment · card details never touch our servers</div>
+              <div style="display:flex; flex-direction:column; gap:10px">
+                <input placeholder="Card number" style="padding:12px 13px; border:1px solid #C4BCA9; border-radius:2px; background:#FFFFFF; font-size:14.5px; outline:none" style-focus="border-color:#C9A24B" />
+                <div style="display:flex; gap:10px">
+                  <input placeholder="MM / YY" style="flex:1; padding:12px 13px; border:1px solid #C4BCA9; border-radius:2px; background:#FFFFFF; font-size:14.5px; outline:none" style-focus="border-color:#C9A24B" />
+                  <input placeholder="CVC" style="flex:1; padding:12px 13px; border:1px solid #C4BCA9; border-radius:2px; background:#FFFFFF; font-size:14.5px; outline:none" style-focus="border-color:#C9A24B" />
+                  <input placeholder="ZIP" style="flex:1; padding:12px 13px; border:1px solid #C4BCA9; border-radius:2px; background:#FFFFFF; font-size:14.5px; outline:none" style-focus="border-color:#C9A24B" />
+                </div>
+              </div>
+              <div style="margin-top:11px; font-size:11.5px; color:#9CA3AF">Payment element styled with brand tokens — navy focus ring, 2px radius, ivory field ground.</div>
+            </div>
+          </div>
+        </div>
+
+        <div style="background:#FFFFFF; border:1px solid #E3DCCE; border-radius:2px; padding:20px 22px; position:sticky; top:96px">
+          <div style="font-size:11px; letter-spacing:.16em; text-transform:uppercase; color:#6B6B72; padding-bottom:11px; border-bottom:1px solid rgba(201,162,75,.45)">Order summary</div>
+          <div style="display:flex; gap:13px; padding:16px 0; border-bottom:1px solid #E9E3D6">
+            <div style="width:62px; height:62px; flex:0 0 62px; border:1px solid #E3DCCE; border-radius:2px; background:repeating-linear-gradient(135deg,#EFEAE0 0 5px,#E6E0D2 5px 10px)"></div>
+            <div style="flex:1; min-width:0"><div style="font-family:'Source Serif 4',Cambria,serif; font-size:15.5px; line-height:1.3">Edwardian Diamond Cluster Ring</div><div style="font-size:12px; color:#6B6B72; margin-top:3px">Size 6 ¼ · EST-4412</div></div>
+            <div style="font-size:15px; font-weight:600">$6,800</div>
+          </div>
+          <div style="padding-top:14px; display:flex; flex-direction:column; gap:7px; font-size:14px">
+            <div style="display:flex; justify-content:space-between; color:#6B6B72"><span>Subtotal</span><span style="color:#24242A">$6,800.00</span></div>
+            <div style="display:flex; justify-content:space-between; color:#6B6B72"><span>Insured shipping</span><span style="color:#2E7D32">Included</span></div>
+            <div style="display:flex; justify-content:space-between; color:#6B6B72"><span>Sales tax</span><span style="color:#24242A">$603.50</span></div>
+          </div>
+          <div style="display:flex; justify-content:space-between; align-items:baseline; margin-top:14px; padding-top:14px; border-top:1px solid rgba(201,162,75,.45)">
+            <span style="font-size:14px; letter-spacing:.08em; text-transform:uppercase; color:#6B6B72">Total</span>
+            <span style="font-family:'Source Serif 4',Cambria,serif; font-size:28px; font-weight:600">$7,403.50</span>
+          </div>
+          <button style="width:100%; margin-top:18px; padding:16px; border:1px solid #1C1F2E; background:#1C1F2E; color:#F7F4EE; border-radius:2px; font-size:14.5px; letter-spacing:.08em; text-transform:uppercase; cursor:pointer" style-hover="background:#C9A24B; border-color:#C9A24B; color:#1C1F2E">Pay $7,403.50</button>
+          <div style="margin-top:11px; font-size:12px; color:#6B6B72; text-align:center">14-day insured return · appraisal enclosed</div>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ isAccount }}" hint-placeholder-val="{{ false }}">
+    <div style="max-width:1000px; margin:0 auto; padding:30px 28px 60px">
+      <h1 style="margin:0; font-family:'Source Serif 4',Cambria,serif; font-size:30px; font-weight:400">Anne Delacroix</h1>
+      <div style="font-size:13.5px; color:#6B6B72; margin-top:5px">a.delacroix@example.com · Member since 2021</div>
+      <div style="display:grid; grid-template-columns:minmax(0,1.6fr) minmax(0,1fr); gap:28px; margin-top:26px; align-items:start">
+        <div style="background:#FFFFFF; border:1px solid #E3DCCE; border-radius:2px">
+          <div style="padding:15px 20px; border-bottom:1px solid rgba(201,162,75,.45); font-size:16px; font-weight:600">Order history</div>
+          <div style="padding:4px 20px 14px">
+            <div style="display:flex; gap:14px; align-items:center; padding:15px 0; border-bottom:1px solid #F0EBE0">
+              <div style="width:54px; height:54px; flex:0 0 54px; border:1px solid #E3DCCE; border-radius:2px; background:repeating-linear-gradient(135deg,#EFEAE0 0 5px,#E6E0D2 5px 10px)"></div>
+              <div style="flex:1; min-width:0"><div style="font-family:'Source Serif 4',Cambria,serif; font-size:16px">Retro Ruby Cocktail Ring</div><div style="font-size:12px; color:#6B6B72; margin-top:3px">Order #10438 · Aug 28, 2026</div></div>
+              <span style="font-size:11px; font-weight:600; letter-spacing:.06em; text-transform:uppercase; padding:3px 8px; border-radius:2px; border:1px solid #2E7D32; color:#2E7D32; background:#EEF5EE">Delivered</span>
+              <div style="font-size:15px; font-weight:600; width:88px; text-align:right">$3,975.00</div>
+            </div>
+            <div style="display:flex; gap:14px; align-items:center; padding:15px 0; border-bottom:1px solid #F0EBE0">
+              <div style="width:54px; height:54px; flex:0 0 54px; border:1px solid #E3DCCE; border-radius:2px; background:repeating-linear-gradient(135deg,#EFEAE0 0 5px,#E6E0D2 5px 10px)"></div>
+              <div style="flex:1; min-width:0"><div style="font-family:'Source Serif 4',Cambria,serif; font-size:16px">Pearl Strand, 18in</div><div style="font-size:12px; color:#6B6B72; margin-top:3px">Order #10438 · Aug 28, 2026</div></div>
+              <span style="font-size:11px; font-weight:600; letter-spacing:.06em; text-transform:uppercase; padding:3px 8px; border-radius:2px; border:1px solid #D4A017; color:#8A6A0B; background:#FBF4E2">Return open</span>
+              <div style="font-size:15px; font-weight:600; width:88px; text-align:right">$890.00</div>
+            </div>
+            <div style="display:flex; gap:14px; align-items:center; padding:15px 0">
+              <div style="width:54px; height:54px; flex:0 0 54px; border:1px solid #E3DCCE; border-radius:2px; background:repeating-linear-gradient(135deg,#EFEAE0 0 5px,#E6E0D2 5px 10px)"></div>
+              <div style="flex:1; min-width:0"><div style="font-family:'Source Serif 4',Cambria,serif; font-size:16px">Victorian Gold Bangle</div><div style="font-size:12px; color:#6B6B72; margin-top:3px">Order #9981 · Mar 4, 2026</div></div>
+              <span style="font-size:11px; font-weight:600; letter-spacing:.06em; text-transform:uppercase; padding:3px 8px; border-radius:2px; border:1px solid #9CA3AF; color:#5C626D; background:#F4F5F6">Archived</span>
+              <div style="font-size:15px; font-weight:600; width:88px; text-align:right">$1,240.00</div>
+            </div>
+          </div>
+        </div>
+        <div style="display:flex; flex-direction:column; gap:18px">
+          <div style="background:#FFFFFF; border:1px solid #E3DCCE; border-radius:2px; padding:18px 20px">
+            <div style="font-size:11px; letter-spacing:.16em; text-transform:uppercase; color:#6B6B72; padding-bottom:10px; border-bottom:1px solid rgba(201,162,75,.45)">Saved address</div>
+            <div style="margin-top:12px; font-size:14px; line-height:1.6">Anne Delacroix<br />88 Wooster Street, Apt 4R<br />New York, NY 10012</div>
+            <a href="#" style="display:inline-block; margin-top:11px; font-size:13px; color:#6B6B72; text-decoration:underline">Edit</a>
+          </div>
+          <div style="background:#FFFFFF; border:1px solid #E3DCCE; border-radius:2px; padding:18px 20px">
+            <div style="font-size:11px; letter-spacing:.16em; text-transform:uppercase; color:#6B6B72; padding-bottom:10px; border-bottom:1px solid rgba(201,162,75,.45)">Appraisal documents</div>
+            <div style="margin-top:12px; display:flex; flex-direction:column; gap:9px; font-size:14px">
+              <a href="#">Ruby cocktail ring — PDF</a>
+              <a href="#">Victorian bangle — PDF</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <footer style="background:#1C1F2E; color:#8A8FA3; margin-top:0">
+    <div style="max-width:1240px; margin:0 auto; padding:34px 28px; display:flex; flex-wrap:wrap; gap:20px; align-items:center; font-size:12.5px">
+      <div style="font-family:'Source Serif 4',Cambria,serif; font-size:14px; letter-spacing:.2em; text-transform:uppercase; color:#C9A24B">Jewelry Trader</div>
+      <div>412 Madison Avenue, New York</div>
+      <div style="margin-left:auto; display:flex; gap:18px"><a href="#">Appraisals</a><a href="#">Returns</a><a href="#">Privacy</a></div>
+    </div>
+  </footer>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{}">
+class Component extends DCLogic {
+  state = { screen: 'home' };
+  renderVals() {
+    const s = this.state.screen;
+    const go = (k) => () => { this.setState({ screen: k }); window.scrollTo(0, 0); };
+    return {
+      isHome: s === 'home', isCatalog: s === 'catalog', isProduct: s === 'product',
+      isCart: s === 'cart', isAccount: s === 'account',
+      goHome: go('home'), goCatalog: go('catalog'), goProduct: go('product'),
+      goCart: go('cart'), goAccount: go('account')
+    };
+  }
+}
+</script>
+</body>
+</html>

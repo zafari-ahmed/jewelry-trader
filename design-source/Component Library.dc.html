@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous" />
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&family=Source+Sans+3:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<style>
+  body { margin: 0; background: #F7F4EE; -webkit-font-smoothing: antialiased; }
+  * { box-sizing: border-box; }
+  a { color: #1C1F2E; } a:hover { color: #C9A24B; }
+  input, select, textarea, button { font: inherit; }
+</style>
+</helmet>
+<div style="min-height:100vh; background:#F7F4EE; font-family:'Source Sans 3',Calibri,sans-serif; color:#24242A">
+  <div style="max-width:1160px; margin:0 auto; padding:44px 28px 80px; display:flex; flex-direction:column; gap:44px">
+
+    <header style="padding-bottom:22px; border-bottom:1px solid rgba(201,162,75,.45)">
+      <div style="font-size:11px; letter-spacing:.2em; text-transform:uppercase; color:#8A6A0B">Jewelry Trader · Design System v1</div>
+      <h1 style="margin:10px 0 0; font-family:'Source Serif 4',Cambria,serif; font-size:38px; font-weight:600; letter-spacing:-.01em">Component Library</h1>
+      <p style="margin:9px 0 0; font-size:15.5px; color:#45454C; max-width:62ch; line-height:1.6; text-wrap:pretty">Shared tokens and parts across the Admin Panel, Point of Sale and Storefront. Signature motif: a 1px gold hairline rule beneath every section header, and a 2px corner radius on every surface — nothing rounder, no accent bars.</p>
+    </header>
+
+    <section>
+      <div style="display:flex; align-items:baseline; gap:14px; padding-bottom:12px; border-bottom:1px solid rgba(201,162,75,.45)">
+        <h2 style="margin:0; font-family:'Source Serif 4',Cambria,serif; font-size:24px; font-weight:600">Color</h2>
+        <span style="font-size:12.5px; color:#6B6B72">Brand palette — no ad-hoc colors outside this set</span>
+      </div>
+      <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(164px,1fr)); gap:14px; margin-top:20px">
+        <div style="border:1px solid #E3DCCE; border-radius:2px; background:#FFFFFF; overflow:hidden"><div style="height:74px; background:#1C1F2E"></div><div style="padding:10px 12px 12px"><div style="font-size:13.5px; font-weight:600">Primary Navy</div><div style="font-family:ui-monospace,Menlo,monospace; font-size:11.5px; color:#6B6B72">#1C1F2E</div></div></div>
+        <div style="border:1px solid #E3DCCE; border-radius:2px; background:#FFFFFF; overflow:hidden"><div style="height:74px; background:#262B3D"></div><div style="padding:10px 12px 12px"><div style="font-size:13.5px; font-weight:600">Panel Navy</div><div style="font-family:ui-monospace,Menlo,monospace; font-size:11.5px; color:#6B6B72">#262B3D</div></div></div>
+        <div style="border:1px solid #E3DCCE; border-radius:2px; background:#FFFFFF; overflow:hidden"><div style="height:74px; background:#C9A24B"></div><div style="padding:10px 12px 12px"><div style="font-size:13.5px; font-weight:600">Accent Gold</div><div style="font-family:ui-monospace,Menlo,monospace; font-size:11.5px; color:#6B6B72">#C9A24B</div></div></div>
+        <div style="border:1px solid #E3DCCE; border-radius:2px; background:#FFFFFF; overflow:hidden"><div style="height:74px; background:#E4CE8C"></div><div style="padding:10px 12px 12px"><div style="font-size:13.5px; font-weight:600">Gold Tint</div><div style="font-family:ui-monospace,Menlo,monospace; font-size:11.5px; color:#6B6B72">#E4CE8C</div></div></div>
+        <div style="border:1px solid #E3DCCE; border-radius:2px; background:#FFFFFF; overflow:hidden"><div style="height:74px; background:#F7F4EE"></div><div style="padding:10px 12px 12px"><div style="font-size:13.5px; font-weight:600">Ivory</div><div style="font-family:ui-monospace,Menlo,monospace; font-size:11.5px; color:#6B6B72">#F7F4EE</div></div></div>
+        <div style="border:1px solid #E3DCCE; border-radius:2px; background:#FFFFFF; overflow:hidden"><div style="height:74px; background:#FFFFFF; border-bottom:1px solid #E3DCCE"></div><div style="padding:10px 12px 12px"><div style="font-size:13.5px; font-weight:600">Surface White</div><div style="font-family:ui-monospace,Menlo,monospace; font-size:11.5px; color:#6B6B72">#FFFFFF</div></div></div>
+        <div style="border:1px solid #E3DCCE; border-radius:2px; background:#FFFFFF; overflow:hidden"><div style="height:74px; background:#24242A"></div><div style="padding:10px 12px 12px"><div style="font-size:13.5px; font-weight:600">Ink</div><div style="font-family:ui-monospace,Menlo,monospace; font-size:11.5px; color:#6B6B72">#24242A</div></div></div>
+        <div style="border:1px solid #E3DCCE; border-radius:2px; background:#FFFFFF; overflow:hidden"><div style="height:74px; background:#6B6B72"></div><div style="padding:10px 12px 12px"><div style="font-size:13.5px; font-weight:600">Muted</div><div style="font-family:ui-monospace,Menlo,monospace; font-size:11.5px; color:#6B6B72">#6B6B72</div></div></div>
+      </div>
+
+      <div style="margin-top:22px; background:#FFFFFF; border:1px solid #E3DCCE; border-radius:2px; padding:18px 20px">
+        <div style="font-size:11px; letter-spacing:.16em; text-transform:uppercase; color:#6B6B72; padding-bottom:11px; border-bottom:1px solid rgba(201,162,75,.45)">Field status colors — meaning only, never decoration</div>
+        <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(176px,1fr)); gap:14px; margin-top:16px">
+          <div><div style="height:5px; background:#C0392B; border-radius:2px"></div><div style="margin-top:8px; font-size:13.5px; font-weight:600">Red · Required</div><div style="font-size:12px; color:#6B6B72">Incomplete, blocks submission</div><div style="font-family:ui-monospace,Menlo,monospace; font-size:11px; color:#9CA3AF; margin-top:3px">#C0392B</div></div>
+          <div><div style="height:5px; background:#D4A017; border-radius:2px"></div><div style="margin-top:8px; font-size:13.5px; font-weight:600">Yellow · Suggested</div><div style="font-size:12px; color:#6B6B72">AI value awaiting verification</div><div style="font-family:ui-monospace,Menlo,monospace; font-size:11px; color:#9CA3AF; margin-top:3px">#D4A017</div></div>
+          <div><div style="height:5px; background:#2E7D32; border-radius:2px"></div><div style="margin-top:8px; font-size:13.5px; font-weight:600">Green · Valid</div><div style="font-size:12px; color:#6B6B72">Complete and human-confirmed</div><div style="font-family:ui-monospace,Menlo,monospace; font-size:11px; color:#9CA3AF; margin-top:3px">#2E7D32</div></div>
+          <div><div style="height:5px; background:#9CA3AF; border-radius:2px"></div><div style="margin-top:8px; font-size:13.5px; font-weight:600">Gray · N/A</div><div style="font-size:12px; color:#6B6B72">Not applicable to this item type</div><div style="font-family:ui-monospace,Menlo,monospace; font-size:11px; color:#9CA3AF; margin-top:3px">#9CA3AF</div></div>
+          <div><div style="height:5px; background:#2563EB; border-radius:2px"></div><div style="margin-top:8px; font-size:13.5px; font-weight:600">Blue · Override</div><div style="font-size:12px; color:#6B6B72">Human replaced a system value</div><div style="font-family:ui-monospace,Menlo,monospace; font-size:11px; color:#9CA3AF; margin-top:3px">#2563EB</div></div>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div style="display:flex; align-items:baseline; gap:14px; padding-bottom:12px; border-bottom:1px solid rgba(201,162,75,.45)">
+        <h2 style="margin:0; font-family:'Source Serif 4',Cambria,serif; font-size:24px; font-weight:600">Typography</h2>
+        <span style="font-size:12.5px; color:#6B6B72">Source Serif 4 (spec: Cambria) · Source Sans 3 (spec: Calibri)</span>
+      </div>
+      <div style="background:#FFFFFF; border:1px solid #E3DCCE; border-radius:2px; padding:22px 24px; margin-top:20px; display:flex; flex-direction:column; gap:16px">
+        <div style="display:flex; gap:22px; align-items:baseline; flex-wrap:wrap; padding-bottom:14px; border-bottom:1px solid #F0EBE0"><span style="width:200px; font-family:ui-monospace,Menlo,monospace; font-size:11.5px; color:#6B6B72">Page title · serif 34/600</span><span style="font-family:'Source Serif 4',Cambria,serif; font-size:34px; font-weight:600">Inventory Record</span></div>
+        <div style="display:flex; gap:22px; align-items:baseline; flex-wrap:wrap; padding-bottom:14px; border-bottom:1px solid #F0EBE0"><span style="width:200px; font-family:ui-monospace,Menlo,monospace; font-size:11.5px; color:#6B6B72">Section header · serif 24/600</span><span style="font-family:'Source Serif 4',Cambria,serif; font-size:24px; font-weight:600">Condition &amp; Provenance</span></div>
+        <div style="display:flex; gap:22px; align-items:baseline; flex-wrap:wrap; padding-bottom:14px; border-bottom:1px solid #F0EBE0"><span style="width:200px; font-family:ui-monospace,Menlo,monospace; font-size:11.5px; color:#6B6B72">Card header · sans 16/700</span><span style="font-size:16px; font-weight:700">Recent Activity</span></div>
+        <div style="display:flex; gap:22px; align-items:baseline; flex-wrap:wrap; padding-bottom:14px; border-bottom:1px solid #F0EBE0"><span style="width:200px; font-family:ui-monospace,Menlo,monospace; font-size:11.5px; color:#6B6B72">Body · sans 14–15.5/400</span><span style="font-size:15px">Original glazed compartment intact; pin stem replaced c. 1970.</span></div>
+        <div style="display:flex; gap:22px; align-items:baseline; flex-wrap:wrap; padding-bottom:14px; border-bottom:1px solid #F0EBE0"><span style="width:200px; font-family:ui-monospace,Menlo,monospace; font-size:11.5px; color:#6B6B72">Caption · sans 11.5–12/400</span><span style="font-size:12px; color:#6B6B72">Verified by J. Ortega · 10:12 AM</span></div>
+        <div style="display:flex; gap:22px; align-items:baseline; flex-wrap:wrap"><span style="width:200px; font-family:ui-monospace,Menlo,monospace; font-size:11.5px; color:#6B6B72">POS total · serif 40/700</span><span style="font-family:'Source Serif 4',Cambria,serif; font-size:40px; font-weight:700; color:#8A6A0B">$7,780.00</span></div>
+      </div>
+    </section>
+
+    <section>
+      <div style="display:flex; align-items:baseline; gap:14px; padding-bottom:12px; border-bottom:1px solid rgba(201,162,75,.45)">
+        <h2 style="margin:0; font-family:'Source Serif 4',Cambria,serif; font-size:24px; font-weight:600">Buttons</h2>
+        <span style="font-size:12.5px; color:#6B6B72">Default · hover · pressed · disabled</span>
+      </div>
+      <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(250px,1fr)); gap:16px; margin-top:20px">
+        <div style="background:#FFFFFF; border:1px solid #E3DCCE; border-radius:2px; padding:18px 20px">
+          <div style="font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:#6B6B72; margin-bottom:14px">Primary</div>
+          <div style="display:flex; flex-wrap:wrap; gap:9px; align-items:center">
+            <button style="padding:10px 18px; border:1px solid #1C1F2E; background:#1C1F2E; color:#F7F4EE; border-radius:2px; font-size:14px; font-weight:600; cursor:pointer" style-hover="background:#262B3D">Save</button>
+            <button style="padding:10px 18px; border:1px solid #262B3D; background:#262B3D; color:#F7F4EE; border-radius:2px; font-size:14px; font-weight:600; cursor:pointer">Hover</button>
+            <button style="padding:10px 18px; border:1px solid #C9A24B; background:#141722; color:#E4CE8C; border-radius:2px; font-size:14px; font-weight:600; cursor:pointer">Pressed</button>
+            <button disabled="{{ true }}" style="padding:10px 18px; border:1px solid #E1E3E6; background:#F4F5F6; color:#9CA3AF; border-radius:2px; font-size:14px; font-weight:600; cursor:not-allowed">Disabled</button>
+          </div>
+        </div>
+        <div style="background:#FFFFFF; border:1px solid #E3DCCE; border-radius:2px; padding:18px 20px">
+          <div style="font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:#6B6B72; margin-bottom:14px">Secondary</div>
+          <div style="display:flex; flex-wrap:wrap; gap:9px; align-items:center">
+            <button style="padding:10px 18px; border:1px solid #D9D2C4; background:#FFFFFF; border-radius:2px; font-size:14px; cursor:pointer" style-hover="border-color:#C9A24B">Cancel</button>
+            <button style="padding:10px 18px; border:1px solid #C9A24B; background:#FFFFFF; border-radius:2px; font-size:14px; cursor:pointer">Hover</button>
+            <button style="padding:10px 18px; border:1px solid #C9A24B; background:#F8F1DF; border-radius:2px; font-size:14px; cursor:pointer">Pressed</button>
+            <button disabled="{{ true }}" style="padding:10px 18px; border:1px solid #E1E3E6; background:#FBFBFB; color:#9CA3AF; border-radius:2px; font-size:14px; cursor:not-allowed">Disabled</button>
+          </div>
+        </div>
+        <div style="background:#FFFFFF; border:1px solid #E3DCCE; border-radius:2px; padding:18px 20px">
+          <div style="font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:#6B6B72; margin-bottom:14px">Destructive &amp; approve</div>
+          <div style="display:flex; flex-wrap:wrap; gap:9px; align-items:center">
+            <button style="padding:10px 18px; border:1px solid #2E7D32; background:#2E7D32; color:#FFFFFF; border-radius:2px; font-size:14px; font-weight:600; cursor:pointer" style-hover="background:#276B2A">Approve</button>
+            <button style="padding:10px 18px; border:1px solid #C0392B; background:#FFFFFF; color:#C0392B; border-radius:2px; font-size:14px; cursor:pointer" style-hover="background:#F9EDEB">Discard</button>
+          </div>
+        </div>
+        <div style="background:#1C1F2E; border:1px solid rgba(201,162,75,.4); border-radius:2px; padding:18px 20px">
+          <div style="font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:#8A8FA3; margin-bottom:14px">POS · oversized</div>
+          <div style="display:flex; flex-wrap:wrap; gap:9px; align-items:center">
+            <button style="padding:16px 26px; border:1px solid #C9A24B; background:#C9A24B; color:#1C1F2E; border-radius:2px; font-size:18px; font-weight:700; cursor:pointer" style-hover="background:#E4CE8C">Charge</button>
+            <button style="padding:16px 26px; border:1px solid #3A4058; background:#262B3D; color:#F7F4EE; border-radius:2px; font-size:18px; cursor:pointer" style-hover="border-color:#C9A24B">Hold</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div style="display:flex; align-items:baseline; gap:14px; padding-bottom:12px; border-bottom:1px solid rgba(201,162,75,.45)">
+        <h2 style="margin:0; font-family:'Source Serif 4',Cambria,serif; font-size:24px; font-weight:600">Status Badges</h2>
+        <span style="font-size:12.5px; color:#6B6B72">Inventory lifecycle · 11px uppercase, 1px border, 2px radius</span>
+      </div>
+      <div style="background:#FFFFFF; border:1px solid #E3DCCE; border-radius:2px; padding:20px; margin-top:20px; display:flex; flex-wrap:wrap; gap:10px">
+        <span style="font-size:11px; font-weight:600; letter-spacing:.06em; text-transform:uppercase; padding:4px 9px; border-radius:2px; border:1px solid #9CA3AF; color:#5C626D; background:#F4F5F6">Draft</span>
+        <span style="font-size:11px; font-weight:600; letter-spacing:.06em; text-transform:uppercase; padding:4px 9px; border-radius:2px; border:1px solid #D4A017; color:#8A6A0B; background:#FBF4E2">Pending</span>
+        <span style="font-size:11px; font-weight:600; letter-spacing:.06em; text-transform:uppercase; padding:4px 9px; border-radius:2px; border:1px solid #1C1F2E; color:#1C1F2E; background:#EDEDF0">Approved</span>
+        <span style="font-size:11px; font-weight:600; letter-spacing:.06em; text-transform:uppercase; padding:4px 9px; border-radius:2px; border:1px solid #2E7D32; color:#2E7D32; background:#EEF5EE">Listed</span>
+        <span style="font-size:11px; font-weight:600; letter-spacing:.06em; text-transform:uppercase; padding:4px 9px; border-radius:2px; border:1px solid #C0392B; color:#C0392B; background:#F9EDEB">Sold</span>
+        <span style="font-size:11px; font-weight:600; letter-spacing:.06em; text-transform:uppercase; padding:4px 9px; border-radius:2px; border:1px solid #2563EB; color:#2563EB; background:#F3F7FE">Overridden</span>
+        <span style="font-size:11px; font-weight:600; letter-spacing:.06em; text-transform:uppercase; padding:4px 9px; border-radius:2px; border:1px solid #9CA3AF; color:#5C626D; background:#F4F5F6">Phase 2</span>
+      </div>
+    </section>
+
+    <section>
+      <div style="display:flex; align-items:baseline; gap:14px; padding-bottom:12px; border-bottom:1px solid rgba(201,162,75,.45)">
+        <h2 style="margin:0; font-family:'Source Serif 4',Cambria,serif; font-size:24px; font-weight:600">Status Field</h2>
+        <span style="font-size:12.5px; color:#6B6B72">The core inventory component — dot + label color + border + helper line</span>
+      </div>
+      <div style="background:#FFFFFF; border:1px solid #E3DCCE; border-radius:2px; padding:22px 24px; margin-top:20px; display:grid; grid-template-columns:repeat(auto-fit,minmax(238px,1fr)); gap:18px">
+        <div>
+          <label style="display:flex; align-items:center; gap:7px; font-size:12.5px; font-weight:600; color:#C0392B; margin-bottom:5px"><span style="width:8px; height:8px; border-radius:50%; background:#C0392B"></span>Required · empty</label>
+          <input placeholder="Select purity…" style="width:100%; padding:9px 11px; border:1px solid #C0392B; border-radius:2px; background:#FDF6F5; font-size:14px; outline:none" />
+          <div style="font-size:11.5px; color:#C0392B; margin-top:4px">Required before submission.</div>
+        </div>
+        <div>
+          <label style="display:flex; align-items:center; gap:7px; font-size:12.5px; font-weight:600; color:#8A6A0B; margin-bottom:5px"><span style="width:8px; height:8px; border-radius:50%; background:#D4A017"></span>Suggested</label>
+          <input value="Edwardian (c. 1901–1915)" style="width:100%; padding:9px 11px; border:1px solid #D4A017; border-radius:2px; background:#FCF8EE; font-size:14px; outline:none" />
+          <div style="font-size:11.5px; color:#8A6A0B; margin-top:4px">Not yet verified.</div>
+        </div>
+        <div>
+          <label style="display:flex; align-items:center; gap:7px; font-size:12.5px; font-weight:600; color:#2E7D32; margin-bottom:5px"><span style="width:8px; height:8px; border-radius:50%; background:#2E7D32"></span>Valid</label>
+          <input value="950 Platinum" style="width:100%; padding:9px 11px; border:1px solid #2E7D32; border-radius:2px; background:#FFFFFF; font-size:14px; outline:none" />
+          <div style="font-size:11.5px; color:#6B6B72; margin-top:4px">Confirmed by J. Ortega.</div>
+        </div>
+        <div>
+          <label style="display:flex; align-items:center; gap:7px; font-size:12.5px; font-weight:600; color:#9CA3AF; margin-bottom:5px"><span style="width:8px; height:8px; border-radius:50%; background:#9CA3AF"></span>Not applicable</label>
+          <input disabled="{{ true }}" placeholder="Not applicable — ring" style="width:100%; padding:9px 11px; border:1px solid #E1E3E6; border-radius:2px; background:#F4F5F6; font-size:14px; color:#9CA3AF; outline:none; cursor:not-allowed" />
+          <div style="font-size:11.5px; color:#9CA3AF; margin-top:4px">Hidden from listing.</div>
+        </div>
+        <div>
+          <label style="display:flex; align-items:center; gap:7px; font-size:12.5px; font-weight:600; color:#2563EB; margin-bottom:5px"><span style="width:8px; height:8px; border-radius:50%; background:#2563EB"></span>Overridden</label>
+          <input value="$6,800.00" style="width:100%; padding:9px 11px; border:1px solid #2563EB; border-radius:2px; background:#F3F7FE; font-size:14px; font-weight:600; outline:none" />
+          <div style="font-size:11.5px; color:#2563EB; margin-top:4px">Was $7,250 · M. Renner.</div>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div style="display:flex; align-items:baseline; gap:14px; padding-bottom:12px; border-bottom:1px solid rgba(201,162,75,.45)">
+        <h2 style="margin:0; font-family:'Source Serif 4',Cambria,serif; font-size:24px; font-weight:600">Toggles &amp; Dormant Controls</h2>
+        <span style="font-size:12.5px; color:#6B6B72">Phase-2 controls must read as intentionally inactive, never broken</span>
+      </div>
+      <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:16px; margin-top:20px">
+        <div style="background:#FFFFFF; border:1px solid #E3DCCE; border-radius:2px; padding:18px 20px; display:flex; flex-direction:column; gap:15px">
+          <div style="display:flex; align-items:center; gap:14px">
+            <div style="width:42px; height:23px; border-radius:2px; background:#2E7D32; border:1px solid #2E7D32; position:relative"><div style="position:absolute; top:2px; right:2px; width:17px; height:17px; background:#FFFFFF; border-radius:1px"></div></div>
+            <div><div style="font-size:14px; font-weight:600">On</div><div style="font-size:12px; color:#6B6B72">Active feature</div></div>
+          </div>
+          <div style="display:flex; align-items:center; gap:14px">
+            <div style="width:42px; height:23px; border-radius:2px; background:#FFFFFF; border:1px solid #C4BCA9; position:relative"><div style="position:absolute; top:2px; left:2px; width:17px; height:17px; background:#C4BCA9; border-radius:1px"></div></div>
+            <div><div style="font-size:14px; font-weight:600">Off</div><div style="font-size:12px; color:#6B6B72">Available, not enabled</div></div>
+          </div>
+          <div style="display:flex; align-items:center; gap:14px; opacity:.62">
+            <div style="width:42px; height:23px; border-radius:2px; background:#F4F5F6; border:1px dashed #9CA3AF; position:relative"><div style="position:absolute; top:2px; left:2px; width:17px; height:17px; background:#D6D9DD; border-radius:1px"></div></div>
+            <div><div style="font-size:14px; font-weight:600; color:#6B6B72">Dormant</div><div style="font-size:12px; color:#9CA3AF">Phase 2 — dashed track signals "prepared, not broken"</div></div>
+          </div>
+        </div>
+
+        <div style="background:#FFFFFF; border:1px solid #E3DCCE; border-radius:2px; padding:18px 20px">
+          <div style="font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:#6B6B72; padding-bottom:11px; border-bottom:1px solid rgba(201,162,75,.45)">Masked credential</div>
+          <label style="display:block; font-size:12.5px; font-weight:600; margin:14px 0 5px">Live secret key</label>
+          <div style="display:flex; gap:8px">
+            <input value="sk_live_••••••••••••1234" style="flex:1; padding:9px 11px; border:1px solid #D9D2C4; border-radius:2px; background:#FBFAF7; font-family:ui-monospace,Menlo,monospace; font-size:13.5px; outline:none" style-focus="border-color:#C9A24B" />
+            <button style="padding:9px 13px; border:1px solid #D9D2C4; background:#FFFFFF; border-radius:2px; font-size:13px; cursor:pointer" style-hover="border-color:#C9A24B">Reveal</button>
+          </div>
+          <div style="display:flex; align-items:center; gap:7px; font-size:11.5px; color:#6B6B72; margin-top:8px"><span style="width:8px; height:8px; border-radius:50%; background:#2E7D32"></span>Last rotated 14 days ago · rotation required every 90 days</div>
+        </div>
+
+        <div style="background:#FFFFFF; border:1px solid #C0392B; border-radius:2px; padding:18px 20px">
+          <div style="font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:#C0392B; padding-bottom:11px; border-bottom:1px solid rgba(192,57,43,.4)">High-consequence action</div>
+          <div style="margin-top:13px; font-family:'Source Serif 4',Cambria,serif; font-size:18px; font-weight:600">Lock inventory item</div>
+          <p style="margin:6px 0 0; font-size:13px; color:#45454C; line-height:1.55">Locking removes EST-4301 from POS and the storefront until a Super Admin releases it. This is recorded in the audit log.</p>
+          <div style="display:flex; gap:9px; margin-top:14px; flex-wrap:wrap">
+            <button style="padding:10px 18px; border:1px solid #C0392B; background:#C0392B; color:#FFFFFF; border-radius:2px; font-size:14px; font-weight:600; cursor:pointer" style-hover="background:#A53125">Confirm lock</button>
+            <button style="padding:10px 18px; border:1px solid #D9D2C4; background:#FFFFFF; border-radius:2px; font-size:14px; cursor:pointer" style-hover="border-color:#C9A24B">Cancel</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div style="display:flex; align-items:baseline; gap:14px; padding-bottom:12px; border-bottom:1px solid rgba(201,162,75,.45)">
+        <h2 style="margin:0; font-family:'Source Serif 4',Cambria,serif; font-size:24px; font-weight:600">Surfaces &amp; Motif</h2>
+        <span style="font-size:12.5px; color:#6B6B72">Card, dark panel, placeholder, empty state</span>
+      </div>
+      <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(250px,1fr)); gap:16px; margin-top:20px">
+        <div style="background:#FFFFFF; border:1px solid #E3DCCE; border-radius:2px">
+          <div style="padding:13px 18px; border-bottom:1px solid rgba(201,162,75,.45); font-size:16px; font-weight:700">Light card</div>
+          <div style="padding:15px 18px 18px; font-size:13.5px; color:#45454C; line-height:1.6">1px #E3DCCE frame, 2px radius, gold hairline under the header. Used on ivory in Admin and Storefront.</div>
+        </div>
+        <div style="background:#1C1F2E; border:1px solid rgba(201,162,75,.4); border-radius:2px; color:#F7F4EE">
+          <div style="padding:13px 18px; border-bottom:1px solid rgba(201,162,75,.35); font-size:16px; font-weight:700">Dark panel</div>
+          <div style="padding:15px 18px 18px; font-size:13.5px; color:#B9BDCB; line-height:1.6">Navy ground with a 40%-gold hairline frame. Used for POS chrome and admin summary panels.</div>
+        </div>
+        <div style="background:#FFFFFF; border:1px solid #E3DCCE; border-radius:2px; padding:18px">
+          <div style="font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:#6B6B72; margin-bottom:12px">Image placeholder</div>
+          <div style="aspect-ratio:4/3; border:1px solid #E3DCCE; border-radius:2px; background:repeating-linear-gradient(135deg,#EFEAE0 0 6px,#E6E0D2 6px 12px); display:flex; align-items:center; justify-content:center"><span style="font-family:ui-monospace,Menlo,monospace; font-size:11px; color:#6B6B72; background:#FFFFFFCC; padding:3px 7px; border-radius:2px">product shot · 2000×1500</span></div>
+        </div>
+        <div style="background:#FFFFFF; border:1px solid #E3DCCE; border-radius:2px; padding:30px 20px; text-align:center">
+          <div style="width:38px; height:38px; margin:0 auto 12px; border:1px solid #C9A24B; border-radius:50%"></div>
+          <div style="font-family:'Source Serif 4',Cambria,serif; font-size:18px; font-weight:600">Nothing here yet</div>
+          <div style="font-size:13px; color:#6B6B72; margin-top:5px">Empty state: gold hairline circle, serif line, one muted sentence, one action.</div>
+        </div>
+      </div>
+    </section>
+
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{}">
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

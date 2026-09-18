@@ -1,0 +1,939 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+<template id="__bundler_thumbnail" data-bg-color="#1C1F2E">
+  <svg viewBox="0 0 1200 800" xmlns="http://www.w3.org/2000/svg">
+    <rect width="1200" height="800" fill="#1C1F2E"/>
+    <rect x="360" y="250" width="480" height="300" fill="#F7F4EE"/>
+    <rect x="360" y="250" width="480" height="52" fill="#262B3D"/>
+    <circle cx="600" cy="420" r="62" fill="none" stroke="#C9A24B" stroke-width="6"/>
+    <rect x="420" y="540" width="360" height="4" fill="#C9A24B"/>
+    <text x="600" y="640" font-family="Georgia, serif" font-size="58" fill="#C9A24B" text-anchor="middle" letter-spacing="14">JT</text>
+  </svg>
+</template>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous" />
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&family=Source+Sans+3:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<style>
+  body { margin: 0; background: #F7F4EE; -webkit-font-smoothing: antialiased; }
+  * { box-sizing: border-box; }
+  a { color: #1C1F2E; text-decoration: none; }
+  a:hover { color: #C9A24B; }
+  input, select, textarea, button { font: inherit; }
+</style>
+</helmet>
+<div style="display:flex; min-height:100vh; font-family:'Source Sans 3',Calibri,sans-serif; color:#24242A; background:#F7F4EE">
+
+  <nav style="width:236px; flex:0 0 236px; background:#1C1F2E; color:#E4CE8C; display:flex; flex-direction:column; position:sticky; top:0; height:100vh">
+    <div style="padding:22px 20px 18px; border-bottom:1px solid rgba(201,162,75,.35)">
+      <div style="font-family:'Source Serif 4',Cambria,serif; font-size:17px; font-weight:600; letter-spacing:.16em; color:#F7F4EE; text-transform:uppercase">Jewelry</div>
+      <div style="font-family:'Source Serif 4',Cambria,serif; font-size:17px; font-weight:600; letter-spacing:.16em; color:#C9A24B; text-transform:uppercase">Trader</div>
+      <div style="margin-top:8px; font-size:10.5px; letter-spacing:.14em; text-transform:uppercase; color:#8A8FA3">Estate &amp; Fine Jewelry</div>
+    </div>
+
+    <div style="padding:16px 12px; display:flex; flex-direction:column; gap:2px; overflow-y:auto">
+      <div style="padding:6px 8px 8px; font-size:10px; letter-spacing:.16em; text-transform:uppercase; color:#6F748A">Operations</div>
+      <div onClick="{{ goDashboard }}" style="{{ navDashboard }}" style-hover="background:#262B3D; color:#F7F4EE">Dashboard</div>
+      <div onClick="{{ goInventory }}" style="{{ navInventory }}" style-hover="background:#262B3D; color:#F7F4EE">Inventory</div>
+      <div onClick="{{ goCreate }}" style="{{ navCreate }}" style-hover="background:#262B3D; color:#F7F4EE">Add / Edit Item</div>
+      <div onClick="{{ goReview }}" style="{{ navReview }}" style-hover="background:#262B3D; color:#F7F4EE">Review Queue<span style="margin-left:auto; background:#C9A24B; color:#1C1F2E; font-size:10.5px; font-weight:700; padding:1px 6px; border-radius:2px">7</span></div>
+
+      <div style="padding:18px 8px 8px; font-size:10px; letter-spacing:.16em; text-transform:uppercase; color:#6F748A">Administration</div>
+      <div onClick="{{ goSettings }}" style="{{ navSettings }}" style-hover="background:#262B3D; color:#F7F4EE">Settings Hub</div>
+      <div onClick="{{ goPayments }}" style="{{ navPayments }}" style-hover="background:#262B3D; color:#F7F4EE">Payment Settings</div>
+      <div onClick="{{ goAi }}" style="{{ navAi }}" style-hover="background:#262B3D; color:#F7F4EE">AI &amp; Automation</div>
+      <div onClick="{{ goFlags }}" style="{{ navFlags }}" style-hover="background:#262B3D; color:#F7F4EE">Feature Flags</div>
+      <div onClick="{{ goOverride }}" style="{{ navOverride }}" style-hover="background:#262B3D; color:#F7F4EE">Override &amp; Lock</div>
+
+      <div style="padding:18px 8px 8px; font-size:10px; letter-spacing:.16em; text-transform:uppercase; color:#6F748A">Reporting</div>
+      <div onClick="{{ goCommission }}" style="{{ navCommission }}" style-hover="background:#262B3D; color:#F7F4EE">Commission Report</div>
+      <div onClick="{{ goAudit }}" style="{{ navAudit }}" style-hover="background:#262B3D; color:#F7F4EE">Audit Log</div>
+      <div onClick="{{ goRoles }}" style="{{ navRoles }}" style-hover="background:#262B3D; color:#F7F4EE">Roles &amp; Permissions</div>
+    </div>
+
+    <div style="margin-top:auto; padding:14px 16px; border-top:1px solid rgba(201,162,75,.35); display:flex; align-items:center; gap:10px">
+      <div style="width:30px; height:30px; border-radius:50%; border:1px solid #C9A24B; display:flex; align-items:center; justify-content:center; font-size:11.5px; font-weight:700; color:#C9A24B">MR</div>
+      <div style="line-height:1.25">
+        <div style="font-size:13px; color:#F7F4EE">M. Renner</div>
+        <div style="font-size:10.5px; color:#8A8FA3">Super Admin</div>
+      </div>
+    </div>
+  </nav>
+
+  <main style="flex:1; min-width:0; display:flex; flex-direction:column">
+    <header style="background:#FFFFFF; border-bottom:1px solid #E3DCCE; padding:16px 28px; display:flex; align-items:center; gap:20px; position:sticky; top:0; z-index:5">
+      <div style="min-width:0">
+        <h1 style="margin:0; font-family:'Source Serif 4',Cambria,serif; font-size:26px; font-weight:600; letter-spacing:-.01em">{{ pageTitle }}</h1>
+        <div style="margin-top:3px; font-size:12px; color:#6B6B72">{{ pageSub }}</div>
+      </div>
+      <div style="margin-left:auto; display:flex; align-items:center; gap:10px">
+        <input placeholder="Search SKU, title, or maker…" style="width:270px; max-width:32vw; padding:8px 11px; border:1px solid #D9D2C4; border-radius:2px; background:#FBFAF7; font-size:13.5px; color:#24242A; outline:none" style-focus="border-color:#C9A24B; background:#FFFFFF" />
+        <button style="padding:9px 15px; border:1px solid #1C1F2E; background:#1C1F2E; color:#F7F4EE; border-radius:2px; font-size:13.5px; font-weight:600; cursor:pointer" style-hover="background:#262B3D" style-active="background:#14172233">New Item</button>
+      </div>
+    </header>
+
+    <div style="padding:26px 28px 48px; display:flex; flex-direction:column; gap:22px">
+
+      <sc-if value="{{ isDashboard }}" hint-placeholder-val="{{ true }}">
+        <div style="display:flex; flex-direction:column; gap:22px">
+          <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:16px">
+            <div style="background:#FFFFFF; border:1px solid #E3DCCE; border-radius:2px; padding:16px 18px">
+              <div style="font-size:11px; letter-spacing:.13em; text-transform:uppercase; color:#6B6B72; padding-bottom:10px; border-bottom:1px solid rgba(201,162,75,.45)">Today's Sales</div>
+              <div style="margin-top:12px; font-family:'Source Serif 4',Cambria,serif; font-size:32px; font-weight:600; color:#1C1F2E">$18,420</div>
+              <div style="margin-top:4px; font-size:12px; color:#2E7D32">▲ 12.4% vs. yesterday · 6 transactions</div>
+            </div>
+            <div style="background:#FFFFFF; border:1px solid #E3DCCE; border-radius:2px; padding:16px 18px">
+              <div style="font-size:11px; letter-spacing:.13em; text-transform:uppercase; color:#6B6B72; padding-bottom:10px; border-bottom:1px solid rgba(201,162,75,.45)">Pending Review</div>
+              <div style="margin-top:12px; font-family:'Source Serif 4',Cambria,serif; font-size:32px; font-weight:600; color:#C9A24B">7</div>
+              <div style="margin-top:4px; font-size:12px; color:#6B6B72">3 awaiting photography</div>
+            </div>
+            <div style="background:#FFFFFF; border:1px solid #E3DCCE; border-radius:2px; padding:16px 18px">
+              <div style="font-size:11px; letter-spacing:.13em; text-transform:uppercase; color:#6B6B72; padding-bottom:10px; border-bottom:1px solid rgba(201,162,75,.45)">Incomplete Records</div>
+              <div style="margin-top:12px; font-family:'Source Serif 4',Cambria,serif; font-size:32px; font-weight:600; color:#C0392B">14</div>
+              <div style="margin-top:4px; font-size:12px; color:#6B6B72">Missing required fields</div>
+            </div>
+            <div style="background:#FFFFFF; border:1px solid #E3DCCE; border-radius:2px; padding:16px 18px">
+              <div style="font-size:11px; letter-spacing:.13em; text-transform:uppercase; color:#6B6B72; padding-bottom:10px; border-bottom:1px solid rgba(201,162,75,.45)">Active Inventory</div>
+              <div style="margin-top:12px; font-family:'Source Serif 4',Cambria,serif; font-size:32px; font-weight:600; color:#1C1F2E">1,284</div>
+              <div style="margin-top:4px; font-size:12px; color:#6B6B72">Across 3 locations</div>
+            </div>
+          </div>
+
+          <div style="display:grid; grid-template-columns:minmax(0,1.6fr) minmax(0,1fr); gap:16px">
+            <div style="background:#FFFFFF; border:1px solid #E3DCCE; border-radius:2px">
+              <div style="padding:14px 18px; border-bottom:1px solid rgba(201,162,75,.45); display:flex; align-items:center">
+                <h2 style="margin:0; font-size:16px; font-weight:700">Recent Activity</h2>
+                <a href="#" style="margin-left:auto; font-size:12.5px; color:#6B6B72">View audit log</a>
+              </div>
+              <div style="padding:6px 18px 14px">
+                <div style="display:flex; gap:12px; padding:11px 0; border-bottom:1px solid #F0EBE0">
+                  <div style="width:6px; height:6px; border-radius:50%; background:#2E7D32; margin-top:7px; flex:0 0 6px"></div>
+                  <div style="min-width:0"><div style="font-size:14px">Sale completed — <strong>EST-4412</strong> Edwardian diamond cluster ring</div><div style="font-size:11.5px; color:#6B6B72">A. Whitfield · Madison Ave · 11:42 AM · $6,800</div></div>
+                </div>
+                <div style="display:flex; gap:12px; padding:11px 0; border-bottom:1px solid #F0EBE0">
+                  <div style="width:6px; height:6px; border-radius:50%; background:#C9A24B; margin-top:7px; flex:0 0 6px"></div>
+                  <div style="min-width:0"><div style="font-size:14px">Submitted for review — <strong>EST-4487</strong> Victorian mourning brooch</div><div style="font-size:11.5px; color:#6B6B72">J. Ortega · Workshop · 10:15 AM</div></div>
+                </div>
+                <div style="display:flex; gap:12px; padding:11px 0; border-bottom:1px solid #F0EBE0">
+                  <div style="width:6px; height:6px; border-radius:50%; background:#2563EB; margin-top:7px; flex:0 0 6px"></div>
+                  <div style="min-width:0"><div style="font-size:14px">Price overridden — <strong>EST-4390</strong> from $2,400 to $2,150</div><div style="font-size:11.5px; color:#6B6B72">M. Renner · Reason: trade-show pricing · 9:58 AM</div></div>
+                </div>
+                <div style="display:flex; gap:12px; padding:11px 0">
+                  <div style="width:6px; height:6px; border-radius:50%; background:#C0392B; margin-top:7px; flex:0 0 6px"></div>
+                  <div style="min-width:0"><div style="font-size:14px">Inventory locked — <strong>EST-4301</strong> pending appraisal</div><div style="font-size:11.5px; color:#6B6B72">M. Renner · Lock type: Valuation hold · 9:20 AM</div></div>
+                </div>
+              </div>
+            </div>
+
+            <div style="background:#FFFFFF; border:1px solid #E3DCCE; border-radius:2px">
+              <div style="padding:14px 18px; border-bottom:1px solid rgba(201,162,75,.45)">
+                <h2 style="margin:0; font-size:16px; font-weight:700">Quick Actions</h2>
+              </div>
+              <div style="padding:14px 18px 18px; display:flex; flex-direction:column; gap:9px">
+                <button onClick="{{ goCreate }}" style="text-align:left; padding:11px 13px; border:1px solid #D9D2C4; background:#FBFAF7; border-radius:2px; cursor:pointer; font-size:14px; font-weight:600" style-hover="border-color:#C9A24B; background:#FFFFFF">Intake new item<div style="font-size:11.5px; font-weight:400; color:#6B6B72; margin-top:2px">Create an inventory record</div></button>
+                <button onClick="{{ goReview }}" style="text-align:left; padding:11px 13px; border:1px solid #D9D2C4; background:#FBFAF7; border-radius:2px; cursor:pointer; font-size:14px; font-weight:600" style-hover="border-color:#C9A24B; background:#FFFFFF">Review queue (7)<div style="font-size:11.5px; font-weight:400; color:#6B6B72; margin-top:2px">Approve items for listing</div></button>
+                <button style="text-align:left; padding:11px 13px; border:1px solid #D9D2C4; background:#FBFAF7; border-radius:2px; cursor:pointer; font-size:14px; font-weight:600" style-hover="border-color:#C9A24B; background:#FFFFFF">Open register<div style="font-size:11.5px; font-weight:400; color:#6B6B72; margin-top:2px">Start a POS session</div></button>
+                <button style="text-align:left; padding:11px 13px; border:1px solid #D9D2C4; background:#FBFAF7; border-radius:2px; cursor:pointer; font-size:14px; font-weight:600" style-hover="border-color:#C9A24B; background:#FFFFFF">Export commission report<div style="font-size:11.5px; font-weight:400; color:#6B6B72; margin-top:2px">Month to date</div></button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ isInventory }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex; flex-direction:column; gap:16px">
+          <div style="display:flex; flex-wrap:wrap; gap:8px; align-items:center">
+            <select style="padding:8px 11px; border:1px solid #D9D2C4; border-radius:2px; background:#FFFFFF; font-size:13.5px; color:#24242A"><option>All locations</option><option>Madison Ave</option><option>Workshop</option></select>
+            <select style="padding:8px 11px; border:1px solid #D9D2C4; border-radius:2px; background:#FFFFFF; font-size:13.5px; color:#24242A"><option>All statuses</option><option>Draft</option><option>Pending</option><option>Approved</option><option>Listed</option><option>Sold</option></select>
+            <select style="padding:8px 11px; border:1px solid #D9D2C4; border-radius:2px; background:#FFFFFF; font-size:13.5px; color:#24242A"><option>All periods</option><option>Georgian</option><option>Victorian</option><option>Edwardian</option><option>Art Deco</option><option>Mid-century</option></select>
+            <button style="margin-left:auto; padding:8px 14px; border:1px solid #D9D2C4; background:#FFFFFF; border-radius:2px; font-size:13.5px; cursor:pointer" style-hover="border-color:#C9A24B">Export CSV</button>
+          </div>
+
+          <div style="background:#FFFFFF; border:1px solid #E3DCCE; border-radius:2px; overflow-x:auto">
+            <div style="display:grid; grid-template-columns:64px minmax(210px,2.4fr) 100px minmax(110px,1fr) 110px 100px 80px; gap:14px; min-width:900px; padding:11px 18px; border-bottom:1px solid rgba(201,162,75,.45); font-size:10.5px; letter-spacing:.13em; text-transform:uppercase; color:#6B6B72; background:#FBFAF7">
+              <div>Image</div><div>Item</div><div>SKU</div><div>Location</div><div>Status</div><div style="text-align:right">Price</div><div style="text-align:right">Actions</div>
+            </div>
+
+            <div style="display:grid; grid-template-columns:64px minmax(210px,2.4fr) 100px minmax(110px,1fr) 110px 100px 80px; gap:14px; min-width:900px; padding:12px 18px; border-bottom:1px solid #F0EBE0; align-items:center" style-hover="background:#FBFAF7">
+              <div style="width:44px; height:44px; border:1px solid #E3DCCE; border-radius:2px; background:repeating-linear-gradient(135deg,#F3EFE6 0 5px,#EAE4D7 5px 10px)"></div>
+              <div style="min-width:0"><div style="font-family:'Source Serif 4',Cambria,serif; font-size:15px; font-weight:600">Edwardian Diamond Cluster Ring</div><div style="font-size:11.5px; color:#6B6B72">Platinum · c. 1905 · 1.42 ctw</div></div>
+              <div style="font-size:13px; color:#6B6B72">EST-4412</div>
+              <div style="font-size:13px">Madison Ave</div>
+              <div><span style="display:inline-block; font-size:11px; font-weight:600; letter-spacing:.06em; text-transform:uppercase; padding:3px 8px; border-radius:2px; border:1px solid #2E7D32; color:#2E7D32; background:#EEF5EE">Listed</span></div>
+              <div style="text-align:right; font-size:14px; font-weight:600">$6,800</div>
+              <div style="text-align:right"><a href="#" style="font-size:12.5px; color:#6B6B72">Edit</a></div>
+            </div>
+
+            <div style="display:grid; grid-template-columns:64px minmax(210px,2.4fr) 100px minmax(110px,1fr) 110px 100px 80px; gap:14px; min-width:900px; padding:12px 18px; border-bottom:1px solid #F0EBE0; align-items:center" style-hover="background:#FBFAF7">
+              <div style="width:44px; height:44px; border:1px solid #E3DCCE; border-radius:2px; background:repeating-linear-gradient(135deg,#F3EFE6 0 5px,#EAE4D7 5px 10px)"></div>
+              <div style="min-width:0"><div style="font-family:'Source Serif 4',Cambria,serif; font-size:15px; font-weight:600">Victorian Mourning Brooch</div><div style="font-size:11.5px; color:#6B6B72">15k gold · c. 1868 · woven hair panel</div></div>
+              <div style="font-size:13px; color:#6B6B72">EST-4487</div>
+              <div style="font-size:13px">Workshop</div>
+              <div><span style="display:inline-block; font-size:11px; font-weight:600; letter-spacing:.06em; text-transform:uppercase; padding:3px 8px; border-radius:2px; border:1px solid #D4A017; color:#8A6A0B; background:#FBF4E2">Pending</span></div>
+              <div style="text-align:right; font-size:14px; font-weight:600">$1,450</div>
+              <div style="text-align:right"><a href="#" style="font-size:12.5px; color:#6B6B72">Edit</a></div>
+            </div>
+
+            <div style="display:grid; grid-template-columns:64px minmax(210px,2.4fr) 100px minmax(110px,1fr) 110px 100px 80px; gap:14px; min-width:900px; padding:12px 18px; border-bottom:1px solid #F0EBE0; align-items:center" style-hover="background:#FBFAF7">
+              <div style="width:44px; height:44px; border:1px solid #E3DCCE; border-radius:2px; background:repeating-linear-gradient(135deg,#F3EFE6 0 5px,#EAE4D7 5px 10px)"></div>
+              <div style="min-width:0"><div style="font-family:'Source Serif 4',Cambria,serif; font-size:15px; font-weight:600">Art Deco Sapphire Line Bracelet</div><div style="font-size:11.5px; color:#6B6B72">Platinum · c. 1928 · 8.10 ctw</div></div>
+              <div style="font-size:13px; color:#6B6B72">EST-4402</div>
+              <div style="font-size:13px">Madison Ave</div>
+              <div><span style="display:inline-block; font-size:11px; font-weight:600; letter-spacing:.06em; text-transform:uppercase; padding:3px 8px; border-radius:2px; border:1px solid #9CA3AF; color:#5C626D; background:#F4F5F6">Draft</span></div>
+              <div style="text-align:right; font-size:14px; font-weight:600">—</div>
+              <div style="text-align:right"><a href="#" style="font-size:12.5px; color:#6B6B72">Edit</a></div>
+            </div>
+
+            <div style="display:grid; grid-template-columns:64px minmax(210px,2.4fr) 100px minmax(110px,1fr) 110px 100px 80px; gap:14px; min-width:900px; padding:12px 18px; border-bottom:1px solid #F0EBE0; align-items:center" style-hover="background:#FBFAF7">
+              <div style="width:44px; height:44px; border:1px solid #E3DCCE; border-radius:2px; background:repeating-linear-gradient(135deg,#F3EFE6 0 5px,#EAE4D7 5px 10px)"></div>
+              <div style="min-width:0"><div style="font-family:'Source Serif 4',Cambria,serif; font-size:15px; font-weight:600">Retro Ruby &amp; Rose Gold Cocktail Ring</div><div style="font-size:11.5px; color:#6B6B72">14k rose gold · c. 1945 · Burma ruby</div></div>
+              <div style="font-size:13px; color:#6B6B72">EST-4365</div>
+              <div style="font-size:13px">Greenwich</div>
+              <div><span style="display:inline-block; font-size:11px; font-weight:600; letter-spacing:.06em; text-transform:uppercase; padding:3px 8px; border-radius:2px; border:1px solid #1C1F2E; color:#1C1F2E; background:#EDEDF0">Approved</span></div>
+              <div style="text-align:right; font-size:14px; font-weight:600">$3,975</div>
+              <div style="text-align:right"><a href="#" style="font-size:12.5px; color:#6B6B72">Edit</a></div>
+            </div>
+
+            <div style="display:grid; grid-template-columns:64px minmax(210px,2.4fr) 100px minmax(110px,1fr) 110px 100px 80px; gap:14px; min-width:900px; padding:12px 18px; align-items:center; opacity:.72" style-hover="background:#FBFAF7">
+              <div style="width:44px; height:44px; border:1px solid #E3DCCE; border-radius:2px; background:repeating-linear-gradient(135deg,#F3EFE6 0 5px,#EAE4D7 5px 10px)"></div>
+              <div style="min-width:0"><div style="font-family:'Source Serif 4',Cambria,serif; font-size:15px; font-weight:600">Georgian Foiled Garnet Pendant</div><div style="font-size:11.5px; color:#6B6B72">Silver-topped gold · c. 1810</div></div>
+              <div style="font-size:13px; color:#6B6B72">EST-4188</div>
+              <div style="font-size:13px">Madison Ave</div>
+              <div><span style="display:inline-block; font-size:11px; font-weight:600; letter-spacing:.06em; text-transform:uppercase; padding:3px 8px; border-radius:2px; border:1px solid #C0392B; color:#C0392B; background:#F9EDEB">Sold</span></div>
+              <div style="text-align:right; font-size:14px; font-weight:600">$2,300</div>
+              <div style="text-align:right"><a href="#" style="font-size:12.5px; color:#6B6B72">View</a></div>
+            </div>
+          </div>
+
+          <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:16px">
+            <div style="background:#FFFFFF; border:1px solid #E3DCCE; border-radius:2px; padding:34px 20px; text-align:center">
+              <div style="font-size:10.5px; letter-spacing:.14em; text-transform:uppercase; color:#9CA3AF; margin-bottom:14px">Empty state</div>
+              <div style="width:38px; height:38px; margin:0 auto 12px; border:1px solid #C9A24B; border-radius:50%"></div>
+              <div style="font-family:'Source Serif 4',Cambria,serif; font-size:18px; font-weight:600">No items match these filters</div>
+              <div style="font-size:13px; color:#6B6B72; margin-top:5px; max-width:34ch; margin-left:auto; margin-right:auto">Try widening the date range or clearing the status filter.</div>
+              <button style="margin-top:14px; padding:8px 15px; border:1px solid #1C1F2E; background:#1C1F2E; color:#F7F4EE; border-radius:2px; font-size:13.5px; font-weight:600; cursor:pointer" style-hover="background:#262B3D">Clear filters</button>
+            </div>
+            <div style="background:#FFFFFF; border:1px solid #E3DCCE; border-radius:2px; padding:20px">
+              <div style="font-size:10.5px; letter-spacing:.14em; text-transform:uppercase; color:#9CA3AF; margin-bottom:14px; text-align:center">Loading state</div>
+              <div style="display:flex; flex-direction:column; gap:11px">
+                <div style="display:flex; gap:12px; align-items:center"><div style="width:44px; height:44px; border-radius:2px; background:#EEE9DE"></div><div style="flex:1"><div style="height:11px; width:62%; background:#EEE9DE; border-radius:2px"></div><div style="height:9px; width:38%; background:#F3EFE6; border-radius:2px; margin-top:7px"></div></div></div>
+                <div style="display:flex; gap:12px; align-items:center"><div style="width:44px; height:44px; border-radius:2px; background:#EEE9DE"></div><div style="flex:1"><div style="height:11px; width:74%; background:#EEE9DE; border-radius:2px"></div><div style="height:9px; width:30%; background:#F3EFE6; border-radius:2px; margin-top:7px"></div></div></div>
+                <div style="display:flex; gap:12px; align-items:center"><div style="width:44px; height:44px; border-radius:2px; background:#EEE9DE"></div><div style="flex:1"><div style="height:11px; width:52%; background:#EEE9DE; border-radius:2px"></div><div style="height:9px; width:44%; background:#F3EFE6; border-radius:2px; margin-top:7px"></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ isCreate }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex; flex-direction:column; gap:16px">
+
+          <div style="background:#FFFFFF; border:1px solid #E3DCCE; border-radius:2px; padding:13px 18px; display:flex; flex-wrap:wrap; align-items:center; gap:18px">
+            <div style="font-size:10.5px; letter-spacing:.14em; text-transform:uppercase; color:#6B6B72">Field status key</div>
+            <div style="display:flex; flex-wrap:wrap; gap:16px">
+              <div style="display:flex; align-items:center; gap:7px; font-size:12.5px"><span style="width:9px; height:9px; border-radius:50%; background:#C0392B"></span>Required · incomplete</div>
+              <div style="display:flex; align-items:center; gap:7px; font-size:12.5px"><span style="width:9px; height:9px; border-radius:50%; background:#D4A017"></span>AI-suggested · verify</div>
+              <div style="display:flex; align-items:center; gap:7px; font-size:12.5px"><span style="width:9px; height:9px; border-radius:50%; background:#2E7D32"></span>Complete &amp; valid</div>
+              <div style="display:flex; align-items:center; gap:7px; font-size:12.5px"><span style="width:9px; height:9px; border-radius:50%; background:#9CA3AF"></span>Not applicable</div>
+              <div style="display:flex; align-items:center; gap:7px; font-size:12.5px"><span style="width:9px; height:9px; border-radius:50%; background:#2563EB"></span>Human override</div>
+            </div>
+            <div style="margin-left:auto; display:flex; align-items:center; gap:10px">
+              <div onMouseEnter="{{ showTip }}" onMouseLeave="{{ hideTip }}" style="position:relative; display:flex; align-items:center; gap:8px">
+                <button disabled="{{ true }}" style="padding:8px 14px; border:1px dashed #9CA3AF; background:#F4F5F6; color:#9CA3AF; border-radius:2px; font-size:13.5px; font-weight:600; cursor:not-allowed">AI Auto-Fill</button>
+                <span style="font-size:11.5px; color:#9CA3AF; border:1px solid #D9D2C4; border-radius:50%; width:17px; height:17px; display:inline-flex; align-items:center; justify-content:center; cursor:help">?</span>
+                <div style="{{ tipStyle }}">Available in Phase 2. Auto-fill will suggest attributes from photos; every suggestion stays yellow until a human verifies it.</div>
+              </div>
+            </div>
+          </div>
+
+          <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(340px,1fr)); gap:16px; align-items:start">
+
+            <div style="background:#FFFFFF; border:1px solid #E3DCCE; border-radius:2px">
+              <div style="padding:14px 20px; border-bottom:1px solid rgba(201,162,75,.45); display:flex; flex-wrap:wrap; align-items:center; gap:4px 12px">
+                <h2 style="margin:0; font-size:16px; font-weight:700; white-space:nowrap">Item Record</h2>
+                <span style="margin-left:auto; font-size:12px; color:#6B6B72">EST-4488 · Draft · 9 of 14 required fields complete</span>
+              </div>
+
+              <div style="padding:18px 20px 22px; display:grid; grid-template-columns:repeat(auto-fit,minmax(230px,1fr)); gap:16px">
+
+                <div style="grid-column:1/-1">
+                  <label style="display:flex; align-items:center; gap:7px; font-size:12.5px; font-weight:600; color:#2E7D32; margin-bottom:5px"><span style="width:8px; height:8px; border-radius:50%; background:#2E7D32"></span>Item Title<span style="color:#C0392B">*</span></label>
+                  <input value="Edwardian Platinum Diamond Cluster Ring" style="width:100%; padding:9px 11px; border:1px solid #2E7D32; border-radius:2px; background:#FFFFFF; font-size:14px; outline:none" style-focus="box-shadow:0 0 0 2px rgba(46,125,50,.16)" />
+                  <div style="font-size:11.5px; color:#6B6B72; margin-top:4px">Verified by J. Ortega · 10:12 AM</div>
+                </div>
+
+                <div>
+                  <label style="display:flex; align-items:center; gap:7px; font-size:12.5px; font-weight:600; color:#C0392B; margin-bottom:5px"><span style="width:8px; height:8px; border-radius:50%; background:#C0392B"></span>Metal Purity<span>*</span></label>
+                  <select style="width:100%; padding:9px 11px; border:1px solid #C0392B; border-radius:2px; background:#FDF6F5; font-size:14px; color:#6B6B72; outline:none"><option>Select purity…</option><option>900 Platinum</option><option>950 Platinum</option><option>18k</option></select>
+                  <div style="font-size:11.5px; color:#C0392B; margin-top:4px">Required before this item can be submitted for review.</div>
+                </div>
+
+                <div>
+                  <label style="display:flex; align-items:center; gap:7px; font-size:12.5px; font-weight:600; color:#C0392B; margin-bottom:5px"><span style="width:8px; height:8px; border-radius:50%; background:#C0392B"></span>Total Carat Weight<span>*</span></label>
+                  <input value="1.4.2" style="width:100%; padding:9px 11px; border:1px solid #C0392B; border-radius:2px; background:#FDF6F5; font-size:14px; outline:none" />
+                  <div style="font-size:11.5px; color:#C0392B; margin-top:4px">Enter a decimal number, e.g. 1.42.</div>
+                </div>
+
+                <div>
+                  <label style="display:flex; align-items:center; gap:7px; font-size:12.5px; font-weight:600; color:#8A6A0B; margin-bottom:5px"><span style="width:8px; height:8px; border-radius:50%; background:#D4A017"></span>Style Period</label>
+                  <input value="Edwardian (c. 1901–1915)" style="width:100%; padding:9px 11px; border:1px solid #D4A017; border-radius:2px; background:#FCF8EE; font-size:14px; outline:none" />
+                  <div style="display:flex; align-items:center; gap:8px; font-size:11.5px; color:#8A6A0B; margin-top:4px">Suggested — not yet verified<a href="#" style="color:#8A6A0B; text-decoration:underline">Accept</a><a href="#" style="color:#6B6B72; text-decoration:underline">Reject</a></div>
+                </div>
+
+                <div>
+                  <label style="display:flex; align-items:center; gap:7px; font-size:12.5px; font-weight:600; color:#8A6A0B; margin-bottom:5px"><span style="width:8px; height:8px; border-radius:50%; background:#D4A017"></span>Maker / Hallmark</label>
+                  <input value="Unmarked — French import mark" style="width:100%; padding:9px 11px; border:1px solid #D4A017; border-radius:2px; background:#FCF8EE; font-size:14px; outline:none" />
+                  <div style="font-size:11.5px; color:#8A6A0B; margin-top:4px">Suggested — not yet verified</div>
+                </div>
+
+                <div>
+                  <label style="display:flex; align-items:center; gap:7px; font-size:12.5px; font-weight:600; color:#2563EB; margin-bottom:5px"><span style="width:8px; height:8px; border-radius:50%; background:#2563EB"></span>Retail Price</label>
+                  <input value="$6,800.00" style="width:100%; padding:9px 11px; border:1px solid #2563EB; border-radius:2px; background:#F3F7FE; font-size:14px; font-weight:600; outline:none" />
+                  <div style="font-size:11.5px; color:#2563EB; margin-top:4px">Overridden by M. Renner — was $7,250 · trade-show pricing</div>
+                </div>
+
+                <div>
+                  <label style="display:flex; align-items:center; gap:7px; font-size:12.5px; font-weight:600; color:#2E7D32; margin-bottom:5px"><span style="width:8px; height:8px; border-radius:50%; background:#2E7D32"></span>Acquisition Cost<span style="color:#C0392B">*</span></label>
+                  <input value="$3,100.00" style="width:100%; padding:9px 11px; border:1px solid #2E7D32; border-radius:2px; background:#FFFFFF; font-size:14px; outline:none" />
+                </div>
+
+                <div>
+                  <label style="display:flex; align-items:center; gap:7px; font-size:12.5px; font-weight:600; color:#2E7D32; margin-bottom:5px"><span style="width:8px; height:8px; border-radius:50%; background:#2E7D32"></span>Location<span style="color:#C0392B">*</span></label>
+                  <select style="width:100%; padding:9px 11px; border:1px solid #2E7D32; border-radius:2px; background:#FFFFFF; font-size:14px; outline:none"><option>Madison Ave — Case 4</option><option>Workshop</option><option>Greenwich</option></select>
+                </div>
+
+                <div>
+                  <label style="display:flex; align-items:center; gap:7px; font-size:12.5px; font-weight:600; color:#9CA3AF; margin-bottom:5px"><span style="width:8px; height:8px; border-radius:50%; background:#9CA3AF"></span>Ring Size</label>
+                  <input value="6 ¼" style="width:100%; padding:9px 11px; border:1px solid #E1E3E6; border-radius:2px; background:#F8F8F8; font-size:14px; color:#24242A; outline:none" />
+                </div>
+
+                <div>
+                  <label style="display:flex; align-items:center; gap:7px; font-size:12.5px; font-weight:600; color:#9CA3AF; margin-bottom:5px"><span style="width:8px; height:8px; border-radius:50%; background:#9CA3AF"></span>Chain Length</label>
+                  <input disabled="{{ true }}" placeholder="Not applicable — ring" style="width:100%; padding:9px 11px; border:1px solid #E1E3E6; border-radius:2px; background:#F4F5F6; font-size:14px; color:#9CA3AF; outline:none; cursor:not-allowed" />
+                  <div style="font-size:11.5px; color:#9CA3AF; margin-top:4px">Hidden from listing for this item type.</div>
+                </div>
+
+                <div style="grid-column:1/-1">
+                  <label style="display:flex; align-items:center; gap:7px; font-size:12.5px; font-weight:600; color:#C0392B; margin-bottom:5px"><span style="width:8px; height:8px; border-radius:50%; background:#C0392B"></span>Condition &amp; Restoration Notes<span>*</span></label>
+                  <textarea placeholder="Describe wear, repairs, replaced stones, resizing history…" style="width:100%; min-height:84px; padding:10px 11px; border:1px solid #C0392B; border-radius:2px; background:#FDF6F5; font-size:14px; resize:vertical; outline:none"></textarea>
+                  <div style="font-size:11.5px; color:#C0392B; margin-top:4px">Required — appraisal records cannot be generated without condition notes.</div>
+                </div>
+              </div>
+
+              <div style="padding:14px 20px; border-top:1px solid #F0EBE0; display:flex; flex-wrap:wrap; gap:9px; align-items:center; background:#FBFAF7">
+                <button style="padding:9px 16px; border:1px solid #D9D2C4; background:#FFFFFF; border-radius:2px; font-size:13.5px; cursor:pointer" style-hover="border-color:#C9A24B">Save draft</button>
+                <button disabled="{{ true }}" style="padding:9px 16px; border:1px solid #E1E3E6; background:#F4F5F6; color:#9CA3AF; border-radius:2px; font-size:13.5px; font-weight:600; cursor:not-allowed">Submit for review</button>
+                <span style="font-size:12px; color:#C0392B">3 required fields remain</span>
+                <button style="margin-left:auto; padding:9px 16px; border:1px solid #C0392B; background:#FFFFFF; color:#C0392B; border-radius:2px; font-size:13.5px; cursor:pointer" style-hover="background:#F9EDEB">Discard</button>
+              </div>
+            </div>
+
+            <div style="display:flex; flex-direction:column; gap:16px">
+              <div style="background:#FFFFFF; border:1px solid #E3DCCE; border-radius:2px">
+                <div style="padding:14px 18px; border-bottom:1px solid rgba(201,162,75,.45); display:flex; align-items:center">
+                  <h2 style="margin:0; font-size:16px; font-weight:700">Photography</h2>
+                  <span style="margin-left:auto; font-size:12px; color:#6B6B72">4 of 5–15</span>
+                </div>
+                <div style="padding:16px 18px 18px">
+                  <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:9px">
+                    <div style="aspect-ratio:1; border:1px solid #E3DCCE; border-radius:2px; background:repeating-linear-gradient(135deg,#F3EFE6 0 5px,#EAE4D7 5px 10px); display:flex; align-items:flex-end; padding:6px"><span style="font-family:ui-monospace,Menlo,monospace; font-size:9.5px; background:#1C1F2E; color:#E4CE8C; padding:1px 4px; border-radius:2px">HERO</span></div>
+                    <div style="aspect-ratio:1; border:1px solid #E3DCCE; border-radius:2px; background:repeating-linear-gradient(135deg,#F3EFE6 0 5px,#EAE4D7 5px 10px); display:flex; align-items:flex-end; padding:6px"><span style="font-family:ui-monospace,Menlo,monospace; font-size:9.5px; background:#1C1F2E; color:#E4CE8C; padding:1px 4px; border-radius:2px">SIDE</span></div>
+                    <div style="aspect-ratio:1; border:1px solid #E3DCCE; border-radius:2px; background:repeating-linear-gradient(135deg,#F3EFE6 0 5px,#EAE4D7 5px 10px); display:flex; align-items:flex-end; padding:6px"><span style="font-family:ui-monospace,Menlo,monospace; font-size:9.5px; background:#1C1F2E; color:#E4CE8C; padding:1px 4px; border-radius:2px">HALLMARK</span></div>
+                    <div style="aspect-ratio:1; border:1px solid #E3DCCE; border-radius:2px; background:repeating-linear-gradient(135deg,#F3EFE6 0 5px,#EAE4D7 5px 10px); display:flex; align-items:flex-end; padding:6px"><span style="font-family:ui-monospace,Menlo,monospace; font-size:9.5px; background:#1C1F2E; color:#E4CE8C; padding:1px 4px; border-radius:2px">ON-HAND</span></div>
+                    <div style="aspect-ratio:1; border:1px dashed #C9A24B; border-radius:2px; background:#FCF8EE; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:3px; cursor:pointer" style-hover="background:#F8F1DF"><span style="font-size:18px; color:#C9A24B; line-height:1">+</span><span style="font-family:ui-monospace,Menlo,monospace; font-size:9px; color:#8A6A0B">ADD</span></div>
+                  </div>
+                  <div style="margin-top:11px; font-size:11.5px; color:#6B6B72">Drag to reorder. The hero image is used on the storefront card.</div>
+                </div>
+              </div>
+
+              <div style="background:#1C1F2E; border:1px solid rgba(201,162,75,.4); border-radius:2px; color:#F7F4EE">
+                <div style="padding:13px 18px; border-bottom:1px solid rgba(201,162,75,.35); font-size:16px; font-weight:700">Record Completeness</div>
+                <div style="padding:16px 18px 18px; display:flex; flex-direction:column; gap:10px">
+                  <div style="display:flex; align-items:center; gap:9px; font-size:13.5px"><span style="width:9px; height:9px; border-radius:50%; background:#2E7D32"></span>Complete<span style="margin-left:auto; color:#E4CE8C; font-weight:600">9</span></div>
+                  <div style="display:flex; align-items:center; gap:9px; font-size:13.5px"><span style="width:9px; height:9px; border-radius:50%; background:#C0392B"></span>Required, missing<span style="margin-left:auto; color:#E4CE8C; font-weight:600">3</span></div>
+                  <div style="display:flex; align-items:center; gap:9px; font-size:13.5px"><span style="width:9px; height:9px; border-radius:50%; background:#D4A017"></span>Awaiting verification<span style="margin-left:auto; color:#E4CE8C; font-weight:600">2</span></div>
+                  <div style="display:flex; align-items:center; gap:9px; font-size:13.5px"><span style="width:9px; height:9px; border-radius:50%; background:#2563EB"></span>Overridden<span style="margin-left:auto; color:#E4CE8C; font-weight:600">1</span></div>
+                  <div style="display:flex; align-items:center; gap:9px; font-size:13.5px"><span style="width:9px; height:9px; border-radius:50%; background:#9CA3AF"></span>Not applicable<span style="margin-left:auto; color:#8A8FA3; font-weight:600">2</span></div>
+                  <div style="margin-top:6px; height:5px; background:#262B3D; border-radius:2px; overflow:hidden"><div style="width:64%; height:100%; background:#C9A24B"></div></div>
+                  <div style="font-size:11.5px; color:#8A8FA3">64% ready for review</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ isReview }}" hint-placeholder-val="{{ false }}">
+        <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(340px,1fr)); gap:16px; align-items:start">
+          <div style="background:#FFFFFF; border:1px solid #E3DCCE; border-radius:2px">
+            <div style="padding:14px 20px; border-bottom:1px solid rgba(201,162,75,.45); display:flex; align-items:center; gap:12px">
+              <h2 style="margin:0; font-family:'Source Serif 4',Cambria,serif; font-size:19px; font-weight:600">Victorian Mourning Brooch</h2>
+              <span style="font-size:12px; color:#6B6B72">EST-4487</span>
+              <span style="margin-left:auto; font-size:11px; font-weight:600; letter-spacing:.06em; text-transform:uppercase; padding:3px 8px; border-radius:2px; border:1px solid #D4A017; color:#8A6A0B; background:#FBF4E2">Pending review</span>
+            </div>
+
+            <div style="padding:6px 20px 18px">
+              <div style="display:flex; flex-wrap:wrap; align-items:baseline; gap:10px 14px; padding:13px 0; border-bottom:1px solid #F0EBE0">
+                <div style="width:160px; flex:0 0 160px; font-size:12.5px; color:#6B6B72; display:flex; align-items:center; gap:7px"><span style="width:8px; height:8px; border-radius:50%; background:#2E7D32"></span>Item Title</div>
+                <div style="flex:1 1 220px; min-width:200px; font-size:14.5px">Victorian Mourning Brooch, woven hair panel</div>
+                <a href="#" style="font-size:12.5px; color:#6B6B72; text-decoration:underline">Edit</a>
+              </div>
+              <div style="display:flex; flex-wrap:wrap; align-items:baseline; gap:10px 14px; padding:13px 0; border-bottom:1px solid #F0EBE0">
+                <div style="width:160px; flex:0 0 160px; font-size:12.5px; color:#6B6B72; display:flex; align-items:center; gap:7px"><span style="width:8px; height:8px; border-radius:50%; background:#2E7D32"></span>Metal &amp; Purity</div>
+                <div style="flex:1 1 220px; min-width:200px; font-size:14.5px">15k yellow gold</div>
+                <a href="#" style="font-size:12.5px; color:#6B6B72; text-decoration:underline">Edit</a>
+              </div>
+              <div style="display:flex; flex-wrap:wrap; align-items:baseline; gap:10px 14px; padding:13px 0; border-bottom:1px solid #F0EBE0; background:#FCF8EE; margin:0 -20px; padding-left:20px; padding-right:20px">
+                <div style="width:160px; flex:0 0 160px; font-size:12.5px; color:#8A6A0B; display:flex; align-items:center; gap:7px"><span style="width:8px; height:8px; border-radius:50%; background:#D4A017"></span>Style Period</div>
+                <div style="flex:1 1 220px; min-width:200px"><div style="font-size:14.5px">Victorian, Grand period (c. 1868)</div><div style="font-size:11.5px; color:#8A6A0B; margin-top:2px">Suggested value — inactive until a reviewer accepts it</div></div>
+                <div style="display:flex; gap:8px"><button style="padding:5px 11px; border:1px solid #D4A017; background:#FFFFFF; color:#8A6A0B; border-radius:2px; font-size:12.5px; font-weight:600; cursor:pointer" style-hover="background:#FBF4E2">Accept</button><button style="padding:5px 11px; border:1px solid #D9D2C4; background:#FFFFFF; color:#6B6B72; border-radius:2px; font-size:12.5px; cursor:pointer" style-hover="border-color:#C0392B; color:#C0392B">Reject</button></div>
+              </div>
+              <div style="display:flex; flex-wrap:wrap; align-items:baseline; gap:10px 14px; padding:13px 0; border-bottom:1px solid #F0EBE0">
+                <div style="width:160px; flex:0 0 160px; font-size:12.5px; color:#2563EB; display:flex; align-items:center; gap:7px"><span style="width:8px; height:8px; border-radius:50%; background:#2563EB"></span>Retail Price</div>
+                <div style="flex:1 1 220px; min-width:200px"><div style="font-size:14.5px; font-weight:600">$1,450.00</div><div style="font-size:11.5px; color:#2563EB; margin-top:2px">Overridden by M. Renner — was $1,600</div></div>
+                <a href="#" style="font-size:12.5px; color:#6B6B72; text-decoration:underline">Edit</a>
+              </div>
+              <div style="display:flex; flex-wrap:wrap; align-items:baseline; gap:10px 14px; padding:13px 0; border-bottom:1px solid #F0EBE0">
+                <div style="width:160px; flex:0 0 160px; font-size:12.5px; color:#6B6B72; display:flex; align-items:center; gap:7px"><span style="width:8px; height:8px; border-radius:50%; background:#2E7D32"></span>Condition Notes</div>
+                <div style="flex:1 1 220px; min-width:200px; font-size:14.5px">Original glazed compartment intact; pin stem replaced c. 1970. Light surface wear to bezel.</div>
+                <a href="#" style="font-size:12.5px; color:#6B6B72; text-decoration:underline">Edit</a>
+              </div>
+              <div style="display:flex; flex-wrap:wrap; align-items:baseline; gap:10px 14px; padding:13px 0">
+                <div style="width:160px; flex:0 0 160px; font-size:12.5px; color:#9CA3AF; display:flex; align-items:center; gap:7px"><span style="width:8px; height:8px; border-radius:50%; background:#9CA3AF"></span>Carat Weight</div>
+                <div style="flex:1 1 220px; min-width:200px; font-size:14.5px; color:#9CA3AF">Not applicable — no gemstones</div>
+                <span style="font-size:12.5px; color:#C8CBD1">Edit</span>
+              </div>
+            </div>
+
+            <div style="padding:14px 20px; border-top:1px solid #F0EBE0; background:#FBFAF7; display:flex; flex-wrap:wrap; gap:9px; align-items:center">
+              <button style="padding:10px 20px; border:1px solid #2E7D32; background:#2E7D32; color:#FFFFFF; border-radius:2px; font-size:14px; font-weight:600; cursor:pointer" style-hover="background:#276B2A">Approve &amp; list</button>
+              <button style="padding:10px 16px; border:1px solid #D9D2C4; background:#FFFFFF; border-radius:2px; font-size:14px; cursor:pointer" style-hover="border-color:#C9A24B">Return to submitter</button>
+              <span style="margin-left:auto; font-size:12px; color:#8A6A0B">1 suggested value must be accepted or rejected before approval</span>
+            </div>
+          </div>
+
+          <div style="display:flex; flex-direction:column; gap:16px">
+            <div style="background:#FFFFFF; border:1px solid #E3DCCE; border-radius:2px; padding:16px 18px">
+              <div style="font-size:11px; letter-spacing:.13em; text-transform:uppercase; color:#6B6B72; padding-bottom:10px; border-bottom:1px solid rgba(201,162,75,.45)">Photography</div>
+              <div style="margin-top:12px; aspect-ratio:4/3; border:1px solid #E3DCCE; border-radius:2px; background:repeating-linear-gradient(135deg,#F3EFE6 0 6px,#EAE4D7 6px 12px); display:flex; align-items:center; justify-content:center"><span style="font-family:ui-monospace,Menlo,monospace; font-size:11px; color:#6B6B72; background:#FFFFFFCC; padding:3px 7px; border-radius:2px">hero shot · 2000×1500</span></div>
+              <div style="margin-top:9px; display:grid; grid-template-columns:repeat(4,1fr); gap:8px">
+                <div style="aspect-ratio:1; border:1px solid #E3DCCE; border-radius:2px; background:repeating-linear-gradient(135deg,#F3EFE6 0 5px,#EAE4D7 5px 10px)"></div>
+                <div style="aspect-ratio:1; border:1px solid #E3DCCE; border-radius:2px; background:repeating-linear-gradient(135deg,#F3EFE6 0 5px,#EAE4D7 5px 10px)"></div>
+                <div style="aspect-ratio:1; border:1px solid #E3DCCE; border-radius:2px; background:repeating-linear-gradient(135deg,#F3EFE6 0 5px,#EAE4D7 5px 10px)"></div>
+                <div style="aspect-ratio:1; border:1px solid #E3DCCE; border-radius:2px; background:repeating-linear-gradient(135deg,#F3EFE6 0 5px,#EAE4D7 5px 10px)"></div>
+              </div>
+            </div>
+            <div style="background:#FFFFFF; border:1px solid #E3DCCE; border-radius:2px; padding:16px 18px">
+              <div style="font-size:11px; letter-spacing:.13em; text-transform:uppercase; color:#6B6B72; padding-bottom:10px; border-bottom:1px solid rgba(201,162,75,.45)">Provenance Trail</div>
+              <div style="margin-top:12px; display:flex; flex-direction:column; gap:11px; font-size:13px">
+                <div>Intake by J. Ortega<div style="font-size:11.5px; color:#6B6B72">Sep 9, 10:15 AM · Workshop</div></div>
+                <div>Photographed by L. Tan<div style="font-size:11.5px; color:#6B6B72">Sep 9, 2:40 PM · 5 images</div></div>
+                <div>Price overridden by M. Renner<div style="font-size:11.5px; color:#6B6B72">Sep 10, 9:58 AM</div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ isSettings }}" hint-placeholder-val="{{ false }}">
+        <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:16px">
+          <div style="background:#FFFFFF; border:1px solid #E3DCCE; border-radius:2px; padding:18px 20px; cursor:pointer" style-hover="border-color:#C9A24B">
+            <div style="width:34px; height:34px; border:1px solid #C9A24B; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:13px; color:#C9A24B; font-weight:700">G</div>
+            <h3 style="margin:13px 0 0; font-family:'Source Serif 4',Cambria,serif; font-size:18px; font-weight:600">General</h3>
+            <p style="margin:5px 0 0; font-size:13px; color:#6B6B72">Business details, tax profile, currency, receipt footer.</p>
+          </div>
+          <div style="background:#FFFFFF; border:1px solid #E3DCCE; border-radius:2px; padding:18px 20px; cursor:pointer" style-hover="border-color:#C9A24B">
+            <div style="width:34px; height:34px; border:1px solid #C9A24B; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:13px; color:#C9A24B; font-weight:700">L</div>
+            <h3 style="margin:13px 0 0; font-family:'Source Serif 4',Cambria,serif; font-size:18px; font-weight:600">Locations</h3>
+            <p style="margin:5px 0 0; font-size:13px; color:#6B6B72">3 active locations, case mapping, transfer rules.</p>
+          </div>
+          <div onClick="{{ goPayments }}" style="background:#FFFFFF; border:1px solid #E3DCCE; border-radius:2px; padding:18px 20px; cursor:pointer" style-hover="border-color:#C9A24B">
+            <div style="width:34px; height:34px; border:1px solid #C9A24B; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:13px; color:#C9A24B; font-weight:700">P</div>
+            <h3 style="margin:13px 0 0; font-family:'Source Serif 4',Cambria,serif; font-size:18px; font-weight:600">Payments</h3>
+            <p style="margin:5px 0 0; font-size:13px; color:#6B6B72">Gateway, API credentials, test mode.</p>
+            <span style="display:inline-block; margin-top:10px; font-size:11px; font-weight:600; letter-spacing:.06em; text-transform:uppercase; padding:3px 8px; border-radius:2px; border:1px solid #2E7D32; color:#2E7D32; background:#EEF5EE">Live</span>
+          </div>
+          <div onClick="{{ goAi }}" style="background:#FFFFFF; border:1px solid #E3DCCE; border-radius:2px; padding:18px 20px; cursor:pointer" style-hover="border-color:#C9A24B">
+            <div style="width:34px; height:34px; border:1px solid #9CA3AF; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:13px; color:#9CA3AF; font-weight:700">AI</div>
+            <h3 style="margin:13px 0 0; font-family:'Source Serif 4',Cambria,serif; font-size:18px; font-weight:600; color:#6B6B72">AI &amp; Automation</h3>
+            <p style="margin:5px 0 0; font-size:13px; color:#6B6B72">Auto-fill and description generation.</p>
+            <span style="display:inline-block; margin-top:10px; font-size:11px; font-weight:600; letter-spacing:.06em; text-transform:uppercase; padding:3px 8px; border-radius:2px; border:1px solid #9CA3AF; color:#5C626D; background:#F4F5F6">Not active — Phase 2</span>
+          </div>
+          <div onClick="{{ goOverride }}" style="background:#FFFFFF; border:1px solid #E3DCCE; border-radius:2px; padding:18px 20px; cursor:pointer" style-hover="border-color:#C9A24B">
+            <div style="width:34px; height:34px; border:1px solid #C9A24B; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:13px; color:#C9A24B; font-weight:700">S</div>
+            <h3 style="margin:13px 0 0; font-family:'Source Serif 4',Cambria,serif; font-size:18px; font-weight:600">Security</h3>
+            <p style="margin:5px 0 0; font-size:13px; color:#6B6B72">Two-factor, session policy, override authority.</p>
+          </div>
+          <div onClick="{{ goCommission }}" style="background:#FFFFFF; border:1px solid #E3DCCE; border-radius:2px; padding:18px 20px; cursor:pointer" style-hover="border-color:#C9A24B">
+            <div style="width:34px; height:34px; border:1px solid #C9A24B; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:13px; color:#C9A24B; font-weight:700">C</div>
+            <h3 style="margin:13px 0 0; font-family:'Source Serif 4',Cambria,serif; font-size:18px; font-weight:600">Commission</h3>
+            <p style="margin:5px 0 0; font-size:13px; color:#6B6B72">Rate tiers, split rules, payout schedule.</p>
+          </div>
+          <div onClick="{{ goFlags }}" style="background:#FFFFFF; border:1px solid #E3DCCE; border-radius:2px; padding:18px 20px; cursor:pointer" style-hover="border-color:#C9A24B">
+            <div style="width:34px; height:34px; border:1px solid #C9A24B; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:13px; color:#C9A24B; font-weight:700">F</div>
+            <h3 style="margin:13px 0 0; font-family:'Source Serif 4',Cambria,serif; font-size:18px; font-weight:600">Feature Flags</h3>
+            <p style="margin:5px 0 0; font-size:13px; color:#6B6B72">Rental, Salesperson Storefront, Quarterly Audit.</p>
+            <span style="display:inline-block; margin-top:10px; font-size:11px; font-weight:600; letter-spacing:.06em; text-transform:uppercase; padding:3px 8px; border-radius:2px; border:1px solid #9CA3AF; color:#5C626D; background:#F4F5F6">3 off</span>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ isPayments }}" hint-placeholder-val="{{ false }}">
+        <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(340px,1fr)); gap:16px; align-items:start">
+          <div style="display:flex; flex-direction:column; gap:16px">
+            <div style="background:#FFFFFF; border:1px solid #E3DCCE; border-radius:2px">
+              <div style="padding:14px 20px; border-bottom:1px solid rgba(201,162,75,.45); display:flex; flex-wrap:wrap; align-items:center; gap:4px 12px">
+                <h2 style="margin:0; font-size:16px; font-weight:700; white-space:nowrap">Active Gateway</h2>
+                <span style="margin-left:auto; font-size:11px; font-weight:600; letter-spacing:.06em; text-transform:uppercase; padding:3px 8px; border-radius:2px; border:1px solid #2E7D32; color:#2E7D32; background:#EEF5EE">Live</span>
+              </div>
+              <div style="padding:18px 20px 20px; display:flex; flex-direction:column; gap:14px">
+                <div>
+                  <label style="display:block; font-size:12.5px; font-weight:600; margin-bottom:5px">Processor</label>
+                  <select style="width:100%; padding:9px 11px; border:1px solid #D9D2C4; border-radius:2px; background:#FFFFFF; font-size:14px; outline:none" style-focus="border-color:#C9A24B"><option>Stripe — card present &amp; online</option><option>Square</option><option>Authorize.net</option></select>
+                </div>
+                <div style="display:flex; align-items:flex-start; gap:14px; padding:14px; border:1px solid #E9E3D6; border-radius:2px; background:#FBFAF7">
+                  <div style="width:42px; height:23px; flex:0 0 42px; border-radius:2px; background:#FFFFFF; border:1px solid #C4BCA9; position:relative; cursor:pointer"><div style="position:absolute; top:2px; left:2px; width:17px; height:17px; background:#C4BCA9; border-radius:1px"></div></div>
+                  <div><div style="font-size:14px; font-weight:600">Test mode</div><div style="font-size:12.5px; color:#6B6B72; margin-top:2px">Off — transactions are settling to the live account. Enabling test mode suspends storefront checkout.</div></div>
+                </div>
+              </div>
+            </div>
+
+            <div style="background:#FFFFFF; border:1px solid #E3DCCE; border-radius:2px">
+              <div style="padding:14px 20px; border-bottom:1px solid rgba(201,162,75,.45); display:flex; flex-wrap:wrap; align-items:center; gap:4px 12px">
+                <h2 style="margin:0; font-size:16px; font-weight:700">API Credentials</h2>
+                <span style="margin-left:auto; display:flex; align-items:center; gap:7px; font-size:11.5px; color:#6B6B72"><span style="width:8px; height:8px; border-radius:50%; background:#2E7D32"></span>Rotated 14 days ago</span>
+              </div>
+              <div style="padding:18px 20px 20px; display:flex; flex-direction:column; gap:14px">
+                <div>
+                  <label style="display:block; font-size:12.5px; font-weight:600; margin-bottom:5px">Publishable key</label>
+                  <input value="pk_live_51NfQ2xKq8vRtY7bM" style="width:100%; padding:9px 11px; border:1px solid #D9D2C4; border-radius:2px; background:#FBFAF7; font-family:ui-monospace,Menlo,monospace; font-size:13.5px; outline:none" style-focus="border-color:#C9A24B" />
+                </div>
+                <div>
+                  <label style="display:block; font-size:12.5px; font-weight:600; margin-bottom:5px">Secret key</label>
+                  <div style="display:flex; gap:8px; flex-wrap:wrap">
+                    <input value="sk_live_••••••••••••1234" style="flex:1 1 200px; padding:9px 11px; border:1px solid #D9D2C4; border-radius:2px; background:#FBFAF7; font-family:ui-monospace,Menlo,monospace; font-size:13.5px; outline:none" style-focus="border-color:#C9A24B" />
+                    <button style="padding:9px 14px; border:1px solid #D9D2C4; background:#FFFFFF; border-radius:2px; font-size:13.5px; cursor:pointer" style-hover="border-color:#C9A24B">Reveal</button>
+                    <button style="padding:9px 14px; border:1px solid #C0392B; background:#FFFFFF; color:#C0392B; border-radius:2px; font-size:13.5px; cursor:pointer" style-hover="background:#F9EDEB">Rotate</button>
+                  </div>
+                  <div style="font-size:11.5px; color:#6B6B72; margin-top:5px">Revealing a key is recorded in the audit log with your name and IP.</div>
+                </div>
+                <div>
+                  <label style="display:block; font-size:12.5px; font-weight:600; margin-bottom:5px">Webhook signing secret</label>
+                  <input value="whsec_••••••••••••9f2a" style="width:100%; padding:9px 11px; border:1px solid #D9D2C4; border-radius:2px; background:#FBFAF7; font-family:ui-monospace,Menlo,monospace; font-size:13.5px; outline:none" style-focus="border-color:#C9A24B" />
+                </div>
+              </div>
+              <div style="padding:14px 20px; border-top:1px solid #F0EBE0; background:#FBFAF7; display:flex; flex-wrap:wrap; gap:9px; align-items:center">
+                <button style="padding:9px 16px; border:1px solid #1C1F2E; background:#1C1F2E; color:#F7F4EE; border-radius:2px; font-size:13.5px; font-weight:600; cursor:pointer" style-hover="background:#262B3D">Save credentials</button>
+                <button style="padding:9px 16px; border:1px solid #D9D2C4; background:#FFFFFF; border-radius:2px; font-size:13.5px; cursor:pointer" style-hover="border-color:#C9A24B">Send test charge</button>
+              </div>
+            </div>
+          </div>
+
+          <div style="display:flex; flex-direction:column; gap:16px">
+            <div style="background:#1C1F2E; border:1px solid rgba(201,162,75,.4); border-radius:2px; color:#F7F4EE">
+              <div style="padding:13px 18px; border-bottom:1px solid rgba(201,162,75,.35); font-size:16px; font-weight:700">Security posture</div>
+              <div style="padding:15px 18px 18px; display:flex; flex-direction:column; gap:11px; font-size:13.5px">
+                <div style="display:flex; align-items:center; gap:9px"><span style="width:8px; height:8px; border-radius:50%; background:#2E7D32"></span>Credentials stored encrypted at rest<span style="margin-left:auto; color:#8A8FA3">AES-256</span></div>
+                <div style="display:flex; align-items:center; gap:9px"><span style="width:8px; height:8px; border-radius:50%; background:#2E7D32"></span>Two-factor required to edit<span style="margin-left:auto; color:#8A8FA3">Enforced</span></div>
+                <div style="display:flex; align-items:center; gap:9px"><span style="width:8px; height:8px; border-radius:50%; background:#D4A017"></span>Key rotation policy<span style="margin-left:auto; color:#E4CE8C">76 days left</span></div>
+                <div style="display:flex; align-items:center; gap:9px"><span style="width:8px; height:8px; border-radius:50%; background:#2E7D32"></span>PCI scope<span style="margin-left:auto; color:#8A8FA3">SAQ-A</span></div>
+              </div>
+            </div>
+            <div style="background:#FFFFFF; border:1px solid #E3DCCE; border-radius:2px; padding:18px 20px">
+              <div style="font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:#6B6B72; padding-bottom:10px; border-bottom:1px solid rgba(201,162,75,.45)">Recent credential events</div>
+              <div style="margin-top:12px; display:flex; flex-direction:column; gap:11px; font-size:13px">
+                <div>Secret key rotated<div style="font-size:11.5px; color:#6B6B72">M. Renner · Aug 27, 2026</div></div>
+                <div>Webhook endpoint updated<div style="font-size:11.5px; color:#6B6B72">M. Renner · Aug 14, 2026</div></div>
+                <div>Test mode disabled<div style="font-size:11.5px; color:#6B6B72">M. Renner · Jul 30, 2026</div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ isAi }}" hint-placeholder-val="{{ false }}">
+        <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(340px,1fr)); gap:16px; align-items:start">
+          <div style="background:#FFFFFF; border:1px solid #E3DCCE; border-radius:2px">
+            <div style="padding:14px 20px; border-bottom:1px solid rgba(201,162,75,.45); display:flex; flex-wrap:wrap; align-items:center; gap:4px 12px">
+              <h2 style="margin:0; font-size:16px; font-weight:700">AI &amp; Automation</h2>
+              <span style="margin-left:auto; font-size:11px; font-weight:600; letter-spacing:.06em; text-transform:uppercase; padding:3px 8px; border-radius:2px; border:1px solid #9CA3AF; color:#5C626D; background:#F4F5F6">Not active — Phase 1</span>
+            </div>
+
+            <div style="padding:18px 20px; border-bottom:1px solid #F0EBE0; display:flex; align-items:flex-start; gap:14px; background:#FBFAF7">
+              <div style="width:42px; height:23px; flex:0 0 42px; border-radius:2px; background:#F4F5F6; border:1px dashed #9CA3AF; position:relative; cursor:not-allowed"><div style="position:absolute; top:2px; left:2px; width:17px; height:17px; background:#D6D9DD; border-radius:1px"></div></div>
+              <div>
+                <div style="font-size:14px; font-weight:600; color:#6B6B72">Master AI switch — off</div>
+                <div style="font-size:12.5px; color:#6B6B72; margin-top:3px; max-width:56ch; line-height:1.55">No AI capability is available in Phase 1. This section is configured and ready; turning the master switch on will be possible once the provider is provisioned. Nothing here is broken.</div>
+              </div>
+            </div>
+
+            <div style="padding:6px 20px 18px; opacity:.75">
+              <div style="display:flex; flex-wrap:wrap; align-items:flex-start; gap:14px; padding:15px 0; border-bottom:1px solid #F0EBE0">
+                <div style="width:42px; height:23px; flex:0 0 42px; border-radius:2px; background:#F4F5F6; border:1px dashed #9CA3AF; position:relative; cursor:not-allowed"><div style="position:absolute; top:2px; left:2px; width:17px; height:17px; background:#D6D9DD; border-radius:1px"></div></div>
+                <div style="flex:1 1 220px; min-width:200px"><div style="font-size:14px; font-weight:600; color:#6B6B72">Attribute auto-fill</div><div style="font-size:12.5px; color:#9CA3AF; margin-top:2px">Suggest metal, period and stone data from intake photos. Suggestions enter the record yellow and stay inactive until a human accepts them.</div></div>
+              </div>
+              <div style="display:flex; flex-wrap:wrap; align-items:flex-start; gap:14px; padding:15px 0; border-bottom:1px solid #F0EBE0">
+                <div style="width:42px; height:23px; flex:0 0 42px; border-radius:2px; background:#F4F5F6; border:1px dashed #9CA3AF; position:relative; cursor:not-allowed"><div style="position:absolute; top:2px; left:2px; width:17px; height:17px; background:#D6D9DD; border-radius:1px"></div></div>
+                <div style="flex:1 1 220px; min-width:200px"><div style="font-size:14px; font-weight:600; color:#6B6B72">Customer-facing descriptions</div><div style="font-size:12.5px; color:#9CA3AF; margin-top:2px">Draft storefront copy from the verified attribute set. Requires reviewer approval before publishing.</div></div>
+              </div>
+              <div style="display:flex; flex-wrap:wrap; align-items:flex-start; gap:14px; padding:15px 0">
+                <div style="width:42px; height:23px; flex:0 0 42px; border-radius:2px; background:#F4F5F6; border:1px dashed #9CA3AF; position:relative; cursor:not-allowed"><div style="position:absolute; top:2px; left:2px; width:17px; height:17px; background:#D6D9DD; border-radius:1px"></div></div>
+                <div style="flex:1 1 220px; min-width:200px"><div style="font-size:14px; font-weight:600; color:#6B6B72">Comparable-sale pricing</div><div style="font-size:12.5px; color:#9CA3AF; margin-top:2px">Suggest a retail band from auction comparables. Never sets price directly.</div></div>
+              </div>
+            </div>
+
+            <div style="padding:14px 20px; border-top:1px solid #F0EBE0; background:#FBFAF7; display:flex; flex-wrap:wrap; gap:9px; align-items:center">
+              <button disabled="{{ true }}" style="padding:9px 16px; border:1px solid #E1E3E6; background:#F4F5F6; color:#9CA3AF; border-radius:2px; font-size:13.5px; font-weight:600; cursor:not-allowed">Save AI settings</button>
+              <span style="font-size:12px; color:#6B6B72">Editable once the master switch is enabled in Phase 2.</span>
+            </div>
+          </div>
+
+          <div style="background:#1C1F2E; border:1px solid rgba(201,162,75,.4); border-radius:2px; color:#F7F4EE">
+            <div style="padding:13px 18px; border-bottom:1px solid rgba(201,162,75,.35); font-size:16px; font-weight:700">How suggestions will behave</div>
+            <div style="padding:16px 18px 18px; display:flex; flex-direction:column; gap:13px; font-size:13.5px; line-height:1.55">
+              <div style="display:flex; gap:10px"><span style="width:9px; height:9px; border-radius:50%; background:#D4A017; margin-top:6px; flex:0 0 9px"></span><span>A suggested value lands <strong style="color:#E4CE8C">yellow</strong> and is excluded from listings, POS and reports until reviewed.</span></div>
+              <div style="display:flex; gap:10px"><span style="width:9px; height:9px; border-radius:50%; background:#2E7D32; margin-top:6px; flex:0 0 9px"></span><span>Accepting a suggestion turns the field <strong style="color:#E4CE8C">green</strong> and attributes it to the reviewer.</span></div>
+              <div style="display:flex; gap:10px"><span style="width:9px; height:9px; border-radius:50%; background:#2563EB; margin-top:6px; flex:0 0 9px"></span><span>Editing a suggestion instead of accepting it turns the field <strong style="color:#E4CE8C">blue</strong> — a human override.</span></div>
+              <div style="margin-top:4px; padding-top:13px; border-top:1px solid rgba(201,162,75,.3); font-size:12.5px; color:#8A8FA3">This mapping is already implemented in the inventory form, so no screen changes are needed when AI is switched on.</div>
+            </div>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ isFlags }}" hint-placeholder-val="{{ false }}">
+        <div style="background:#FFFFFF; border:1px solid #E3DCCE; border-radius:2px; max-width:880px">
+          <div style="padding:14px 20px; border-bottom:1px solid rgba(201,162,75,.45); display:flex; flex-wrap:wrap; align-items:center; gap:4px 12px">
+            <h2 style="margin:0; font-size:16px; font-weight:700">Feature Flags</h2>
+            <span style="margin-left:auto; font-size:12px; color:#6B6B72">3 flags · all off by default</span>
+          </div>
+          <div style="padding:6px 20px 18px">
+            <div style="display:flex; flex-wrap:wrap; align-items:center; gap:14px; padding:17px 0; border-bottom:1px solid #F0EBE0">
+              <div style="width:42px; height:23px; flex:0 0 42px; border-radius:2px; background:#FFFFFF; border:1px solid #C4BCA9; position:relative; cursor:pointer"><div style="position:absolute; top:2px; left:2px; width:17px; height:17px; background:#C4BCA9; border-radius:1px"></div></div>
+              <div style="flex:1 1 240px; min-width:220px"><div style="font-size:15px; font-weight:600">Rental module</div><div style="font-size:12.5px; color:#6B6B72; margin-top:2px">Short-term hire of showcase pieces with deposit handling and return inspection.</div></div>
+              <span style="font-size:11px; font-weight:600; letter-spacing:.06em; text-transform:uppercase; padding:3px 8px; border-radius:2px; border:1px solid #9CA3AF; color:#5C626D; background:#F4F5F6">Coming in Phase 2</span>
+            </div>
+            <div style="display:flex; flex-wrap:wrap; align-items:center; gap:14px; padding:17px 0; border-bottom:1px solid #F0EBE0">
+              <div style="width:42px; height:23px; flex:0 0 42px; border-radius:2px; background:#FFFFFF; border:1px solid #C4BCA9; position:relative; cursor:pointer"><div style="position:absolute; top:2px; left:2px; width:17px; height:17px; background:#C4BCA9; border-radius:1px"></div></div>
+              <div style="flex:1 1 240px; min-width:220px"><div style="font-size:15px; font-weight:600">Salesperson storefront</div><div style="font-size:12.5px; color:#6B6B72; margin-top:2px">Personal shopfronts per salesperson with attributed commission on referred sales.</div></div>
+              <span style="font-size:11px; font-weight:600; letter-spacing:.06em; text-transform:uppercase; padding:3px 8px; border-radius:2px; border:1px solid #9CA3AF; color:#5C626D; background:#F4F5F6">Coming in Phase 2</span>
+            </div>
+            <div style="display:flex; flex-wrap:wrap; align-items:center; gap:14px; padding:17px 0">
+              <div style="width:42px; height:23px; flex:0 0 42px; border-radius:2px; background:#FFFFFF; border:1px solid #C4BCA9; position:relative; cursor:pointer"><div style="position:absolute; top:2px; left:2px; width:17px; height:17px; background:#C4BCA9; border-radius:1px"></div></div>
+              <div style="flex:1 1 240px; min-width:220px"><div style="font-size:15px; font-weight:600">Quarterly audit</div><div style="font-size:12.5px; color:#6B6B72; margin-top:2px">Scheduled physical-count reconciliation with variance reporting per location.</div></div>
+              <span style="font-size:11px; font-weight:600; letter-spacing:.06em; text-transform:uppercase; padding:3px 8px; border-radius:2px; border:1px solid #9CA3AF; color:#5C626D; background:#F4F5F6">Coming in Phase 2</span>
+            </div>
+          </div>
+          <div style="padding:14px 20px; border-top:1px solid #F0EBE0; background:#FBFAF7; font-size:12.5px; color:#6B6B72">Enabling a flag exposes an unfinished module to staff. Flag changes are written to the audit log.</div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ isOverride }}" hint-placeholder-val="{{ false }}">
+        <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(340px,1fr)); gap:16px; align-items:start">
+          <div style="background:#FFFFFF; border:1px solid #C0392B; border-radius:2px">
+            <div style="padding:14px 20px; border-bottom:1px solid rgba(192,57,43,.4); display:flex; flex-wrap:wrap; align-items:center; gap:4px 12px">
+              <h2 style="margin:0; font-size:16px; font-weight:700; color:#C0392B">Override Request</h2>
+              <span style="margin-left:auto; font-size:11px; font-weight:600; letter-spacing:.06em; text-transform:uppercase; padding:3px 8px; border-radius:2px; border:1px solid #C0392B; color:#C0392B; background:#F9EDEB">High consequence</span>
+            </div>
+            <div style="padding:18px 20px 20px; display:flex; flex-direction:column; gap:14px">
+              <div>
+                <label style="display:block; font-size:12.5px; font-weight:600; margin-bottom:5px">Override type</label>
+                <select style="width:100%; padding:9px 11px; border:1px solid #D9D2C4; border-radius:2px; background:#FFFFFF; font-size:14px; outline:none" style-focus="border-color:#C0392B"><option>Price below floor</option><option>Discount above staff limit</option><option>Sell a locked item</option><option>Return outside window</option></select>
+              </div>
+              <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:12px">
+                <div>
+                  <label style="display:block; font-size:12.5px; font-weight:600; margin-bottom:5px">Item</label>
+                  <input value="EST-4412 — Edwardian Cluster Ring" style="width:100%; padding:9px 11px; border:1px solid #D9D2C4; border-radius:2px; font-size:14px; outline:none" style-focus="border-color:#C0392B" />
+                </div>
+                <div>
+                  <label style="display:flex; align-items:center; gap:7px; font-size:12.5px; font-weight:600; color:#2563EB; margin-bottom:5px"><span style="width:8px; height:8px; border-radius:50%; background:#2563EB"></span>New amount</label>
+                  <input value="$6,150.00" style="width:100%; padding:9px 11px; border:1px solid #2563EB; border-radius:2px; background:#F3F7FE; font-size:14px; font-weight:600; outline:none" />
+                  <div style="font-size:11.5px; color:#2563EB; margin-top:4px">9.6% below the $6,800 floor</div>
+                </div>
+              </div>
+              <div>
+                <label style="display:flex; align-items:center; gap:7px; font-size:12.5px; font-weight:600; color:#C0392B; margin-bottom:5px"><span style="width:8px; height:8px; border-radius:50%; background:#C0392B"></span>Reason<span>*</span></label>
+                <textarea placeholder="State the business reason. This text appears in the audit log and the commission calculation." style="width:100%; min-height:78px; padding:10px 11px; border:1px solid #C0392B; border-radius:2px; background:#FDF6F5; font-size:14px; resize:vertical; outline:none"></textarea>
+                <div style="font-size:11.5px; color:#C0392B; margin-top:4px">Required — overrides without a reason are rejected automatically.</div>
+              </div>
+              <label style="display:flex; align-items:flex-start; gap:10px; padding:13px; border:1px solid #E9E3D6; border-radius:2px; background:#FBFAF7; cursor:pointer">
+                <span style="width:15px; height:15px; flex:0 0 15px; margin-top:2px; border:1px solid #C4BCA9; border-radius:2px; background:#FFFFFF"></span>
+                <span style="font-size:13px; color:#45454C; line-height:1.5">I confirm this override is authorised and understand it is attributed to my account permanently.</span>
+              </label>
+            </div>
+            <div style="padding:14px 20px; border-top:1px solid #F0EBE0; background:#FBFAF7; display:flex; flex-wrap:wrap; gap:9px; align-items:center">
+              <button disabled="{{ true }}" style="padding:10px 18px; border:1px solid #E1E3E6; background:#F4F5F6; color:#9CA3AF; border-radius:2px; font-size:14px; font-weight:600; cursor:not-allowed">Submit override</button>
+              <span style="font-size:12px; color:#C0392B">Reason and confirmation required</span>
+              <button style="margin-left:auto; padding:10px 18px; border:1px solid #D9D2C4; background:#FFFFFF; border-radius:2px; font-size:14px; cursor:pointer" style-hover="border-color:#C9A24B">Cancel</button>
+            </div>
+          </div>
+
+          <div style="display:flex; flex-direction:column; gap:16px">
+            <div style="background:#FFFFFF; border:1px solid #E3DCCE; border-radius:2px">
+              <div style="padding:14px 20px; border-bottom:1px solid rgba(201,162,75,.45); font-size:16px; font-weight:700">Inventory Lock</div>
+              <div style="padding:18px 20px 20px; display:flex; flex-direction:column; gap:14px">
+                <div>
+                  <label style="display:block; font-size:12.5px; font-weight:600; margin-bottom:5px">Lock type</label>
+                  <select style="width:100%; padding:9px 11px; border:1px solid #D9D2C4; border-radius:2px; background:#FFFFFF; font-size:14px; outline:none" style-focus="border-color:#C9A24B"><option>Valuation hold</option><option>Repair / workshop</option><option>Consignment dispute</option><option>Legal hold</option></select>
+                </div>
+                <div>
+                  <label style="display:block; font-size:12.5px; font-weight:600; margin-bottom:5px">Reason</label>
+                  <textarea placeholder="Visible to staff who attempt to sell this item." style="width:100%; min-height:64px; padding:10px 11px; border:1px solid #D9D2C4; border-radius:2px; font-size:14px; resize:vertical; outline:none" style-focus="border-color:#C9A24B"></textarea>
+                </div>
+                <div style="padding:13px 14px; border:1px solid rgba(192,57,43,.45); border-radius:2px; background:#FDF6F5; font-size:13px; color:#45454C; line-height:1.55">Locking removes the item from POS lookup and the storefront immediately. Only a Super Admin can release it.</div>
+                <button style="align-self:flex-start; padding:10px 18px; border:1px solid #C0392B; background:#C0392B; color:#FFFFFF; border-radius:2px; font-size:14px; font-weight:600; cursor:pointer" style-hover="background:#A53125">Confirm lock</button>
+              </div>
+            </div>
+            <div style="background:#FFFFFF; border:1px solid #E3DCCE; border-radius:2px; padding:18px 20px">
+              <div style="font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:#6B6B72; padding-bottom:10px; border-bottom:1px solid rgba(201,162,75,.45)">Active locks</div>
+              <div style="margin-top:12px; display:flex; flex-direction:column; gap:12px; font-size:13px">
+                <div style="display:flex; gap:10px; align-items:flex-start"><span style="width:8px; height:8px; border-radius:50%; background:#C0392B; margin-top:6px; flex:0 0 8px"></span><div>EST-4301 · Georgian garnet pendant<div style="font-size:11.5px; color:#6B6B72">Valuation hold · M. Renner · 2 days</div></div></div>
+                <div style="display:flex; gap:10px; align-items:flex-start"><span style="width:8px; height:8px; border-radius:50%; background:#D4A017; margin-top:6px; flex:0 0 8px"></span><div>EST-4177 · Art Nouveau plique-à-jour brooch<div style="font-size:11.5px; color:#6B6B72">Repair / workshop · L. Tan · 9 days</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ isCommission }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex; flex-direction:column; gap:16px">
+          <div style="display:flex; flex-wrap:wrap; gap:8px; align-items:center">
+            <select style="padding:8px 11px; border:1px solid #D9D2C4; border-radius:2px; background:#FFFFFF; font-size:13.5px"><option>All staff</option><option>A. Whitfield</option><option>J. Ortega</option><option>L. Tan</option></select>
+            <select style="padding:8px 11px; border:1px solid #D9D2C4; border-radius:2px; background:#FFFFFF; font-size:13.5px"><option>Sep 1 – Sep 10, 2026</option><option>Last month</option><option>Quarter to date</option></select>
+            <select style="padding:8px 11px; border:1px solid #D9D2C4; border-radius:2px; background:#FFFFFF; font-size:13.5px"><option>All locations</option><option>Madison Ave</option><option>Greenwich</option></select>
+            <button style="margin-left:auto; padding:8px 15px; border:1px solid #1C1F2E; background:#1C1F2E; color:#F7F4EE; border-radius:2px; font-size:13.5px; font-weight:600; cursor:pointer" style-hover="background:#262B3D">Export CSV</button>
+          </div>
+
+          <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:16px">
+            <div style="background:#FFFFFF; border:1px solid #E3DCCE; border-radius:2px; padding:16px 18px"><div style="font-size:11px; letter-spacing:.13em; text-transform:uppercase; color:#6B6B72; padding-bottom:10px; border-bottom:1px solid rgba(201,162,75,.45)">Gross sales</div><div style="margin-top:12px; font-family:'Source Serif 4',Cambria,serif; font-size:30px; font-weight:600">$148,320</div></div>
+            <div style="background:#FFFFFF; border:1px solid #E3DCCE; border-radius:2px; padding:16px 18px"><div style="font-size:11px; letter-spacing:.13em; text-transform:uppercase; color:#6B6B72; padding-bottom:10px; border-bottom:1px solid rgba(201,162,75,.45)">Commissionable</div><div style="margin-top:12px; font-family:'Source Serif 4',Cambria,serif; font-size:30px; font-weight:600">$139,870</div></div>
+            <div style="background:#FFFFFF; border:1px solid #E3DCCE; border-radius:2px; padding:16px 18px"><div style="font-size:11px; letter-spacing:.13em; text-transform:uppercase; color:#6B6B72; padding-bottom:10px; border-bottom:1px solid rgba(201,162,75,.45)">Commission due</div><div style="margin-top:12px; font-family:'Source Serif 4',Cambria,serif; font-size:30px; font-weight:600; color:#C9A24B">$7,214</div></div>
+            <div style="background:#FFFFFF; border:1px solid #E3DCCE; border-radius:2px; padding:16px 18px"><div style="font-size:11px; letter-spacing:.13em; text-transform:uppercase; color:#6B6B72; padding-bottom:10px; border-bottom:1px solid rgba(201,162,75,.45)">Overrides applied</div><div style="margin-top:12px; font-family:'Source Serif 4',Cambria,serif; font-size:30px; font-weight:600; color:#2563EB">4</div></div>
+          </div>
+
+          <div style="background:#FFFFFF; border:1px solid #E3DCCE; border-radius:2px; overflow-x:auto">
+            <div style="display:grid; grid-template-columns:minmax(170px,1.6fr) 110px minmax(120px,1fr) 120px 110px 110px; gap:14px; min-width:820px; padding:11px 18px; border-bottom:1px solid rgba(201,162,75,.45); font-size:10.5px; letter-spacing:.13em; text-transform:uppercase; color:#6B6B72; background:#FBFAF7">
+              <div>Salesperson</div><div style="text-align:right">Sales</div><div style="text-align:right">Gross</div><div style="text-align:right">Rate</div><div style="text-align:right">Adjustments</div><div style="text-align:right">Commission</div>
+            </div>
+            <div style="display:grid; grid-template-columns:minmax(170px,1.6fr) 110px minmax(120px,1fr) 120px 110px 110px; gap:14px; min-width:820px; padding:13px 18px; border-bottom:1px solid #F0EBE0; align-items:center; font-size:14px" style-hover="background:#FBFAF7">
+              <div style="font-weight:600">A. Whitfield<div style="font-size:11.5px; font-weight:400; color:#6B6B72">Madison Ave · Senior</div></div>
+              <div style="text-align:right">18</div><div style="text-align:right">$62,140</div><div style="text-align:right">5.5%</div><div style="text-align:right; color:#2563EB">−$210</div><div style="text-align:right; font-weight:600">$3,207.70</div>
+            </div>
+            <div style="display:grid; grid-template-columns:minmax(170px,1.6fr) 110px minmax(120px,1fr) 120px 110px 110px; gap:14px; min-width:820px; padding:13px 18px; border-bottom:1px solid #F0EBE0; align-items:center; font-size:14px" style-hover="background:#FBFAF7">
+              <div style="font-weight:600">J. Ortega<div style="font-size:11.5px; font-weight:400; color:#6B6B72">Workshop · Associate</div></div>
+              <div style="text-align:right">12</div><div style="text-align:right">$41,880</div><div style="text-align:right">4.5%</div><div style="text-align:right; color:#6B6B72">—</div><div style="text-align:right; font-weight:600">$1,884.60</div>
+            </div>
+            <div style="display:grid; grid-template-columns:minmax(170px,1.6fr) 110px minmax(120px,1fr) 120px 110px 110px; gap:14px; min-width:820px; padding:13px 18px; border-bottom:1px solid #F0EBE0; align-items:center; font-size:14px" style-hover="background:#FBFAF7">
+              <div style="font-weight:600">L. Tan<div style="font-size:11.5px; font-weight:400; color:#6B6B72">Greenwich · Associate</div></div>
+              <div style="text-align:right">9</div><div style="text-align:right">$35,850</div><div style="text-align:right">4.5%</div><div style="text-align:right; color:#2563EB">−$187</div><div style="text-align:right; font-weight:600">$1,426.25</div>
+            </div>
+            <div style="display:grid; grid-template-columns:minmax(170px,1.6fr) 110px minmax(120px,1fr) 120px 110px 110px; gap:14px; min-width:820px; padding:13px 18px; align-items:center; font-size:14px; background:#FBFAF7; font-weight:700">
+              <div>Total</div><div style="text-align:right">39</div><div style="text-align:right">$139,870</div><div style="text-align:right">—</div><div style="text-align:right">−$397</div><div style="text-align:right">$6,518.55</div>
+            </div>
+          </div>
+
+          <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:16px">
+            <div style="background:#FFFFFF; border:1px solid #E3DCCE; border-radius:2px; padding:34px 20px; text-align:center">
+              <div style="font-size:10.5px; letter-spacing:.14em; text-transform:uppercase; color:#9CA3AF; margin-bottom:14px">Empty state</div>
+              <div style="width:38px; height:38px; margin:0 auto 12px; border:1px solid #C9A24B; border-radius:50%"></div>
+              <div style="font-family:'Source Serif 4',Cambria,serif; font-size:18px; font-weight:600">No commissionable sales in this range</div>
+              <div style="font-size:13px; color:#6B6B72; margin-top:5px; max-width:36ch; margin-left:auto; margin-right:auto">Widen the date range or clear the salesperson filter.</div>
+            </div>
+            <div style="background:#FFFFFF; border:1px solid #E3DCCE; border-radius:2px; padding:20px">
+              <div style="font-size:10.5px; letter-spacing:.14em; text-transform:uppercase; color:#9CA3AF; margin-bottom:14px; text-align:center">Loading state</div>
+              <div style="display:flex; flex-direction:column; gap:12px">
+                <div style="display:flex; gap:14px"><div style="height:12px; flex:2; background:#EEE9DE; border-radius:2px"></div><div style="height:12px; flex:1; background:#F3EFE6; border-radius:2px"></div><div style="height:12px; flex:1; background:#F3EFE6; border-radius:2px"></div></div>
+                <div style="display:flex; gap:14px"><div style="height:12px; flex:2; background:#EEE9DE; border-radius:2px"></div><div style="height:12px; flex:1; background:#F3EFE6; border-radius:2px"></div><div style="height:12px; flex:1; background:#F3EFE6; border-radius:2px"></div></div>
+                <div style="display:flex; gap:14px"><div style="height:12px; flex:2; background:#EEE9DE; border-radius:2px"></div><div style="height:12px; flex:1; background:#F3EFE6; border-radius:2px"></div><div style="height:12px; flex:1; background:#F3EFE6; border-radius:2px"></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ isAudit }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex; flex-direction:column; gap:16px">
+          <div style="display:flex; flex-wrap:wrap; gap:8px; align-items:center">
+            <input placeholder="Filter by entity, e.g. EST-4412" style="flex:1 1 220px; min-width:180px; padding:8px 11px; border:1px solid #D9D2C4; border-radius:2px; background:#FFFFFF; font-size:13.5px; outline:none" style-focus="border-color:#C9A24B" />
+            <select style="padding:8px 11px; border:1px solid #D9D2C4; border-radius:2px; background:#FFFFFF; font-size:13.5px"><option>All users</option><option>M. Renner</option><option>A. Whitfield</option><option>J. Ortega</option></select>
+            <select style="padding:8px 11px; border:1px solid #D9D2C4; border-radius:2px; background:#FFFFFF; font-size:13.5px"><option>All actions</option><option>Create</option><option>Update</option><option>Override</option><option>Lock</option><option>Reveal credential</option></select>
+            <button style="padding:8px 15px; border:1px solid #D9D2C4; background:#FFFFFF; border-radius:2px; font-size:13.5px; cursor:pointer" style-hover="border-color:#C9A24B">Export</button>
+          </div>
+
+          <div style="background:#FFFFFF; border:1px solid #E3DCCE; border-radius:2px; overflow-x:auto">
+            <div style="display:grid; grid-template-columns:140px 130px 110px 120px minmax(220px,1.6fr); gap:14px; min-width:860px; padding:10px 18px; border-bottom:1px solid rgba(201,162,75,.45); font-size:10.5px; letter-spacing:.13em; text-transform:uppercase; color:#6B6B72; background:#FBFAF7">
+              <div>Timestamp</div><div>User</div><div>Action</div><div>Entity</div><div>Before → after</div>
+            </div>
+            <div style="display:grid; grid-template-columns:140px 130px 110px 120px minmax(220px,1.6fr); gap:14px; min-width:860px; padding:11px 18px; border-bottom:1px solid #F0EBE0; align-items:center; font-size:13px" style-hover="background:#FBFAF7">
+              <div style="font-family:ui-monospace,Menlo,monospace; font-size:12px; color:#6B6B72">Sep 10 11:42:07</div><div>A. Whitfield</div>
+              <div><span style="font-size:10.5px; font-weight:600; letter-spacing:.06em; text-transform:uppercase; padding:2px 7px; border-radius:2px; border:1px solid #2E7D32; color:#2E7D32; background:#EEF5EE">Sale</span></div>
+              <div style="font-family:ui-monospace,Menlo,monospace; font-size:12px">EST-4412</div>
+              <div style="color:#45454C">status <span style="color:#6B6B72">listed</span> → <strong>sold</strong> · $6,800.00</div>
+            </div>
+            <div style="display:grid; grid-template-columns:140px 130px 110px 120px minmax(220px,1.6fr); gap:14px; min-width:860px; padding:11px 18px; border-bottom:1px solid #F0EBE0; align-items:center; font-size:13px" style-hover="background:#FBFAF7">
+              <div style="font-family:ui-monospace,Menlo,monospace; font-size:12px; color:#6B6B72">Sep 10 09:58:44</div><div>M. Renner</div>
+              <div><span style="font-size:10.5px; font-weight:600; letter-spacing:.06em; text-transform:uppercase; padding:2px 7px; border-radius:2px; border:1px solid #2563EB; color:#2563EB; background:#F3F7FE">Override</span></div>
+              <div style="font-family:ui-monospace,Menlo,monospace; font-size:12px">EST-4390</div>
+              <div style="color:#45454C">price <span style="color:#6B6B72">$2,400.00</span> → <strong>$2,150.00</strong> · trade-show pricing</div>
+            </div>
+            <div style="display:grid; grid-template-columns:140px 130px 110px 120px minmax(220px,1.6fr); gap:14px; min-width:860px; padding:11px 18px; border-bottom:1px solid #F0EBE0; align-items:center; font-size:13px" style-hover="background:#FBFAF7">
+              <div style="font-family:ui-monospace,Menlo,monospace; font-size:12px; color:#6B6B72">Sep 10 09:20:11</div><div>M. Renner</div>
+              <div><span style="font-size:10.5px; font-weight:600; letter-spacing:.06em; text-transform:uppercase; padding:2px 7px; border-radius:2px; border:1px solid #C0392B; color:#C0392B; background:#F9EDEB">Lock</span></div>
+              <div style="font-family:ui-monospace,Menlo,monospace; font-size:12px">EST-4301</div>
+              <div style="color:#45454C">lock <span style="color:#6B6B72">none</span> → <strong>valuation hold</strong></div>
+            </div>
+            <div style="display:grid; grid-template-columns:140px 130px 110px 120px minmax(220px,1.6fr); gap:14px; min-width:860px; padding:11px 18px; border-bottom:1px solid #F0EBE0; align-items:center; font-size:13px" style-hover="background:#FBFAF7">
+              <div style="font-family:ui-monospace,Menlo,monospace; font-size:12px; color:#6B6B72">Sep 09 16:04:53</div><div>M. Renner</div>
+              <div><span style="font-size:10.5px; font-weight:600; letter-spacing:.06em; text-transform:uppercase; padding:2px 7px; border-radius:2px; border:1px solid #D4A017; color:#8A6A0B; background:#FBF4E2">Reveal</span></div>
+              <div style="font-family:ui-monospace,Menlo,monospace; font-size:12px">settings.pay</div>
+              <div style="color:#45454C">secret key revealed · IP 74.12.8.90</div>
+            </div>
+            <div style="display:grid; grid-template-columns:140px 130px 110px 120px minmax(220px,1.6fr); gap:14px; min-width:860px; padding:11px 18px; align-items:center; font-size:13px" style-hover="background:#FBFAF7">
+              <div style="font-family:ui-monospace,Menlo,monospace; font-size:12px; color:#6B6B72">Sep 09 10:15:32</div><div>J. Ortega</div>
+              <div><span style="font-size:10.5px; font-weight:600; letter-spacing:.06em; text-transform:uppercase; padding:2px 7px; border-radius:2px; border:1px solid #9CA3AF; color:#5C626D; background:#F4F5F6">Create</span></div>
+              <div style="font-family:ui-monospace,Menlo,monospace; font-size:12px">EST-4487</div>
+              <div style="color:#45454C">record created · status <strong>draft</strong></div>
+            </div>
+          </div>
+
+          <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:16px">
+            <div style="background:#FFFFFF; border:1px solid #E3DCCE; border-radius:2px; padding:34px 20px; text-align:center">
+              <div style="font-size:10.5px; letter-spacing:.14em; text-transform:uppercase; color:#9CA3AF; margin-bottom:14px">Empty state</div>
+              <div style="width:38px; height:38px; margin:0 auto 12px; border:1px solid #C9A24B; border-radius:50%"></div>
+              <div style="font-family:'Source Serif 4',Cambria,serif; font-size:18px; font-weight:600">No events match these filters</div>
+              <div style="font-size:13px; color:#6B6B72; margin-top:5px; max-width:36ch; margin-left:auto; margin-right:auto">The audit log is append-only — nothing has been deleted.</div>
+            </div>
+            <div style="background:#FFFFFF; border:1px solid #E3DCCE; border-radius:2px; padding:20px">
+              <div style="font-size:10.5px; letter-spacing:.14em; text-transform:uppercase; color:#9CA3AF; margin-bottom:14px; text-align:center">Loading state</div>
+              <div style="display:flex; flex-direction:column; gap:11px">
+                <div style="display:flex; gap:12px"><div style="height:11px; width:90px; background:#EEE9DE; border-radius:2px"></div><div style="height:11px; flex:1; background:#F3EFE6; border-radius:2px"></div></div>
+                <div style="display:flex; gap:12px"><div style="height:11px; width:90px; background:#EEE9DE; border-radius:2px"></div><div style="height:11px; flex:1; background:#F3EFE6; border-radius:2px"></div></div>
+                <div style="display:flex; gap:12px"><div style="height:11px; width:90px; background:#EEE9DE; border-radius:2px"></div><div style="height:11px; flex:1; background:#F3EFE6; border-radius:2px"></div></div>
+                <div style="display:flex; gap:12px"><div style="height:11px; width:90px; background:#EEE9DE; border-radius:2px"></div><div style="height:11px; flex:1; background:#F3EFE6; border-radius:2px"></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ isRoles }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex; flex-direction:column; gap:16px">
+          <div style="background:#FFFFFF; border:1px solid #E3DCCE; border-radius:2px; overflow-x:auto">
+            <div style="display:grid; grid-template-columns:minmax(190px,1.5fr) repeat(6,minmax(88px,1fr)); gap:10px; min-width:880px; padding:12px 18px; border-bottom:1px solid rgba(201,162,75,.45); font-size:10.5px; letter-spacing:.11em; text-transform:uppercase; color:#6B6B72; background:#FBFAF7">
+              <div>Permission</div><div style="text-align:center">Super Admin</div><div style="text-align:center">Admin</div><div style="text-align:center">Manager</div><div style="text-align:center">Sales</div><div style="text-align:center">Intake</div><div style="text-align:center">Viewer</div>
+            </div>
+            <div style="display:grid; grid-template-columns:minmax(190px,1.5fr) repeat(6,minmax(88px,1fr)); gap:10px; min-width:880px; padding:12px 18px; border-bottom:1px solid #F0EBE0; align-items:center; font-size:13.5px" style-hover="background:#FBFAF7">
+              <div>View inventory</div>
+              <div style="text-align:center; color:#2E7D32; font-weight:700">●</div><div style="text-align:center; color:#2E7D32; font-weight:700">●</div><div style="text-align:center; color:#2E7D32; font-weight:700">●</div><div style="text-align:center; color:#2E7D32; font-weight:700">●</div><div style="text-align:center; color:#2E7D32; font-weight:700">●</div><div style="text-align:center; color:#2E7D32; font-weight:700">●</div>
+            </div>
+            <div style="display:grid; grid-template-columns:minmax(190px,1.5fr) repeat(6,minmax(88px,1fr)); gap:10px; min-width:880px; padding:12px 18px; border-bottom:1px solid #F0EBE0; align-items:center; font-size:13.5px" style-hover="background:#FBFAF7">
+              <div>Create &amp; edit records</div>
+              <div style="text-align:center; color:#2E7D32; font-weight:700">●</div><div style="text-align:center; color:#2E7D32; font-weight:700">●</div><div style="text-align:center; color:#2E7D32; font-weight:700">●</div><div style="text-align:center; color:#9CA3AF">—</div><div style="text-align:center; color:#2E7D32; font-weight:700">●</div><div style="text-align:center; color:#9CA3AF">—</div>
+            </div>
+            <div style="display:grid; grid-template-columns:minmax(190px,1.5fr) repeat(6,minmax(88px,1fr)); gap:10px; min-width:880px; padding:12px 18px; border-bottom:1px solid #F0EBE0; align-items:center; font-size:13.5px" style-hover="background:#FBFAF7">
+              <div>Approve for listing</div>
+              <div style="text-align:center; color:#2E7D32; font-weight:700">●</div><div style="text-align:center; color:#2E7D32; font-weight:700">●</div><div style="text-align:center; color:#2E7D32; font-weight:700">●</div><div style="text-align:center; color:#9CA3AF">—</div><div style="text-align:center; color:#9CA3AF">—</div><div style="text-align:center; color:#9CA3AF">—</div>
+            </div>
+            <div style="display:grid; grid-template-columns:minmax(190px,1.5fr) repeat(6,minmax(88px,1fr)); gap:10px; min-width:880px; padding:12px 18px; border-bottom:1px solid #F0EBE0; align-items:center; font-size:13.5px" style-hover="background:#FBFAF7">
+              <div>Process sales &amp; returns</div>
+              <div style="text-align:center; color:#2E7D32; font-weight:700">●</div><div style="text-align:center; color:#2E7D32; font-weight:700">●</div><div style="text-align:center; color:#2E7D32; font-weight:700">●</div><div style="text-align:center; color:#2E7D32; font-weight:700">●</div><div style="text-align:center; color:#9CA3AF">—</div><div style="text-align:center; color:#9CA3AF">—</div>
+            </div>
+            <div style="display:grid; grid-template-columns:minmax(190px,1.5fr) repeat(6,minmax(88px,1fr)); gap:10px; min-width:880px; padding:12px 18px; border-bottom:1px solid #F0EBE0; align-items:center; font-size:13.5px" style-hover="background:#FBFAF7">
+              <div>Apply price override</div>
+              <div style="text-align:center; color:#2E7D32; font-weight:700">●</div><div style="text-align:center; color:#2E7D32; font-weight:700">●</div><div style="text-align:center; color:#D4A017; font-weight:700">◐</div><div style="text-align:center; color:#9CA3AF">—</div><div style="text-align:center; color:#9CA3AF">—</div><div style="text-align:center; color:#9CA3AF">—</div>
+            </div>
+            <div style="display:grid; grid-template-columns:minmax(190px,1.5fr) repeat(6,minmax(88px,1fr)); gap:10px; min-width:880px; padding:12px 18px; border-bottom:1px solid #F0EBE0; align-items:center; font-size:13.5px" style-hover="background:#FBFAF7">
+              <div>Lock / release inventory</div>
+              <div style="text-align:center; color:#2E7D32; font-weight:700">●</div><div style="text-align:center; color:#D4A017; font-weight:700">◐</div><div style="text-align:center; color:#9CA3AF">—</div><div style="text-align:center; color:#9CA3AF">—</div><div style="text-align:center; color:#9CA3AF">—</div><div style="text-align:center; color:#9CA3AF">—</div>
+            </div>
+            <div style="display:grid; grid-template-columns:minmax(190px,1.5fr) repeat(6,minmax(88px,1fr)); gap:10px; min-width:880px; padding:12px 18px; border-bottom:1px solid #F0EBE0; align-items:center; font-size:13.5px" style-hover="background:#FBFAF7">
+              <div>View commission report</div>
+              <div style="text-align:center; color:#2E7D32; font-weight:700">●</div><div style="text-align:center; color:#2E7D32; font-weight:700">●</div><div style="text-align:center; color:#2E7D32; font-weight:700">●</div><div style="text-align:center; color:#D4A017; font-weight:700">◐</div><div style="text-align:center; color:#9CA3AF">—</div><div style="text-align:center; color:#9CA3AF">—</div>
+            </div>
+            <div style="display:grid; grid-template-columns:minmax(190px,1.5fr) repeat(6,minmax(88px,1fr)); gap:10px; min-width:880px; padding:12px 18px; border-bottom:1px solid #F0EBE0; align-items:center; font-size:13.5px" style-hover="background:#FBFAF7">
+              <div>Edit payment credentials</div>
+              <div style="text-align:center; color:#2E7D32; font-weight:700">●</div><div style="text-align:center; color:#9CA3AF">—</div><div style="text-align:center; color:#9CA3AF">—</div><div style="text-align:center; color:#9CA3AF">—</div><div style="text-align:center; color:#9CA3AF">—</div><div style="text-align:center; color:#9CA3AF">—</div>
+            </div>
+            <div style="display:grid; grid-template-columns:minmax(190px,1.5fr) repeat(6,minmax(88px,1fr)); gap:10px; min-width:880px; padding:12px 18px; align-items:center; font-size:13.5px" style-hover="background:#FBFAF7">
+              <div>Toggle feature flags</div>
+              <div style="text-align:center; color:#2E7D32; font-weight:700">●</div><div style="text-align:center; color:#9CA3AF">—</div><div style="text-align:center; color:#9CA3AF">—</div><div style="text-align:center; color:#9CA3AF">—</div><div style="text-align:center; color:#9CA3AF">—</div><div style="text-align:center; color:#9CA3AF">—</div>
+            </div>
+          </div>
+
+          <div style="background:#FFFFFF; border:1px solid #E3DCCE; border-radius:2px; padding:16px 18px; display:flex; flex-wrap:wrap; gap:22px; align-items:center">
+            <div style="font-size:10.5px; letter-spacing:.14em; text-transform:uppercase; color:#6B6B72">Key</div>
+            <div style="display:flex; align-items:center; gap:7px; font-size:13px"><span style="color:#2E7D32; font-weight:700">●</span>Granted</div>
+            <div style="display:flex; align-items:center; gap:7px; font-size:13px"><span style="color:#D4A017; font-weight:700">◐</span>Granted with limit — requires approval above threshold</div>
+            <div style="display:flex; align-items:center; gap:7px; font-size:13px"><span style="color:#9CA3AF; font-weight:700">—</span>Denied</div>
+            <button style="margin-left:auto; padding:9px 16px; border:1px solid #1C1F2E; background:#1C1F2E; color:#F7F4EE; border-radius:2px; font-size:13.5px; font-weight:600; cursor:pointer" style-hover="background:#262B3D">Edit role</button>
+          </div>
+        </div>
+      </sc-if>
+
+    </div>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{}">
+class Component extends DCLogic {
+  state = { screen: 'dashboard', tip: false };
+
+  nav(active) {
+    return 'display:flex; align-items:center; padding:8px 10px; border-radius:2px; font-size:14px; cursor:pointer; '
+      + (active
+        ? 'background:#262B3D; color:#F7F4EE; border-left:2px solid #C9A24B; padding-left:12px; font-weight:600;'
+        : 'color:#B9BDCB; border-left:2px solid transparent; padding-left:12px;');
+  }
+
+  renderVals() {
+    const s = this.state.screen;
+    const go = (k) => () => this.setState({ screen: k });
+    const meta = {
+      dashboard: ['Dashboard', 'Wednesday, September 10 · Madison Ave, Workshop, Greenwich'],
+      inventory: ['Inventory', '1,284 active records · 14 incomplete'],
+      create: ['Add / Edit Item', 'Draft EST-4488 · last saved 2 minutes ago'],
+      review: ['Review Queue', '7 items awaiting approval'],
+      settings: ['Settings', 'Super Admin configuration'],
+      payments: ['Payment Settings', 'Stripe · live · two-factor required to edit'],
+      ai: ['AI & Automation', 'Prepared for Phase 2 — no capability active'],
+      flags: ['Feature Flags', 'Phase 2 modules · all off by default'],
+      override: ['Override & Lock', 'High-consequence actions · fully audited'],
+      commission: ['Commission Report', 'Sep 1 – Sep 10, 2026 · all locations'],
+      audit: ['Audit Log', 'Append-only · 12,480 events retained'],
+      roles: ['Roles & Permissions', '6 roles · 10 permission scopes']
+    }[s];
+    return {
+      isDashboard: s === 'dashboard', isInventory: s === 'inventory', isCreate: s === 'create',
+      isReview: s === 'review', isSettings: s === 'settings',
+      isPayments: s === 'payments', isAi: s === 'ai', isFlags: s === 'flags',
+      isOverride: s === 'override', isCommission: s === 'commission',
+      isAudit: s === 'audit', isRoles: s === 'roles',
+      pageTitle: meta[0], pageSub: meta[1],
+      goDashboard: go('dashboard'), goInventory: go('inventory'), goCreate: go('create'),
+      goReview: go('review'), goSettings: go('settings'),
+      goPayments: go('payments'), goAi: go('ai'), goFlags: go('flags'),
+      goOverride: go('override'), goCommission: go('commission'),
+      goAudit: go('audit'), goRoles: go('roles'),
+      navDashboard: this.nav(s === 'dashboard'), navInventory: this.nav(s === 'inventory'),
+      navCreate: this.nav(s === 'create'), navReview: this.nav(s === 'review'),
+      navSettings: this.nav(s === 'settings'), navPayments: this.nav(s === 'payments'),
+      navAi: this.nav(s === 'ai'), navFlags: this.nav(s === 'flags'),
+      navOverride: this.nav(s === 'override'), navCommission: this.nav(s === 'commission'),
+      navAudit: this.nav(s === 'audit'), navRoles: this.nav(s === 'roles'),
+      true: true,
+      showTip: () => this.setState({ tip: true }),
+      hideTip: () => this.setState({ tip: false }),
+      tipStyle: 'position:absolute; top:calc(100% + 8px); right:0; width:230px; background:#1C1F2E; color:#F7F4EE; border:1px solid rgba(201,162,75,.5); border-radius:2px; padding:9px 11px; font-size:11.5px; line-height:1.45; z-index:20; pointer-events:none; transition:opacity .12s ease; opacity:'
+        + (this.state.tip ? '1' : '0') + '; visibility:' + (this.state.tip ? 'visible' : 'hidden') + ';'
+    };
+  }
+}
+</script>
+</body>
+</html>
