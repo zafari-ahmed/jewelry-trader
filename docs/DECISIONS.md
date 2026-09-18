@@ -44,3 +44,16 @@ CLAUDE.md remains the specification; this file records where reality diverged fr
 | Transfer approval | The **sending** location's manager approves. | User |
 | Commission credit | The **logged-in** POS user earns the commission on the sale. | User |
 | Photos | No hard server-side count and no required photo types for submit-for-review; the 5–15 range is guidance in the UI. | User |
+
+## Module 1 — Super Admin Configuration Hub
+
+| # | Decision | Rationale |
+|---|---|---|
+| Settings registry | `App\Support\SettingsRegistry` declares which settings exist, their type and seeded default. The **values** live in the `settings` table and are edited from the panel — the registry is metadata for the seeder and the form renderer, not configuration. | Rule 3.1 without a UI that has to guess at field types |
+| Settings cache | All settings are cached as one array under `settings.all` and flushed on every write. | A per-request DB hit per `Setting::get()` would be paid on every page |
+| Stripe key pairs | Live and test keys are stored as separate settings; `payments.test_mode` selects the pair Module 3 reads. | Rotating live keys must not disturb test credentials |
+| Secrets in forms | Secret inputs render empty with the masked value as placeholder. An empty submission keeps the stored value; there is no way to read a secret back through the UI. | Rule 3.2 |
+| Audit masking | Only `is_encrypted` settings are masked in the audit log. A gateway switch or tax change stays readable in the trail. | Module 1 acceptance: changes auditable, secrets masked |
+| Audit retention | Two settings: `security.audit_retention_days` (730) and `security.audit_retention_days_financial` (2557 = 7 years, validated as a floor). `audit_logs.category` separates them. | IRS 7-year recordkeeping on financial records |
+| Auth | Session login built now (`/login`), since settings pages need a gated user. Module 8 inserts MFA between password check and redirect. The design system has no login screen — built from its tokens. | Module 1 cannot be gated without it |
+| Observers | Audited models are registered in `AppServiceProvider::bootAuditing()` rather than by attribute on the trait, so the audited list is visible in one place. Modules 3–4 append Payment, Product, Order. | Rule 3.5 |

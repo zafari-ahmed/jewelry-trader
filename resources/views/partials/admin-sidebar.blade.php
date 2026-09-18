@@ -17,6 +17,7 @@
         <x-ui.nav-item :href="route('admin.settings')" :active="$current === 'admin.settings'">Settings Hub</x-ui.nav-item>
         <x-ui.nav-item :href="route('admin.settings.payments')" :active="$current === 'admin.settings.payments'">Payment Settings</x-ui.nav-item>
         <x-ui.nav-item :href="route('admin.settings.ai')" :active="$current === 'admin.settings.ai'">AI &amp; Automation</x-ui.nav-item>
+        <x-ui.nav-item :href="route('admin.settings.security')" :active="$current === 'admin.settings.security'">Security</x-ui.nav-item>
         <x-ui.nav-item :href="route('admin.settings.flags')" :active="$current === 'admin.settings.flags'">Feature Flags</x-ui.nav-item>
         <x-ui.nav-item :href="route('admin.override')" :active="$current === 'admin.override'">Override &amp; Lock</x-ui.nav-item>
 
@@ -26,11 +27,21 @@
         <x-ui.nav-item :href="route('admin.roles')" :active="$current === 'admin.roles'">Roles &amp; Permissions</x-ui.nav-item>
     </div>
 
-    <div class="mt-auto flex items-center gap-10 border-t border-hairline-dark pt-14">
-        <div class="flex size-38 items-center justify-center rounded-surface border border-hairline-panel font-serif text-meta text-gold">MR</div>
-        <div>
-            <div class="text-body-sm font-semibold text-ivory">M. Renner</div>
-            <div class="text-caption text-navy-eyebrow">Super Admin</div>
-        </div>
+    <div class="mt-auto border-t border-hairline-dark pt-14">
+        @auth
+            <div class="flex items-center gap-10">
+                <div class="flex size-38 items-center justify-center rounded-surface border border-hairline-panel font-serif text-meta text-gold">
+                    {{ str(auth()->user()->name)->substr(0, 1) }}{{ str(auth()->user()->name)->after(' ')->substr(0, 1) }}
+                </div>
+                <div class="min-w-0 flex-1">
+                    <div class="truncate text-body-sm font-semibold text-ivory">{{ auth()->user()->name }}</div>
+                    <div class="text-caption text-navy-eyebrow">{{ auth()->user()->getRoleNames()->map(fn ($r) => str($r)->headline())->implode(', ') ?: 'No role' }}</div>
+                </div>
+            </div>
+            <form method="POST" action="{{ route('logout') }}" class="mt-12">
+                @csrf
+                <button type="submit" class="cursor-pointer text-caption text-navy-eyebrow hover:text-gold">Sign out</button>
+            </form>
+        @endauth
     </div>
 </nav>
