@@ -1,0 +1,20 @@
+[
+    {
+        "name": "OpenAI",
+        "slug": "openai",
+        "driver_class": null,
+        "capabilities": ["vision", "text", "search"]
+    },
+    {
+        "name": "Anthropic",
+        "slug": "anthropic",
+        "driver_class": null,
+        "capabilities": ["vision", "text", "search"]
+    },
+    {
+        "name": "Local model",
+        "slug": "local",
+        "driver_class": null,
+        "capabilities": ["vision", "text"]
+    }
+]

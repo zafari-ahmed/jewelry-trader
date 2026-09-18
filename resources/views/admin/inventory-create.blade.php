@@ -18,9 +18,8 @@
                     @endforeach
                 </div>
                 <div class="ml-auto">
-                    <x-ui.tooltip text="Available in Phase 2. Auto-fill will suggest attributes from photos; every suggestion stays yellow until a human verifies it.">
-                        <x-ui.button disabled>AI Auto-Fill</x-ui.button>
-                    </x-ui.tooltip>
+                    {{-- Bound to the ai.vision flag (Module 2). Off by default. --}}
+                    <livewire:inventory.ai-auto-fill />
                 </div>
             </div>
         </x-ui.card>

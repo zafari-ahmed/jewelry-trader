@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class AiProvider extends Model
 {
-    protected $fillable = ['name', 'slug', 'is_active', 'capabilities'];
+    protected $fillable = ['name', 'slug', 'driver_class', 'is_active', 'capabilities'];
 
     protected $casts = [
         'is_active' => 'boolean',

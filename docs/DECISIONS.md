@@ -57,3 +57,13 @@ CLAUDE.md remains the specification; this file records where reality diverged fr
 | Audit retention | Two settings: `security.audit_retention_days` (730) and `security.audit_retention_days_financial` (2557 = 7 years, validated as a floor). `audit_logs.category` separates them. | IRS 7-year recordkeeping on financial records |
 | Auth | Session login built now (`/login`), since settings pages need a gated user. Module 8 inserts MFA between password check and redirect. The design system has no login screen — built from its tokens. | Module 1 cannot be gated without it |
 | Observers | Audited models are registered in `AppServiceProvider::bootAuditing()` rather than by attribute on the trait, so the audited list is visible in one place. Modules 3–4 append Payment, Product, Order. | Rule 3.5 |
+
+## Module 2 — AI Abstraction Layer (scaffold only)
+
+| # | Decision | Rationale |
+|---|---|---|
+| **Spec conflict: vendor names** | Module 1 says "seed with OpenAI"; Module 2's acceptance says the codebase must have **zero** references to that name. Resolved by moving the seeded provider list to `database/seeders/data/ai_providers.json` — the names are data (which is what "providers are rows, not code" means), and no PHP, Blade, config or migration carries a vendor string. `NoVendorReferencesTest` enforces this over app/, config/, routes/, bootstrap/, resources/views/, database/migrations/ and database/seeders/. | Satisfies both readings; flag raised in the Module 2 report |
+| Provider driver class | Added `ai_providers.driver_class`, mirroring `payment_gateways.driver_class`. A Phase 2 provider is a row plus a class; the resolver never changes. | Rule 3.3 |
+| Two-key gate | A capability resolves to a real provider only when `ai.enabled` **and** the capability flag are on **and** an active provider row names a class that implements the contract. Any gap falls back to the Null provider. | A half-configured provider must refuse loudly, not half-work |
+| Value object vs model | The value object is `App\Services\AI\AiAnalysisResult` (the spec's name); the Eloquent model for `ai_analysis_results` is `App\Models\AiAnalysisRecord` to avoid a name collision. | Readability at call sites |
+| product_id foreign keys | `ai_analysis_results` and `ai_correction_log` carry indexed `product_id` with **no** FK constraint — `products` does not exist until Module 4, which adds the constraint. | Tables had to exist now per §6 |
