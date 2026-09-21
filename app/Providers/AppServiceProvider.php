@@ -3,7 +3,11 @@
 namespace App\Providers;
 
 use App\Models\Location;
+use App\Models\Customer;
+use App\Models\Order;
 use App\Models\Payment;
+use App\Models\Product;
+use App\Models\TransferRequest;
 use App\Models\Setting;
 use App\Models\User;
 use App\Observers\AuditableObserver;
@@ -38,11 +42,12 @@ class AppServiceProvider extends ServiceProvider
 
     /**
      * Rule 3.5: every state-changing action is logged, no role exempt.
-     * Module 4 adds Product and Order to this list.
+     * Every audited model is listed here.
      */
     private function bootAuditing(): void
     {
-        foreach ([Setting::class, Location::class, User::class, Payment::class] as $model) {
+        foreach ([Setting::class, Location::class, User::class, Payment::class,
+            Product::class, Order::class, Customer::class, TransferRequest::class] as $model) {
             $model::observe(AuditableObserver::class);
         }
     }

@@ -20,7 +20,9 @@
                 </div>
                 <div class="flex items-center gap-9">
                     <x-ui.input placeholder="Search SKU, title, or maker…" class="w-230" />
-                    <x-ui.button variant="primary" href="{{ route('admin.inventory.create') }}" class="shrink-0 whitespace-nowrap">New Item</x-ui.button>
+                    @can('create', App\Models\Product::class)
+                        <x-ui.button variant="primary" href="{{ route('admin.inventory.create') }}" class="shrink-0 whitespace-nowrap">New Item</x-ui.button>
+                    @endcan
                 </div>
             </header>
 

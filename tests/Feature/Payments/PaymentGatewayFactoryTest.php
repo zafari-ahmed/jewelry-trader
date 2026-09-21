@@ -2,6 +2,8 @@
 
 namespace Tests\Feature\Payments;
 
+use App\Models\Location;
+use App\Models\Order;
 use App\Models\PaymentGateway;
 use App\Models\Setting;
 use App\Services\Payments\Contracts\PaymentGatewayInterface;
@@ -117,8 +119,14 @@ class PaymentGatewayFactoryTest extends TestCase
     {
         Setting::set('payments.stripe_test_secret_key', 'sk_test_fixture');
 
+        $order = Order::create([
+            'order_number' => Order::nextOrderNumber(),
+            'location_id' => Location::factory()->create()->id,
+            'channel' => 'pos',
+        ]);
+
         app(\App\Services\Payments\PaymentService::class)
-            ->pay(1, [Tender::card(680000, 'pm_card_visa')], 'EST-4412');
+            ->pay($order->id, [Tender::card(680000, 'pm_card_visa')], 'EST-4412');
 
         // PCI DSS: only a token and the gateway's ids are stored.
         foreach (\App\Models\Payment::all() as $payment) {

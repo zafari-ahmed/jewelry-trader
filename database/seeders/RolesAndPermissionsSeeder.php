@@ -24,17 +24,39 @@ class RolesAndPermissionsSeeder extends Seeder
             'super-admin' => ['*'],
             'store-manager' => [
                 'view-settings', 'manage-locations',
+                'view-products', 'manage-products', 'approve-products',
+                'view-customers', 'manage-customers',
+                'view-orders', 'manage-orders', 'process-refunds',
+                'manage-inventory-transfers', 'approve-inventory-transfers',
+                'view-all-locations',
             ],
-            'sales-staff' => [],
-            'inventory-specialist' => [],
+            'sales-staff' => [
+                'view-products', 'manage-products',
+                'view-customers', 'manage-customers',
+                'view-orders', 'manage-orders',
+                'manage-inventory-transfers',
+                // The business wants staff to see other locations' stock
+                // (docs/DECISIONS.md); the scoping exists for roles without it.
+                'view-all-locations',
+            ],
+            'inventory-specialist' => [
+                'view-products', 'manage-products', 'approve-products',
+                'manage-inventory-transfers',
+                'view-all-locations',
+            ],
             'accountant' => [
                 'view-settings',
+                'view-products', 'view-orders', 'view-customers',
+                'view-all-locations',
             ],
-            'customer-service' => [],
+            'customer-service' => [
+                'view-products', 'view-orders', 'view-customers',
+                'manage-customers', 'process-refunds',
+            ],
         ];
     }
 
-    /** Module 1's permissions. Later modules add their own. */
+    /** Permissions introduced by Modules 1 and 4. Later modules add their own. */
     public static function permissions(): array
     {
         return [
@@ -46,6 +68,21 @@ class RolesAndPermissionsSeeder extends Seeder
             'manage-security-config',
             'manage-commission-config',
             'manage-feature-flags',
+
+            // Module 4 — core platform
+            'view-products',
+            'manage-products',
+            'approve-products',
+            'view-customers',
+            'manage-customers',
+            'view-orders',
+            'manage-orders',
+            'process-refunds',
+            'manage-inventory-transfers',
+            'approve-inventory-transfers',
+            // Cross-location visibility; without it a user sees only their own
+            // location's inventory and orders (rule 3.7).
+            'view-all-locations',
         ];
     }
 

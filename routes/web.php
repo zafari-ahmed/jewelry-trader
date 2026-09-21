@@ -2,6 +2,9 @@
 
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Webhooks\StripeWebhookController;
+use App\Livewire\Customers;
+use App\Livewire\Inventory;
+use App\Livewire\Orders;
 use App\Livewire\Settings;
 use Illuminate\Support\Facades\Route;
 
@@ -47,8 +50,11 @@ Route::post('/logout', [LoginController::class, 'destroy'])->middleware('auth')-
 */
 Route::middleware('auth')->prefix('admin')->name('admin.')->group(function () {
     Route::view('/', 'admin.dashboard')->name('dashboard');
-    Route::view('/inventory', 'admin.inventory')->name('inventory');
-    Route::view('/inventory/create', 'admin.inventory-create')->name('inventory.create');
+    Route::get('/inventory', Inventory\ProductList::class)->middleware('permission:view-products')->name('inventory');
+    Route::get('/inventory/create', Inventory\ProductForm::class)->middleware('permission:manage-products')->name('inventory.create');
+    Route::get('/inventory/{product}/edit', Inventory\ProductForm::class)->middleware('permission:view-products')->name('inventory.edit');
+    Route::get('/customers', Customers\CustomerList::class)->middleware('permission:view-customers')->name('customers');
+    Route::get('/orders', Orders\OrderList::class)->middleware('permission:view-orders')->name('orders');
     Route::view('/review', 'admin.review')->name('review');
     Route::view('/override', 'admin.override')->name('override');
     Route::view('/commission', 'admin.commission')->name('commission');

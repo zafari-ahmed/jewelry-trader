@@ -7,6 +7,8 @@ use App\Models\Setting;
 use App\Services\Payments\PaymentService;
 use App\Services\Payments\Stripe\StripeApi;
 use App\Services\Payments\Tender;
+use App\Models\Location;
+use App\Models\Order;
 use Database\Seeders\PaymentGatewaySeeder;
 use Database\Seeders\SettingsSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -31,6 +33,16 @@ class PaymentFlowTest extends TestCase
         $this->app->instance(StripeApi::class, $this->stripe);
     }
 
+    /** A real order to attach payments to — payments.order_id is a foreign key. */
+    private function orderId(): int
+    {
+        return Order::create([
+            'order_number' => Order::nextOrderNumber(),
+            'location_id' => Location::factory()->create()->id,
+            'channel' => 'pos',
+        ])->id;
+    }
+
     private function service(): PaymentService
     {
         return app(PaymentService::class);
@@ -38,7 +50,7 @@ class PaymentFlowTest extends TestCase
 
     public function test_a_full_card_sale_completes_and_records_one_card_payment(): void
     {
-        $payment = $this->service()->pay(1, [Tender::card(680000, 'pm_card_visa')], 'EST-4412');
+        $payment = $this->service()->pay($this->orderId(), [Tender::card(680000, 'pm_card_visa')], 'EST-4412');
 
         $this->assertSame('succeeded', $payment->status);
         $this->assertSame('card', $payment->method);
@@ -51,7 +63,7 @@ class PaymentFlowTest extends TestCase
 
     public function test_a_cash_sale_is_recorded_without_any_gateway_call(): void
     {
-        $payment = $this->service()->pay(2, [Tender::cash(194500, cashTenderedCents: 200000)], 'EST-4365');
+        $payment = $this->service()->pay($this->orderId(), [Tender::cash(194500, cashTenderedCents: 200000)], 'EST-4365');
 
         $this->assertSame('succeeded', $payment->status);
         $this->assertSame('cash', $payment->method);
@@ -61,7 +73,7 @@ class PaymentFlowTest extends TestCase
 
     public function test_a_split_card_and_cash_sale_produces_splits_that_sum_to_the_total(): void
     {
-        $payment = $this->service()->pay(3, [
+        $payment = $this->service()->pay($this->orderId(), [
             Tender::card(600000, 'pm_card_visa'),
             Tender::cash(178000, cashTenderedCents: 178000),
         ], 'EST-4412 + sizing');
@@ -78,7 +90,7 @@ class PaymentFlowTest extends TestCase
     {
         $this->stripe->failNextWith = 'Your card was declined.';
 
-        $payment = $this->service()->pay(4, [Tender::card(680000, 'pm_card_declined')], 'EST-4412');
+        $payment = $this->service()->pay($this->orderId(), [Tender::card(680000, 'pm_card_declined')], 'EST-4412');
 
         $this->assertSame('failed', $payment->status);
         $this->assertStringContainsString('declined', $payment->error_message);
@@ -92,7 +104,7 @@ class PaymentFlowTest extends TestCase
         // complete: the successful first tender is reversed at the gateway.
         $this->stripe->failOnChargeNumber = 2;
 
-        $payment = $this->service()->pay(5, [
+        $payment = $this->service()->pay($this->orderId(), [
             Tender::card(400000, 'pm_card_visa'),
             Tender::card(378000, 'pm_card_declined'),
         ], 'split that fails');
@@ -112,7 +124,7 @@ class PaymentFlowTest extends TestCase
 
     public function test_a_refund_reverses_through_the_gateway_and_updates_status(): void
     {
-        $payment = $this->service()->pay(6, [Tender::card(680000, 'pm_card_visa')], 'EST-4412');
+        $payment = $this->service()->pay($this->orderId(), [Tender::card(680000, 'pm_card_visa')], 'EST-4412');
 
         $refunded = $this->service()->refund($payment, 680000);
 
@@ -124,7 +136,7 @@ class PaymentFlowTest extends TestCase
 
     public function test_a_partial_refund_marks_the_payment_partially_refunded(): void
     {
-        $payment = $this->service()->pay(7, [Tender::card(680000, 'pm_card_visa')], 'EST-4412');
+        $payment = $this->service()->pay($this->orderId(), [Tender::card(680000, 'pm_card_visa')], 'EST-4412');
 
         $refunded = $this->service()->refund($payment, 180000);
 
@@ -135,7 +147,7 @@ class PaymentFlowTest extends TestCase
 
     public function test_a_refund_on_a_split_draws_from_the_card_tender_first(): void
     {
-        $payment = $this->service()->pay(8, [
+        $payment = $this->service()->pay($this->orderId(), [
             Tender::card(600000, 'pm_card_visa'),
             Tender::cash(178000),
         ], 'split refund');
@@ -153,7 +165,7 @@ class PaymentFlowTest extends TestCase
 
     public function test_a_refund_cannot_exceed_what_remains(): void
     {
-        $payment = $this->service()->pay(9, [Tender::card(100000, 'pm_card_visa')], 'EST-4412');
+        $payment = $this->service()->pay($this->orderId(), [Tender::card(100000, 'pm_card_visa')], 'EST-4412');
         $this->service()->refund($payment, 60000);
 
         $this->expectExceptionMessage('Refund exceeds the remaining refundable amount');
@@ -167,7 +179,7 @@ class PaymentFlowTest extends TestCase
 
         $this->expectExceptionMessage('cash payment method is turned off');
 
-        $this->service()->pay(10, [Tender::cash(50000)], 'cash sale');
+        $this->service()->pay($this->orderId(), [Tender::cash(50000)], 'cash sale');
     }
 
     public function test_split_payments_can_be_turned_off_in_settings(): void
@@ -176,12 +188,12 @@ class PaymentFlowTest extends TestCase
 
         $this->expectExceptionMessage('Split payments are turned off');
 
-        $this->service()->pay(11, [Tender::card(50000, 'pm_card_visa'), Tender::cash(50000)], 'split');
+        $this->service()->pay($this->orderId(), [Tender::card(50000, 'pm_card_visa'), Tender::cash(50000)], 'split');
     }
 
     public function test_every_payment_is_audited_as_a_financial_record(): void
     {
-        $this->service()->pay(12, [Tender::card(680000, 'pm_card_visa')], 'EST-4412');
+        $this->service()->pay($this->orderId(), [Tender::card(680000, 'pm_card_visa')], 'EST-4412');
 
         $this->assertDatabaseHas('audit_logs', [
             'action' => 'payment.created',
@@ -192,7 +204,7 @@ class PaymentFlowTest extends TestCase
 
     public function test_the_gateway_response_is_not_written_into_the_audit_trail(): void
     {
-        $this->service()->pay(13, [Tender::card(680000, 'pm_card_visa')], 'EST-4412');
+        $this->service()->pay($this->orderId(), [Tender::card(680000, 'pm_card_visa')], 'EST-4412');
 
         $log = \App\Models\AuditLog::query()->where('action', 'payment.created')->latest('id')->firstOrFail();
 

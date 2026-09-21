@@ -17,7 +17,7 @@ class Location extends Model
     ];
 
     protected $casts = [
-        'tax_rate' => 'decimal:4',
+        'tax_rate' => 'decimal:6',
         'is_active' => 'boolean',
         'is_web' => 'boolean',
     ];

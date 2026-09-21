@@ -83,3 +83,18 @@ CLAUDE.md remains the specification; this file records where reality diverged fr
 | Stripe as refund truth | `charge.refunded` raises `amount_refunded` to match Stripe, so a refund issued from the Stripe dashboard is reflected here. | Refunds can originate outside this application |
 | order_id foreign key | `payments.order_id` is indexed with no FK — `orders` arrives in Module 4, which adds the constraint. | Same as the AI tables |
 | **Not yet verified** | The live-charge acceptance criterion (real Stripe test charge, refund, exchange) is **unverified**: no Stripe test keys have been provided. Everything below that boundary is covered by the in-memory double. | Needs `pk_test_…`/`sk_test_…` entered at Settings → Payments |
+
+## Module 4 — Core Platform
+
+| # | Decision | Rationale |
+|---|---|---|
+| Money in cents | Every money column stores integer **minor units** and carries a `_cents` suffix (`retail_price_cents`, `total_cents`). This renames the spec's columns. | Matches the payments tables; the suffix stops a caller reading 6800 as $6,800. Float money is how rounding reaches the books |
+| **Tax precision bug** | `decimal(6,4)` was too narrow for a real US rate: NYC's 8.875% rounds to 8.88% and overcharges ~$0.03 per $100. Widened `locations.tax_rate` and `orders.tax_rate` to `decimal(9,6)`. | Found by a failing total in test; would have mispriced every NY sale |
+| Tax recorded per order | `orders.tax_rate` and `tax_state` store the rate actually applied. | A later rate change must not rewrite past orders |
+| Pricing is append-only | A price change inserts a `pricing` row; the current price is the latest. | Price history survives; Phase 2 AI pricing writes rows with `priced_by` null |
+| Sold-once guarantee | `markPaid()` locks each `inventory_stock` row `FOR UPDATE` inside the same transaction as the order status and payment link. A claimed item aborts the whole transaction. | Module 4 acceptance. Verified by a forked two-process test **and** a negative control: with the lock removed, both processes sold the same ring |
+| Cross-location visibility | `view-all-locations` permission. Sales Staff, Store Manager, Inventory Specialist and Accountant hold it by default (the business wants staff to see other locations); scoping is enforced in policies and query scopes for roles without it. | Reconciles the spec's acceptance criterion with the business answer; tests cover a user **without** the permission so the scoping is not decorative |
+| Transfers | Stock moves only on completion: approval marks it `transferred` so it cannot also be sold, and completion moves the row's `location_id` rather than duplicating it. | One stock row per piece per location |
+| Order numbers | `ORD-{year}-{000001}`, sequential per year, derived from the highest existing number. | Spec format |
+| Product form scope | `ProductForm` is plain CRUD; Module 5 replaces the screen with the photo upload and colour-coded field workflow writing the same tables. | Avoids building the intake UI twice |
+| Component widths | `x-ui.input/select/textarea` default to `w-full` unless the caller passes a width class. | Filter bars need inline widths; forms need full width |

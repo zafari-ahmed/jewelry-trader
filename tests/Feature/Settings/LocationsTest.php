@@ -40,7 +40,7 @@ class LocationsTest extends TestCase
         $location = Location::query()->where('name', 'Santa Monica')->firstOrFail();
 
         $this->assertSame('CA', $location->state);
-        $this->assertSame('0.1025', (string) $location->tax_rate);
+        $this->assertSame('0.102500', (string) $location->tax_rate);
         $this->assertSame('santa-monica', $location->slug);
     }
 

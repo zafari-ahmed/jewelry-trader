@@ -3,6 +3,7 @@
 namespace Tests\Feature\Ai;
 
 use App\Models\AiAnalysisRecord;
+use App\Models\Product;
 use App\Models\AiCorrection;
 use App\Services\AI\AiAnalysisResult;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -37,12 +38,14 @@ class AiAnalysisResultTest extends TestCase
 
     public function test_a_result_persists_against_a_product(): void
     {
+        $product = Product::factory()->create();
+
         AiAnalysisResult::make(['stone' => 'ruby'], 72, 'Burma ruby, unheated.', 'fixture-model')
-            ->persistFor(productId: 4412, analysisType: 'gemstone');
+            ->persistFor(productId: $product->id, analysisType: 'gemstone');
 
         $record = AiAnalysisRecord::query()->firstOrFail();
 
-        $this->assertSame(4412, $record->product_id);
+        $this->assertSame($product->id, $record->product_id);
         $this->assertSame('gemstone', $record->analysis_type);
         $this->assertSame(72, $record->confidence_score);
         $this->assertSame(['stone' => 'ruby'], $record->raw_response);
@@ -52,8 +55,10 @@ class AiAnalysisResultTest extends TestCase
     {
         $this->assertTrue(Schema::hasTable('ai_correction_log'));
 
+        $product = Product::factory()->create();
+
         AiCorrection::create([
-            'product_id' => 4412,
+            'product_id' => $product->id,
             'field_name' => 'style_period',
             'original_value' => 'Victorian',
             'final_value' => 'Edwardian',

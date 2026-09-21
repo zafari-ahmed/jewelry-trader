@@ -7,6 +7,8 @@ use App\Models\Setting;
 use App\Services\Payments\PaymentService;
 use App\Services\Payments\Stripe\StripeApi;
 use App\Services\Payments\Tender;
+use App\Models\Location;
+use App\Models\Order;
 use Database\Seeders\PaymentGatewaySeeder;
 use Database\Seeders\SettingsSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -30,6 +32,16 @@ class StripeWebhookTest extends TestCase
 
         $this->stripe = new FakeStripeApi;
         $this->app->instance(StripeApi::class, $this->stripe);
+    }
+
+    /** A real order to attach payments to — payments.order_id is a foreign key. */
+    private function orderId(): int
+    {
+        return Order::create([
+            'order_number' => Order::nextOrderNumber(),
+            'location_id' => Location::factory()->create()->id,
+            'channel' => 'pos',
+        ])->id;
     }
 
     private function sendEvent(array $event, ?string $signature = null)
@@ -76,7 +88,7 @@ class StripeWebhookTest extends TestCase
 
     public function test_payment_intent_succeeded_confirms_a_recorded_payment(): void
     {
-        $payment = app(PaymentService::class)->pay(1, [Tender::card(680000, 'pm_card_visa')], 'EST-4412');
+        $payment = app(PaymentService::class)->pay($this->orderId(), [Tender::card(680000, 'pm_card_visa')], 'EST-4412');
         $payment->update(['status' => 'pending']);
 
         $this->sendEvent([
@@ -90,7 +102,7 @@ class StripeWebhookTest extends TestCase
 
     public function test_charge_refunded_records_a_refund_issued_outside_the_application(): void
     {
-        $payment = app(PaymentService::class)->pay(2, [Tender::card(680000, 'pm_card_visa')], 'EST-4412');
+        $payment = app(PaymentService::class)->pay($this->orderId(), [Tender::card(680000, 'pm_card_visa')], 'EST-4412');
 
         // A refund pressed in the Stripe dashboard reaches us only this way.
         $this->sendEvent([
@@ -107,7 +119,7 @@ class StripeWebhookTest extends TestCase
 
     public function test_a_partial_refund_observed_from_stripe_is_recorded_as_partial(): void
     {
-        $payment = app(PaymentService::class)->pay(3, [Tender::card(680000, 'pm_card_visa')], 'EST-4412');
+        $payment = app(PaymentService::class)->pay($this->orderId(), [Tender::card(680000, 'pm_card_visa')], 'EST-4412');
 
         $this->sendEvent([
             'type' => 'charge.refunded',
