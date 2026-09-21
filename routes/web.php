@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\Webhooks\StripeWebhookController;
 use App\Livewire\Settings;
 use Illuminate\Support\Facades\Route;
 
@@ -14,6 +15,15 @@ Route::view('/catalog', 'storefront.catalog')->name('shop.catalog');
 Route::view('/product', 'storefront.product')->name('shop.product');
 Route::view('/checkout', 'storefront.checkout')->name('shop.checkout');
 Route::view('/account', 'storefront.account')->name('shop.account');
+
+/*
+|--------------------------------------------------------------------------
+| Gateway webhooks — signed, stateless, no CSRF token
+|--------------------------------------------------------------------------
+*/
+Route::post('/webhooks/stripe', StripeWebhookController::class)
+    ->withoutMiddleware([\Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class])
+    ->name('webhooks.stripe');
 
 /*
 |--------------------------------------------------------------------------

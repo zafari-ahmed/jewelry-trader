@@ -81,6 +81,11 @@
         </div>
 
         <div class="flex flex-col gap-16">
+            <x-ui.card title="Webhook endpoint">
+                <div class="text-caption text-muted">Add this URL in the Stripe dashboard and paste the signing secret above. Events handled: <span class="font-mono">payment_intent.succeeded</span>, <span class="font-mono">charge.refunded</span>.</div>
+                <div class="mt-10 rounded-surface border border-border-field bg-ivory-raised px-11 py-9 font-mono text-caption-lg break-all">{{ route('webhooks.stripe') }}</div>
+            </x-ui.card>
+
             <x-ui.card title="Security posture">
                 <div class="flex flex-col gap-12">
                     @foreach ([

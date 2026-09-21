@@ -67,3 +67,19 @@ CLAUDE.md remains the specification; this file records where reality diverged fr
 | Two-key gate | A capability resolves to a real provider only when `ai.enabled` **and** the capability flag are on **and** an active provider row names a class that implements the contract. Any gap falls back to the Null provider. | A half-configured provider must refuse loudly, not half-work |
 | Value object vs model | The value object is `App\Services\AI\AiAnalysisResult` (the spec's name); the Eloquent model for `ai_analysis_results` is `App\Models\AiAnalysisRecord` to avoid a name collision. | Readability at call sites |
 | product_id foreign keys | `ai_analysis_results` and `ai_correction_log` carry indexed `product_id` with **no** FK constraint — `products` does not exist until Module 4, which adds the constraint. | Tables had to exist now per §6 |
+
+## Module 3 — Payment Abstraction (Stripe live)
+
+| # | Decision | Rationale |
+|---|---|---|
+| SDK boundary | The Stripe SDK is touched in exactly one class, `StripeApiClient`, behind our own `StripeApi` interface. `StripeGateway` holds the logic (amounts, statuses, errors, webhook dispatch) and is tested against an in-memory double. | Gateway logic is testable without network or keys; an SDK upgrade has one blast radius |
+| Money | Stored in **minor units** (`amount`, `amount_refunded` as integer cents) on both `payments` and `payment_splits`. | Float money is how rounding bugs reach the books |
+| Cash | Recorded with no gateway call, as a split row with a `cash:<uuid>` reference. Change due is computed from the tendered amount and kept in the split's response. | Spec: "cash (recorded, no gateway call)" |
+| Tenders | A sale is a list of `Tender` objects; one tender = card or cash, several = split. Every sale writes `payment_splits` rows — including single-tender sales — so refunds have one code path. | Uniform refund logic |
+| Charge before record | Gateway calls happen **outside** the DB transaction, records are written inside it. A gateway call cannot be rolled back, so money moves first and is recorded second. | A rolled-back transaction must never hide a real charge |
+| Failed split reversal | If any tender in a split fails, tenders that already succeeded are refunded at the gateway and the attempt is recorded as a failed payment + `payment.split_reversed` audit events. | A customer must never be left charged for a sale that did not complete |
+| Refund ordering | Refunds draw from **card tenders first**, then cash. | Card refunds follow the gateway's rules; cash is unrestricted, so it is the flexible remainder |
+| Webhook secret | Verified against the secret for the key pair currently in use (`payments.test_mode` decides). A bad signature is logged as a **security** event and rejected before the body is read. | Rotation with no deploy; bad signatures are hostile until proven otherwise |
+| Stripe as refund truth | `charge.refunded` raises `amount_refunded` to match Stripe, so a refund issued from the Stripe dashboard is reflected here. | Refunds can originate outside this application |
+| order_id foreign key | `payments.order_id` is indexed with no FK — `orders` arrives in Module 4, which adds the constraint. | Same as the AI tables |
+| **Not yet verified** | The live-charge acceptance criterion (real Stripe test charge, refund, exchange) is **unverified**: no Stripe test keys have been provided. Everything below that boundary is covered by the in-memory double. | Needs `pk_test_…`/`sk_test_…` entered at Settings → Payments |
