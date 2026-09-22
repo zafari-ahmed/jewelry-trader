@@ -128,7 +128,13 @@ class OrderService
 
             $payment?->update(['order_id' => $order->id]);
 
-            return $order->fresh();
+            $order = $order->fresh();
+
+            // Queued after commit: commission arithmetic must never block
+            // checkout, and must never run for a sale that rolled back.
+            DB::afterCommit(fn () => \App\Jobs\CalculateCommission::dispatch($order->id));
+
+            return $order;
         });
     }
 

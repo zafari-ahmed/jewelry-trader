@@ -32,6 +32,7 @@ class RolesAndPermissionsSeeder extends Seeder
                 'use-pos', 'apply-discount-above-threshold',
                 'view-audit-log',
                 'request-override', 'approve-overrides', 'lock-inventory',
+                'view-own-commission', 'view-all-commissions',
             ],
             'sales-staff' => [
                 'view-products', 'manage-products',
@@ -45,6 +46,8 @@ class RolesAndPermissionsSeeder extends Seeder
                 'use-pos',
                 // May ask for an override; approval is someone else's job.
                 'request-override',
+                // Own figures only — the report scopes to the viewer.
+                'view-own-commission',
             ],
             'inventory-specialist' => [
                 'view-products', 'manage-products', 'approve-products',
@@ -58,6 +61,7 @@ class RolesAndPermissionsSeeder extends Seeder
                 'view-all-locations',
                 // Financial records are their remit, so the trail is too.
                 'view-audit-log',
+                'view-own-commission', 'view-all-commissions', 'export-payroll',
             ],
             'customer-service' => [
                 'view-products', 'view-orders', 'view-customers',
@@ -115,6 +119,12 @@ class RolesAndPermissionsSeeder extends Seeder
             'lock-inventory',
             'unlock-inventory',
             'manage-stepup-challenges',
+
+            // Module 10 — commissions and payroll
+            'view-own-commission',
+            'view-all-commissions',
+            'manage-commission-plans',
+            'export-payroll',
         ];
     }
 

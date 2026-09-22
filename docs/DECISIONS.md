@@ -169,3 +169,19 @@ CLAUDE.md remains the specification; this file records where reality diverged fr
 | Override types | Seeded as a class constant covering the union of the spec's and the design's lists. | docs/DECISIONS.md, Module 0 |
 | Step-up challenge | Implemented as a configurable second factor with a custom skin: symbols and answers are rows, answers are **hashed**, and `security.stepup_actions` decides which actions it gates. `security.stepup_method` exists so it can be swapped for TOTP step-up with no code change. A pass is good for 10 minutes, not the session. | Spec's framing — brand identity over a standard step-up pattern |
 | Seeded answers are placeholders | `StepUpChallengeSeeder` inserts `change-me-*` answers so the flow works out of the box; they must be replaced before going live. | A seeded secret is not a secret |
+
+## Module 10 — Commissions & Payroll
+
+| # | Decision | Rationale |
+|---|---|---|
+| Queued, after commit | `CalculateCommission` is dispatched from `DB::afterCommit`, so arithmetic never sits between a card and a receipt, and never runs for a sale that rolled back. | Spec: "never synchronously" |
+| Tax is not commissionable | Every calculator works from `subtotal − discount`. Tax was never the shop's money. | Correctness |
+| Profit basis | Margin is line total minus acquisition cost; discounts reduce margin, and service lines (no acquisition cost) are wholly margin. | The business asked for "no comment", so this is the defensible reading — flagged in the report |
+| Tiered basis | The rate is chosen by the **sale's own** commissionable value, not period-to-date. Period tiering needs a running total and belongs in the report, not the per-order job. | Deterministic per order; flagged as an assumption |
+| Split rounding | Shares are floored, then the remainder is distributed a cent at a time by largest fractional part. `SplitRoundingTest` checks 40 pool/share combinations, including indivisible ones. | Spec calls this out as the classic bug |
+| One row per person per order | Unique on `(order_id, user_id)`; recalculating updates rather than duplicating. | Idempotent job retries |
+| §221, no clawbacks | A refund leaves the commission row standing. Nothing in the code reduces an earned commission; a reduction must go through Module 9's override. | California Labor Code §221 |
+| §2751, written terms | `staff_commission_assignments.terms_text` / `terms_document_path` store what was actually agreed, with `hasWrittenTerms()` making the distinction explicit. | California Labor Code §2751 |
+| Fallback plan is virtual | With no assignment, the plan comes from Settings as an unsaved model, so changing the default applies immediately and the commission row records a null plan id. | Rule 3.1 |
+| Payroll mapping | `commission.payroll_export_column_mapping` drives both headers and values; an unmapped source exports `[unmapped: x]` rather than a silent blank. | The target payroll format is unknown |
+| Report scoping | Without `view-all-commissions` the report shows only the viewer's own rows; export needs `export-payroll`. | Spec's permission list |
