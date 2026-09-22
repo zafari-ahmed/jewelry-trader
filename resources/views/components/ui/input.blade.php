@@ -1,12 +1,17 @@
 @props([
-    'status' => null,     // null|red|yellow|green|gray|blue — mirrors field-status
+    'status' => null,    // null|red|yellow|green|neutral|gray|blue — mirrors field-status
+    'tone' => 'light',   // light | dark (sign-in and POS render on navy)
     'mono' => false,
     'disabled' => false,
 ])
 @php
     // A caller-supplied width (w-200, flex-1…) wins over the default w-full.
     $hasWidth = preg_match('/\b(w-|flex-1|max-w-)/', $attributes->get('class', '')) === 1;
-    $tone = match ($status) {
+    $palette = $tone === 'dark'
+        ? 'border-navy-border bg-navy text-ivory placeholder:text-navy-eyebrow focus:border-gold'
+        : null;
+
+    $statusTone = match ($status) {
         'red' => 'border-status-required bg-status-required-ground focus:border-status-required',
         'yellow' => 'border-status-suggested bg-status-suggested-ground focus:border-gold',
         'green' => 'border-status-valid bg-surface focus:border-gold focus:shadow-focus-valid',
@@ -22,6 +27,6 @@
         $hasWidth ? '' : 'w-full',
         'px-11 py-9 rounded-surface text-body outline-none transition-colors',
         $mono ? 'font-mono text-body-sm' : '',
-        $tone,
+        $palette ?? $statusTone,
     ]) }}
 />

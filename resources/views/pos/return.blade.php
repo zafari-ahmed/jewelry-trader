@@ -2,7 +2,7 @@
     <div class="flex flex-col gap-18">
         <x-ui.section-header title="Return / Exchange" tone="dark" meta="Within the 30-day return window" />
 
-        <x-ui.input value="Order #10438 — A. Delacroix — Aug 28, 2026" class="border-navy-border bg-navy-panel text-ivory focus:border-gold" />
+        <x-ui.input value="Order #10438 — A. Delacroix — Aug 28, 2026" tone="dark" />
 
         <div class="rounded-surface border border-hairline-panel bg-navy-panel">
             <div class="border-b border-hairline-dark px-20 py-13 text-eyebrow uppercase tracking-eyebrow text-navy-eyebrow">Select items to return</div>

@@ -98,6 +98,44 @@ class PaymentsSettingsTest extends TestCase
         $this->assertSame('square', Setting::get('payments.active_gateway'));
     }
 
+    public function test_pasting_a_publishable_key_into_the_secret_field_is_rejected(): void
+    {
+        // The dashboard shows both keys together; the wrong one would
+        // otherwise only surface as a gateway error at checkout.
+        Livewire::actingAs($this->superAdmin)
+            ->test(Payments::class)
+            ->set('state.stripe_test_secret_key', 'pk_test_51NfQ2xKq8vRtY7bM')
+            ->call('save')
+            ->assertHasErrors('state.stripe_test_secret_key');
+
+        $this->assertNull(Setting::get('payments.stripe_test_secret_key'));
+    }
+
+    public function test_a_correctly_prefixed_key_is_accepted(): void
+    {
+        Livewire::actingAs($this->superAdmin)
+            ->test(Payments::class)
+            ->set('state.stripe_test_secret_key', 'sk_test_51NfQ2xKq8vRtY7bM')
+            ->set('state.stripe_test_publishable_key', 'pk_test_51NfQ2xKq8vRtY7bM')
+            ->call('save')
+            ->assertHasNoErrors();
+
+        $this->assertSame('sk_test_51NfQ2xKq8vRtY7bM', Setting::get('payments.stripe_test_secret_key'));
+    }
+
+    public function test_leaving_a_secret_blank_still_skips_validation(): void
+    {
+        Setting::set('payments.stripe_test_secret_key', 'sk_test_existing_value');
+
+        Livewire::actingAs($this->superAdmin)
+            ->test(Payments::class)
+            ->set('state.stripe_test_secret_key', '')
+            ->call('save')
+            ->assertHasNoErrors();
+
+        $this->assertSame('sk_test_existing_value', Setting::get('payments.stripe_test_secret_key'));
+    }
+
     public function test_sales_staff_cannot_open_the_component(): void
     {
         $user = User::factory()->create();

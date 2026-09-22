@@ -55,8 +55,18 @@ abstract class SettingsComponent extends Component
         Gate::authorize('manage-settings');
         Gate::authorize($this->permission());
 
-        if ($this->rules() !== []) {
-            $this->validate($this->rules());
+        $rules = $this->rules();
+
+        // An empty secret field means "leave the stored value alone", so it
+        // must not be validated as if it were being set.
+        foreach ($this->secretKeys() as $key) {
+            if (($this->state[$key] ?? '') === '') {
+                unset($rules["state.{$key}"]);
+            }
+        }
+
+        if ($rules !== []) {
+            $this->validate($rules);
         }
 
         foreach (SettingsRegistry::group($this->group()) as $path => $meta) {

@@ -1,9 +1,6 @@
 <x-layouts::pos title="Sale">
     <div class="flex flex-col gap-16">
-        <x-ui.input
-            placeholder="Scan tag or search SKU, title, case…"
-            class="border-navy-border bg-navy-panel text-ivory placeholder:text-navy-eyebrow focus:border-gold"
-        />
+        <x-ui.input placeholder="Scan tag or search SKU, title, case…" tone="dark" />
 
         <div class="flex flex-wrap gap-9">
             @foreach (['Rings', 'Necklaces', 'Bracelets', 'Brooches', 'Watches', 'Custom line item'] as $i => $category)

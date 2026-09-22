@@ -28,13 +28,13 @@
             <div class="flex flex-col gap-14 px-20 py-18">
                 <div class="flex flex-wrap items-center gap-12">
                     <div class="w-200 text-body font-semibold text-ivory">Card ···4417</div>
-                    <x-ui.input value="$6,000.00" class="max-w-cart flex-1 border-navy-border bg-navy text-ivory focus:border-gold" />
+                    <x-ui.input value="$6,000.00" tone="dark" class="max-w-cart flex-1" />
                     <x-ui.badge variant="listed">Approved</x-ui.badge>
                 </div>
 
                 <div class="flex flex-wrap items-center gap-12">
                     <div class="w-200 text-body font-semibold text-ivory">Cash</div>
-                    <x-ui.input placeholder="$0.00" class="max-w-cart flex-1 border-navy-border bg-navy text-ivory placeholder:text-navy-eyebrow focus:border-gold" />
+                    <x-ui.input placeholder="$0.00" tone="dark" class="max-w-cart flex-1" />
                     <x-ui.button variant="ghost-navy">Exact balance</x-ui.button>
                 </div>
 

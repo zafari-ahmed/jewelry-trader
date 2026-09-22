@@ -23,14 +23,12 @@
                 <div class="mt-15 flex flex-col gap-15">
                     <div>
                         <label for="email" class="mb-5 block text-label font-semibold text-ivory">Email</label>
-                        <x-ui.input id="email" name="email" type="email" value="{{ old('email') }}" required autofocus
-                            class="border-navy-border bg-navy text-ivory focus:border-gold" />
+                        <x-ui.input id="email" name="email" type="email" value="{{ old('email') }}" required autofocus tone="dark" />
                     </div>
 
                     <div>
                         <label for="password" class="mb-5 block text-label font-semibold text-ivory">Password</label>
-                        <x-ui.input id="password" name="password" type="password" required
-                            class="border-navy-border bg-navy text-ivory focus:border-gold" />
+                        <x-ui.input id="password" name="password" type="password" required tone="dark" />
                     </div>
 
                     @error('email')
