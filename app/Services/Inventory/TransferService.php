@@ -21,6 +21,10 @@ class TransferService
             throw new RuntimeException('A transfer needs two different locations.');
         }
 
+        if ($product->isLockedFor('sell')) {
+            throw new RuntimeException("{$product->sku} is locked: ".$product->lockReasonFor('sell'));
+        }
+
         $stock = InventoryStock::query()
             ->where('product_id', $product->id)
             ->where('location_id', $fromLocationId)

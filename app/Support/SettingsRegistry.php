@@ -114,6 +114,10 @@ class SettingsRegistry
             // IRS recordkeeping is 7 years; financial entries are retained separately.
             'security.audit_retention_days_financial' => ['type' => 'integer', 'default' => 2557, 'label' => 'Financial audit retention (days)'],
             'security.stepup_challenge_enabled' => ['type' => 'boolean', 'default' => true, 'label' => 'Step-up challenge on high-risk actions'],
+            'security.stepup_actions' => ['type' => 'json', 'default' => [
+                'override.approve', 'payments.credentials', 'security.mfa_settings',
+            ], 'label' => 'Actions requiring the step-up challenge'],
+            'security.stepup_method' => ['type' => 'string', 'default' => 'symbols', 'label' => 'Step-up method', 'help' => 'symbols or totp — swappable without code changes.'],
         ];
     }
 

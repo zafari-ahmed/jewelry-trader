@@ -88,7 +88,7 @@ Route::middleware('auth')->prefix('admin')->name('admin.')->group(function () {
     Route::get('/customers', Customers\CustomerList::class)->middleware('permission:view-customers')->name('customers');
     Route::get('/orders', Orders\OrderList::class)->middleware('permission:view-orders')->name('orders');
     Route::get('/review', Inventory\ReviewQueue::class)->middleware('permission:view-products')->name('review');
-    Route::view('/override', 'admin.override')->name('override');
+    Route::get('/override', \App\Livewire\Admin\OverridesAndLocks::class)->middleware('permission:request-override')->name('override');
     Route::view('/commission', 'admin.commission')->name('commission');
     Route::get('/audit', \App\Livewire\Admin\AuditLogViewer::class)->middleware('permission:view-audit-log')->name('audit');
     Route::get('/roles', \App\Livewire\Admin\RolesPermissions::class)->middleware('permission:manage-roles')->name('roles');

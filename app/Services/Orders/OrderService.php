@@ -100,6 +100,14 @@ class OrderService
             }
 
             foreach ($order->items()->whereNotNull('product_id')->get() as $item) {
+                // A locked piece cannot be sold, whoever is asking — POS,
+                // storefront or an API call (rule: service layer, not UI).
+                if ($item->product && $item->product->isLockedFor('sell')) {
+                    throw new RuntimeException(
+                        "{$item->product->sku} is locked: ".$item->product->lockReasonFor('sell')
+                    );
+                }
+
                 $stock = $this->lockStockFor($item->product_id, $order);
 
                 if (! $stock || ! $stock->isAvailable()) {

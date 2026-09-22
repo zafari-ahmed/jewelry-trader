@@ -157,3 +157,15 @@ CLAUDE.md remains the specification; this file records where reality diverged fr
 | Retention per category | `audit:purge` (daily at 03:15) applies `security.audit_retention_days` to general activity and `security.audit_retention_days_financial` to financial entries. | IRS 7-year recordkeeping |
 | audit_logs.created_at writable | Needed to backdate entries when testing retention and for any future import; the trail is append-only by use, not by column locking. | Testability |
 | Test isolation | `ConcurrentSaleTest` uses `DatabaseTruncation` (it needs committed rows for real locks) and now clears `audit_logs` and `settings` too — leftovers were breaking retention counts in later tests. | Found only when running the full suite |
+
+## Module 9 — Overrides & Inventory Locks
+
+| # | Decision | Rationale |
+|---|---|---|
+| Lock effects, not lock names | `inventory_locks.lock_type` is the spec's five effects (full, sales, rental, edit, view); the design's names live in the free-text reason. `InventoryLock::EFFECTS` maps each type to the actions it blocks. | User's answer; one enforcement table |
+| Enforced at the service layer | `OrderService::markPaid`, `ProductIntakeService::save` and `TransferService::request` all check `isLockedFor()`, so POS, storefront and any future API are covered by one check. A `view` or `full` lock also drops the piece from `publiclyVisible()`. | Spec: "enforce at the service/policy layer, not the UI" |
+| Every type × every action tested | `InventoryLockTest` asserts all four actions for all five lock types as one comparison, plus end-to-end cases (a sales-locked piece is still editable; an edit-locked piece is still sellable). | Module 9 acceptance |
+| Overrides need reason + approval | `OverrideService::request()` refuses an empty reason; nothing is effective until someone with `approve-overrides` approves. A Super Admin self-approving is allowed but recorded with `self_approved: true`. | Spec: no silent bypass |
+| Override types | Seeded as a class constant covering the union of the spec's and the design's lists. | docs/DECISIONS.md, Module 0 |
+| Step-up challenge | Implemented as a configurable second factor with a custom skin: symbols and answers are rows, answers are **hashed**, and `security.stepup_actions` decides which actions it gates. `security.stepup_method` exists so it can be swapped for TOTP step-up with no code change. A pass is good for 10 minutes, not the session. | Spec's framing — brand identity over a standard step-up pattern |
+| Seeded answers are placeholders | `StepUpChallengeSeeder` inserts `change-me-*` answers so the flow works out of the box; they must be replaced before going live. | A seeded secret is not a secret |

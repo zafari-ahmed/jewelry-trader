@@ -31,6 +31,7 @@ class RolesAndPermissionsSeeder extends Seeder
                 'view-all-locations',
                 'use-pos', 'apply-discount-above-threshold',
                 'view-audit-log',
+                'request-override', 'approve-overrides', 'lock-inventory',
             ],
             'sales-staff' => [
                 'view-products', 'manage-products',
@@ -42,11 +43,14 @@ class RolesAndPermissionsSeeder extends Seeder
                 'view-all-locations',
                 // Sells at the register, but cannot discount past the ceiling.
                 'use-pos',
+                // May ask for an override; approval is someone else's job.
+                'request-override',
             ],
             'inventory-specialist' => [
                 'view-products', 'manage-products', 'approve-products',
                 'manage-inventory-transfers',
                 'view-all-locations',
+                'request-override', 'lock-inventory',
             ],
             'accountant' => [
                 'view-settings',
@@ -60,6 +64,7 @@ class RolesAndPermissionsSeeder extends Seeder
                 'manage-customers', 'process-refunds',
                 // Processes returns at the register; no discounting, no pricing.
                 'use-pos',
+                'request-override',
             ],
         ];
     }
@@ -103,6 +108,13 @@ class RolesAndPermissionsSeeder extends Seeder
             'view-audit-log',
             'manage-roles',
             'manage-mfa-settings',
+
+            // Module 9 — overrides and locks
+            'request-override',
+            'approve-overrides',
+            'lock-inventory',
+            'unlock-inventory',
+            'manage-stepup-challenges',
         ];
     }
 

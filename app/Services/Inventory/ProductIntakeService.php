@@ -37,6 +37,12 @@ class ProductIntakeService
     /** @param array<string, mixed> $values */
     public function save(?Product $product, array $values, ?int $userId = null): Product
     {
+        // An edit lock holds during a dispute: the record is frozen but the
+        // piece may still be sellable, depending on its other locks.
+        if ($product?->exists && $product->isLockedFor('edit')) {
+            throw new RuntimeException("{$product->sku} is locked for editing: ".$product->lockReasonFor('edit'));
+        }
+
         return DB::transaction(function () use ($product, $values, $userId) {
             $columns = array_intersect_key($values, array_flip(self::COLUMNS));
             $columns['weight_grams'] = ($columns['weight_grams'] ?? '') === '' ? null : $columns['weight_grams'];

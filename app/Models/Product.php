@@ -89,6 +89,34 @@ class Product extends Model
         return $this->hasMany(InventoryStock::class);
     }
 
+    public function locks(): HasMany
+    {
+        return $this->hasMany(InventoryLock::class);
+    }
+
+    public function activeLocks()
+    {
+        return $this->relationLoaded('locks')
+            ? $this->locks->whereNull('unlocked_at')
+            : $this->locks()->active()->get();
+    }
+
+    /**
+     * Whether a lock blocks an action: sell, edit, rent or display.
+     * Enforced at the service and policy layer, never only in the UI
+     * (CLAUDE.md Module 9).
+     */
+    public function isLockedFor(string $action): bool
+    {
+        return $this->activeLocks()->contains(fn (InventoryLock $lock) => $lock->blocks($action));
+    }
+
+    public function lockReasonFor(string $action): ?string
+    {
+        return $this->activeLocks()
+            ->first(fn (InventoryLock $lock) => $lock->blocks($action))?->reason;
+    }
+
     public function transferRequests(): HasMany
     {
         return $this->hasMany(TransferRequest::class);
@@ -115,6 +143,7 @@ class Product extends Model
     public function isAvailableForSale(): bool
     {
         return $this->status === 'listed'
+            && ! $this->isLockedFor('sell')
             && $this->stock()->where('status', 'in_stock')->where('quantity', '>', 0)->exists();
     }
 
@@ -122,7 +151,11 @@ class Product extends Model
     public function scopePubliclyVisible(Builder $query): Builder
     {
         return $query->where('status', 'listed')
-            ->whereHas('stock', fn (Builder $q) => $q->where('status', 'in_stock')->where('quantity', '>', 0));
+            ->whereHas('stock', fn (Builder $q) => $q->where('status', 'in_stock')->where('quantity', '>', 0))
+            // A lock that hides or freezes a piece takes it off the storefront.
+            ->whereDoesntHave('locks', fn (Builder $q) => $q
+                ->whereNull('unlocked_at')
+                ->whereIn('lock_type', ['full', 'sales', 'view']));
     }
 
     /**
