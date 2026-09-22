@@ -93,6 +93,10 @@ Route::middleware('auth')->prefix('admin')->name('admin.')->group(function () {
     Route::get('/audit', \App\Livewire\Admin\AuditLogViewer::class)->middleware('permission:view-audit-log')->name('audit');
     Route::get('/roles', \App\Livewire\Admin\RolesPermissions::class)->middleware('permission:manage-roles')->name('roles');
 
+    // Phase 2 placeholders: the nav item exists and explains itself; the
+    // module behind it arrives later (Module 11).
+    Route::get('/phase-2/{feature}', \App\Livewire\Admin\Phase2Placeholder::class)->name('phase2');
+
     Route::prefix('settings')->name('settings')->group(function () {
         Route::view('/', 'admin.settings.index')->middleware('permission:manage-settings|view-settings');
 

@@ -27,6 +27,19 @@
         <x-ui.nav-item :href="route('admin.commission')" :active="$current === 'admin.commission'">Commission Report</x-ui.nav-item>
         <x-ui.nav-item :href="route('admin.audit')" :active="$current === 'admin.audit'">Audit Log</x-ui.nav-item>
         <x-ui.nav-item :href="route('admin.roles')" :active="$current === 'admin.roles'">Roles &amp; Permissions</x-ui.nav-item>
+
+        <x-ui.eyebrow tone="navy" class="mt-14 mb-4 pl-12">Phase 2</x-ui.eyebrow>
+        @foreach ([
+            'rental' => 'Rental Services',
+            'salesperson_storefront' => 'Salesperson Storefronts',
+            'quarterly_audit' => 'Quarterly Audit',
+        ] as $feature => $label)
+            <x-ui.nav-item :href="route('admin.phase2', $feature)"
+                :active="request()->routeIs('admin.phase2') && request()->route('feature') === $feature">
+                {{ $label }}
+                <x-slot:badge></x-slot:badge>
+            </x-ui.nav-item>
+        @endforeach
     </div>
 
     <div class="mt-auto border-t border-hairline-dark pt-14">

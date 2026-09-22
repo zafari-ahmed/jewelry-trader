@@ -185,3 +185,13 @@ CLAUDE.md remains the specification; this file records where reality diverged fr
 | Fallback plan is virtual | With no assignment, the plan comes from Settings as an unsaved model, so changing the default applies immediately and the commission row records a null plan id. | Rule 3.1 |
 | Payroll mapping | `commission.payroll_export_column_mapping` drives both headers and values; an unmapped source exports `[unmapped: x]` rather than a silent blank. | The target payroll format is unknown |
 | Report scoping | Without `view-all-commissions` the report shows only the viewer's own rows; export needs `export-payroll`. | Spec's permission list |
+
+## Module 11 — Phase 2 placeholders
+
+| # | Decision | Rationale |
+|---|---|---|
+| One placeholder component | `Phase2Placeholder` renders all three features from a table of metadata: flag, description, the tables already waiting, and the seams Phase 2 will build behind. Three near-identical screens would be three places to drift. | Module 11: nav item + flag + tables, no logic |
+| Honest when the flag is on | Turning a flag on does not pretend the module exists: the screen switches to "Flag on — module not yet built". | A flag that lies is worse than one that is off |
+| Index naming | `storefront_inventory_requests`' unique index is named explicitly; the generated name exceeded MySQL's 64-character limit and failed *after* creating the table, leaving a half-applied migration. | Found by running it |
+| Money columns | `rental_agreements.deposit_amount_cents` follows the same minor-units convention as every other money column. | Consistency with payments, orders, pricing |
+| A test that no logic shipped | `PlaceholderTest` asserts that no Phase 2 service class exists, so "tables and flags only" stays true as the codebase grows. | §6 boundary |
