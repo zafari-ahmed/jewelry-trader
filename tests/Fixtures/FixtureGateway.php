@@ -13,6 +13,16 @@ class FixtureGateway implements PaymentGatewayInterface
         return PaymentResult::success('fx_'.$amountCents, ['gateway' => 'fixture'], $amountCents, 'succeeded');
     }
 
+    public function prepare(int $amountCents, string $currency, array $metadata = []): PaymentResult
+    {
+        return PaymentResult::success('fx_intent_'.$amountCents, ['client_secret' => 'fx_secret'], $amountCents, 'requires_payment_method');
+    }
+
+    public function verify(string $gatewayTransactionId): PaymentResult
+    {
+        return PaymentResult::success($gatewayTransactionId, [], null, 'succeeded');
+    }
+
     public function refund(string $gatewayTransactionId, int $amountCents): PaymentResult
     {
         return PaymentResult::success($gatewayTransactionId, ['refunded' => $amountCents], $amountCents, 'succeeded');

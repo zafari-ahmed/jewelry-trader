@@ -17,6 +17,11 @@ class StripeApiClient implements StripeApi
         return $this->client($secretKey)->paymentIntents->create($params)->toArray();
     }
 
+    public function retrievePaymentIntent(string $id, string $secretKey): array
+    {
+        return $this->client($secretKey)->paymentIntents->retrieve($id)->toArray();
+    }
+
     public function refundPaymentIntent(array $params, string $secretKey): array
     {
         return $this->client($secretKey)->refunds->create($params)->toArray();

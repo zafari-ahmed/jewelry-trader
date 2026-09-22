@@ -100,11 +100,7 @@ class OrderService
             }
 
             foreach ($order->items()->whereNotNull('product_id')->get() as $item) {
-                $stock = InventoryStock::query()
-                    ->where('product_id', $item->product_id)
-                    ->where('location_id', $order->location_id)
-                    ->lockForUpdate()
-                    ->first();
+                $stock = $this->lockStockFor($item->product_id, $order);
 
                 if (! $stock || ! $stock->isAvailable()) {
                     // Aborts the transaction: no order is marked paid, and no
@@ -128,16 +124,41 @@ class OrderService
         });
     }
 
+    /**
+     * Lock the stock row this order should consume.
+     *
+     * A web order belongs to the dedicated Web location, but the piece itself
+     * sits at a physical store — so for web orders the row is found wherever
+     * the piece actually is. Pieces are one of a kind, so that is unambiguous;
+     * the row is still locked FOR UPDATE, which is what makes the sold-once
+     * guarantee hold across channels.
+     */
+    private function lockStockFor(int $productId, Order $order, bool $requireAvailable = true): ?InventoryStock
+    {
+        $atOrderLocation = InventoryStock::query()
+            ->where('product_id', $productId)
+            ->where('location_id', $order->location_id)
+            ->lockForUpdate()
+            ->first();
+
+        if ($atOrderLocation || $order->channel !== 'web') {
+            return $atOrderLocation;
+        }
+
+        return InventoryStock::query()
+            ->where('product_id', $productId)
+            ->when($requireAvailable, fn ($q) => $q->where('status', 'in_stock'))
+            ->orderByRaw("status = 'in_stock' DESC")
+            ->lockForUpdate()
+            ->first();
+    }
+
     /** Return stock to the shelf when an order is cancelled or fully refunded. */
     public function restock(Order $order, string $newStatus = 'refunded'): Order
     {
         return DB::transaction(function () use ($order, $newStatus) {
             foreach ($order->items()->whereNotNull('product_id')->get() as $item) {
-                $stock = InventoryStock::query()
-                    ->where('product_id', $item->product_id)
-                    ->where('location_id', $order->location_id)
-                    ->lockForUpdate()
-                    ->first();
+                $stock = $this->lockStockFor($item->product_id, $order, requireAvailable: false);
 
                 $stock?->update(['status' => 'in_stock', 'quantity' => $stock->quantity + $item->quantity]);
 

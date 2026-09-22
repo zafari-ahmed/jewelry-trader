@@ -49,6 +49,39 @@ class FieldComponentTest extends TestCase
         $this->assertStringContainsString('w-full', Blade::render("<x-{$component} />"));
     }
 
+    /**
+     * Blade escapes a prop on output, so "&amp;" written in an attribute
+     * reaches the page as a literal "&amp;". Caught three times by eye; now
+     * it is caught by the suite.
+     */
+    public function test_no_view_double_escapes_an_ampersand_in_a_component_prop(): void
+    {
+        $offenders = [];
+        $props = 'label|title|heading|subheading|meta|description|eyebrow|text|caption|value|placeholder';
+
+        foreach ($this->bladeFiles() as $file) {
+            if (preg_match_all('/(?:'.$props.')="[^"]*&amp;/', file_get_contents($file), $matches)) {
+                $offenders[] = str_replace(base_path().'/', '', $file);
+            }
+        }
+
+        $this->assertSame([], $offenders, "Write a plain & in component props:\n".implode("\n", $offenders));
+    }
+
+    /** @return \Generator<string> */
+    private function bladeFiles(): \Generator
+    {
+        $iterator = new \RecursiveIteratorIterator(
+            new \RecursiveDirectoryIterator(resource_path('views'), \FilesystemIterator::SKIP_DOTS),
+        );
+
+        foreach ($iterator as $file) {
+            if (str_ends_with($file->getFilename(), '.blade.php')) {
+                yield $file->getPathname();
+            }
+        }
+    }
+
     public function test_every_status_tone_renders(): void
     {
         foreach (['red', 'yellow', 'green', 'neutral', 'gray', 'blue'] as $status) {

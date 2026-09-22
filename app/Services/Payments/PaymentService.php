@@ -89,6 +89,52 @@ class PaymentService
     }
 
     /**
+     * Record a payment the customer's browser confirmed directly with the
+     * gateway (Stripe Payment Element). The intent is re-read from the gateway
+     * rather than trusted from the request — the browser is not authoritative
+     * about whether money moved.
+     */
+    public function recordConfirmed(int $orderId, string $gatewayTransactionId, int $expectedAmountCents, string $currency = 'USD'): Payment
+    {
+        $gateway = PaymentGatewayFactory::make();
+        $result = $gateway->verify($gatewayTransactionId);
+
+        if ($result->failed() || $result->status !== 'succeeded') {
+            throw new RuntimeException($result->errorMessage ?: 'The payment was not completed.');
+        }
+
+        if ($result->amountCents !== null && $result->amountCents !== $expectedAmountCents) {
+            // A mismatch means the intent does not belong to this order.
+            throw new RuntimeException('The confirmed payment does not match the order total.');
+        }
+
+        return DB::transaction(function () use ($orderId, $gateway, $result, $expectedAmountCents, $currency) {
+            $payment = Payment::create([
+                'order_id' => $orderId,
+                'gateway' => $gateway->slug(),
+                'gateway_transaction_id' => $result->gatewayTransactionId,
+                'amount' => $expectedAmountCents,
+                'currency' => $currency,
+                'status' => 'succeeded',
+                'method' => 'card',
+                'raw_response' => $result->rawResponse,
+                'created_by' => Auth::id(),
+            ]);
+
+            PaymentSplit::create([
+                'payment_id' => $payment->id,
+                'method' => 'card',
+                'amount' => $expectedAmountCents,
+                'gateway_transaction_id' => $result->gatewayTransactionId,
+                'status' => 'succeeded',
+                'raw_response' => $result->rawResponse ?: null,
+            ]);
+
+            return $payment->load('splits');
+        });
+    }
+
+    /**
      * Refund up to the payment's remaining refundable amount. Card tenders are
      * reversed through the gateway; cash is recorded (the drawer is physical).
      * Refunds draw from card tenders first, since cash refunds are unrestricted

@@ -9,10 +9,11 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Laravel\Scout\Searchable;
 
 class Product extends Model
 {
-    use Auditable, HasFactory;
+    use Auditable, HasFactory, Searchable;
 
     protected $fillable = [
         'sku', 'title', 'subtitle', 'category', 'subcategory', 'brand', 'style_period',
@@ -35,6 +36,26 @@ class Product extends Model
         return $this->submitted_for_review_at
             ? round($this->created_at->diffInSeconds($this->submitted_for_review_at) / 60, 1)
             : null;
+    }
+
+    /** Only publicly visible products are ever indexed. */
+    public function shouldBeSearchable(): bool
+    {
+        return $this->isAvailableForSale();
+    }
+
+    public function toSearchableArray(): array
+    {
+        return [
+            'id' => $this->id,
+            'sku' => $this->sku,
+            'title' => $this->title,
+            'brand' => $this->brand,
+            'category' => $this->category,
+            'style_period' => $this->style_period,
+            'metal_type' => $this->metal_type,
+            'customer_description' => $this->customer_description,
+        ];
     }
 
     public function images(): HasMany

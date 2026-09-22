@@ -7,6 +7,7 @@ use App\Livewire\Inventory;
 use App\Livewire\Orders;
 use App\Livewire\Pos;
 use App\Livewire\Settings;
+use App\Livewire\Shop;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -14,11 +15,36 @@ use Illuminate\Support\Facades\Route;
 | Public storefront (Module 7 replaces these with real components)
 |--------------------------------------------------------------------------
 */
-Route::view('/', 'storefront.home')->name('shop.home');
-Route::view('/catalog', 'storefront.catalog')->name('shop.catalog');
-Route::view('/product', 'storefront.product')->name('shop.product');
-Route::view('/checkout', 'storefront.checkout')->name('shop.checkout');
-Route::view('/account', 'storefront.account')->name('shop.account');
+Route::get('/', function () {
+    // Only listed, in-stock pieces are ever public (Module 7 acceptance).
+    $listed = \App\Models\Product::query()->publiclyVisible()->with(['currentPricing', 'primaryImage']);
+
+    return view('storefront.home', [
+        'hero' => (clone $listed)->latest('id')->first(),
+        'recent' => (clone $listed)->latest('id')->take(4)->get(),
+        'periods' => (clone $listed)->whereNotNull('style_period')
+            ->get()
+            ->groupBy('style_period')
+            ->map->count()
+            ->sortDesc()
+            ->take(4),
+    ]);
+})->name('shop.home');
+Route::get('/collection', Shop\Catalog::class)->name('shop.catalog');
+Route::get('/piece/{product}', Shop\ProductDetail::class)->name('shop.product');
+Route::get('/bag', Shop\Bag::class)->name('shop.bag');
+Route::get('/checkout', Shop\Checkout::class)->name('shop.checkout');
+Route::get('/account', Shop\Account::class)->name('shop.account');
+Route::get('/order/{order:order_number}', function (\App\Models\Order $order) {
+    // A customer may only see their own order; a guest sees it once, from the
+    // redirect that follows their payment.
+    abort_unless(
+        auth('customer')->id() === $order->customer_id || session()->pull('shop.just_ordered') === $order->order_number,
+        404,
+    );
+
+    return view('shop.confirmation', ['order' => $order->load('items', 'customer')]);
+})->name('shop.confirmation');
 
 /*
 |--------------------------------------------------------------------------

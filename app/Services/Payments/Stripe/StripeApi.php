@@ -13,6 +13,8 @@ interface StripeApi
 {
     public function createPaymentIntent(array $params, string $secretKey): array;
 
+    public function retrievePaymentIntent(string $id, string $secretKey): array;
+
     public function refundPaymentIntent(array $params, string $secretKey): array;
 
     public function capturePaymentIntent(string $id, array $params, string $secretKey): array;

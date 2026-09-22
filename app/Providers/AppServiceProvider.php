@@ -25,6 +25,13 @@ class AppServiceProvider extends ServiceProvider
     {
         // The only place the Stripe SDK is bound; tests swap this for a double.
         $this->app->bind(StripeApi::class, StripeApiClient::class);
+
+        // Phase 1 searches by keyword; Module 2's AiSearchProvider becomes an
+        // alternate binding in Phase 2 with no change to calling code.
+        $this->app->bind(
+            \App\Services\Search\Contracts\ProductSearchService::class,
+            \App\Services\Search\KeywordProductSearch::class,
+        );
     }
 
     /**

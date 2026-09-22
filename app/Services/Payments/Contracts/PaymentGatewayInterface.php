@@ -19,6 +19,16 @@ interface PaymentGatewayInterface
         array $metadata = [],
     ): PaymentResult;
 
+    /**
+     * Create an intent the customer's browser will confirm (Stripe Payment
+     * Element). The result's rawResponse carries the client secret; no card
+     * data ever reaches this application (PCI DSS).
+     */
+    public function prepare(int $amountCents, string $currency, array $metadata = []): PaymentResult;
+
+    /** Read an intent back from the gateway after the browser confirmed it. */
+    public function verify(string $gatewayTransactionId): PaymentResult;
+
     public function refund(string $gatewayTransactionId, int $amountCents): PaymentResult;
 
     /**

@@ -129,3 +129,17 @@ CLAUDE.md remains the specification; this file records where reality diverged fr
 | Exchange | One transaction: return the old lines (restocking them), create the replacement order, and settle only the difference. A cheaper replacement refunds the difference; an even swap moves no money. | Spec: "new order line plus refund/credit adjustment in one transaction" |
 | Card token | The register passes the gateway's test token. Mounting the Stripe Payment Element on the POS screen is the remaining step before real card entry at the counter — no card reader is in scope (docs/DECISIONS.md). | Module 7 mounts the same Element for the storefront |
 | Receipt | On screen, printable at `/pos/receipt/{order}` (80mm `@page`, browser print), and emailed when a customer email is on file. Company details, footer text and return window all read from settings. | Spec |
+
+## Module 7 — Storefront
+
+| # | Decision | Rationale |
+|---|---|---|
+| Search behind an interface | `ProductSearchService` with `KeywordProductSearch` bound in Phase 1. Module 2's `AiSearchProvider` becomes an alternate binding later with no change to calling code. | Spec |
+| Scout indexes, queries do not | Products are Scout-`Searchable` with `shouldBeSearchable()` tied to public visibility, but Phase 1 queries the database directly. The "only listed, in-stock" guarantee lives in `Product::publiclyVisible()` — one place — rather than in an index that could drift and leak a draft. | Module 7 acceptance |
+| Payment Element | Added `prepare()` and `verify()` to `PaymentGatewayInterface`. The browser confirms the intent directly with Stripe; the server **re-reads it from the gateway** before recording, and rejects an intent whose amount does not match the order. The browser is never authoritative about whether money moved. | PCI DSS SAQ-A; spec asks the Element be brand-styled |
+| Element theming | Stripe's appearance API is fed from the design tokens at runtime (`--color-gold`, `--color-border-field`, 2px radius, Source Sans). | Rule 3.8 — no second palette |
+| Stripe.js loaded lazily | Injected only when a customer reaches payment, so browsing makes no third-party request. | Privacy (CCPA/GDPR) |
+| **Web fulfilment bug** | Web orders belong to the Web location, but stock sits at a physical store — `markPaid` found no stock row and left paid orders pending. `lockStockFor()` now falls back to the piece's actual location for web orders, still under `FOR UPDATE`. Found by a real checkout, not by a test. | The sold-once guarantee must hold across channels |
+| Customer guard | Customers authenticate on their own `customer` guard against the `customers` table; `password` is deliberately **not** mass-assignable. A guest who bought earlier claims that record on registration, keeping their history. | Staff and customers are different populations |
+| Cart re-validated on read | The session cart drops anything no longer publicly visible, so a piece sold at the counter disappears from a web bag rather than reaching checkout. | One-of-a-kind stock |
+| Alpine started once | Livewire bundles its own Alpine; this bundle starts Alpine only on pages without Livewire. Two instances were running on every Livewire page. | Found via console warnings |

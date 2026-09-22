@@ -40,16 +40,29 @@ class FakeStripeApi implements StripeApi
 
         $id = 'pi_test_'.count($this->intents).'_'.substr(md5(json_encode($params)), 0, 8);
 
+        // Stripe only settles an intent that was created with confirm: true.
+        // One prepared for the Payment Element starts unpaid, and stays that
+        // way until the browser confirms it.
+        $status = ($params['confirm'] ?? false) ? $this->nextIntentStatus : 'requires_payment_method';
+
         return $this->intents[$id] = [
             'id' => $id,
-            'status' => $this->nextIntentStatus,
+            'client_secret' => $id.'_secret_test',
+            'status' => $status,
             'amount' => $params['amount'],
-            'amount_received' => $this->nextIntentStatus === 'succeeded' ? $params['amount'] : 0,
+            'amount_received' => $status === 'succeeded' ? $params['amount'] : 0,
             'amount_refunded' => 0,
             'currency' => $params['currency'],
             'description' => $params['description'] ?? null,
             'metadata' => $params['metadata'] ?? [],
         ];
+    }
+
+    public function retrievePaymentIntent(string $id, string $secretKey): array
+    {
+        $this->calls[] = ['retrievePaymentIntent', $id, $secretKey];
+
+        return $this->intents[$id] ?? ['id' => $id, 'status' => 'requires_payment_method', 'amount' => 0];
     }
 
     public function refundPaymentIntent(array $params, string $secretKey): array

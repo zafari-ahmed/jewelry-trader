@@ -59,6 +59,35 @@ class StripeGateway implements PaymentGatewayInterface
         }
     }
 
+    public function prepare(int $amountCents, string $currency, array $metadata = []): PaymentResult
+    {
+        if ($amountCents <= 0) {
+            return PaymentResult::failure('Amount must be greater than zero.');
+        }
+
+        try {
+            $intent = $this->api->createPaymentIntent([
+                'amount' => $amountCents,
+                'currency' => strtolower($currency),
+                'metadata' => $metadata,
+                'automatic_payment_methods' => ['enabled' => true, 'allow_redirects' => 'never'],
+            ], $this->secretKey());
+
+            return PaymentResult::success($intent['id'], $intent, $intent['amount'] ?? $amountCents, $intent['status'] ?? 'requires_payment_method');
+        } catch (ApiErrorException $e) {
+            return PaymentResult::failure($e->getMessage(), $this->errorPayload($e));
+        }
+    }
+
+    public function verify(string $gatewayTransactionId): PaymentResult
+    {
+        try {
+            return $this->resultFromIntent($this->api->retrievePaymentIntent($gatewayTransactionId, $this->secretKey()));
+        } catch (ApiErrorException $e) {
+            return PaymentResult::failure($e->getMessage(), $this->errorPayload($e));
+        }
+    }
+
     public function refund(string $gatewayTransactionId, int $amountCents): PaymentResult
     {
         if ($amountCents <= 0) {
