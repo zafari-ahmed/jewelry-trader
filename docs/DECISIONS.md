@@ -114,3 +114,18 @@ CLAUDE.md remains the specification; this file records where reality diverged fr
 | Intake metric | `created_at → submitted_for_review_at`, surfaced on the review queue as median / slowest / count, with the median tile turning red above five minutes. | Module 5 acceptance: "surfaced as a metric to managers" |
 | Approve ≠ list | Two separate actions and two statuses; listing is refused unless the item is approved. | Spec: an item can be approved for the record without being published |
 | ProductForm removed | Module 4's plain CRUD form is deleted, replaced by `ProductIntake`. The static `admin/inventory-create` and `admin/review` views are removed too. | One intake screen, not two |
+
+## Module 6 — Point of Sale
+
+| # | Decision | Rationale |
+|---|---|---|
+| Cart in session | `pos.cart` and `pos.location` are session-backed, so a refresh mid-sale keeps the customer's items. | A lost cart at the counter is worse than a stale one |
+| Cart is a value object | `App\Services\Pos\Cart` holds the arithmetic (subtotal, per-line discount, tax, staff-ceiling check); the Livewire component stays thin. | Money maths is testable without a browser |
+| Pre-filled tender | Reaching payment pre-fills one card tender for the full amount, so the common sale is search → add → charge. | Two-minute target; no modal in the happy path |
+| Tenders must equal the total | The charge button is disabled and the service re-checks server-side. | Prevents a part-paid order being marked paid |
+| Discount ceiling | Per line, percentage or fixed, capped at the line value. Above `pos.max_staff_discount_percent`, the apply is refused unless the user holds `apply-discount-above-threshold` — checked in the component, not the view. | Rule 3.6 |
+| Refund amount | A returned line refunds its discounted value **plus the tax charged on it**, capped at what remains refundable on the order. | The customer paid tax on that line and gets it back |
+| Return window | Outside `pos.return_window_days`, a refund is refused unless the user can `approve-overrides`. Module 9 replaces that check with a real override request. | The window is configurable, not hardcoded |
+| Exchange | One transaction: return the old lines (restocking them), create the replacement order, and settle only the difference. A cheaper replacement refunds the difference; an even swap moves no money. | Spec: "new order line plus refund/credit adjustment in one transaction" |
+| Card token | The register passes the gateway's test token. Mounting the Stripe Payment Element on the POS screen is the remaining step before real card entry at the counter — no card reader is in scope (docs/DECISIONS.md). | Module 7 mounts the same Element for the storefront |
+| Receipt | On screen, printable at `/pos/receipt/{order}` (80mm `@page`, browser print), and emailed when a customer email is on file. Company details, footer text and return window all read from settings. | Spec |

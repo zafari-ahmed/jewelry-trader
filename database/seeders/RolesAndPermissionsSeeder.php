@@ -29,6 +29,7 @@ class RolesAndPermissionsSeeder extends Seeder
                 'view-orders', 'manage-orders', 'process-refunds',
                 'manage-inventory-transfers', 'approve-inventory-transfers',
                 'view-all-locations',
+                'use-pos', 'apply-discount-above-threshold',
             ],
             'sales-staff' => [
                 'view-products', 'manage-products',
@@ -38,6 +39,8 @@ class RolesAndPermissionsSeeder extends Seeder
                 // The business wants staff to see other locations' stock
                 // (docs/DECISIONS.md); the scoping exists for roles without it.
                 'view-all-locations',
+                // Sells at the register, but cannot discount past the ceiling.
+                'use-pos',
             ],
             'inventory-specialist' => [
                 'view-products', 'manage-products', 'approve-products',
@@ -52,6 +55,8 @@ class RolesAndPermissionsSeeder extends Seeder
             'customer-service' => [
                 'view-products', 'view-orders', 'view-customers',
                 'manage-customers', 'process-refunds',
+                // Processes returns at the register; no discounting, no pricing.
+                'use-pos',
             ],
         ];
     }
@@ -86,6 +91,10 @@ class RolesAndPermissionsSeeder extends Seeder
 
             // Module 5 — colour-coded field system
             'manage-field-rules',
+
+            // Module 6 — point of sale
+            'use-pos',
+            'apply-discount-above-threshold',
         ];
     }
 

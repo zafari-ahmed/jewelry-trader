@@ -5,6 +5,7 @@ use App\Http\Controllers\Webhooks\StripeWebhookController;
 use App\Livewire\Customers;
 use App\Livewire\Inventory;
 use App\Livewire\Orders;
+use App\Livewire\Pos;
 use App\Livewire\Settings;
 use Illuminate\Support\Facades\Route;
 
@@ -82,9 +83,12 @@ Route::middleware('auth')->prefix('admin')->name('admin.')->group(function () {
 | Point of Sale (Module 6 replaces these with Livewire components)
 |--------------------------------------------------------------------------
 */
-Route::middleware('auth')->prefix('pos')->name('pos.')->group(function () {
-    Route::view('/', 'pos.sale')->name('sale');
-    Route::view('/payment', 'pos.payment')->name('payment');
-    Route::view('/return', 'pos.return')->name('return');
-    Route::view('/receipt', 'pos.receipt')->name('receipt');
+Route::middleware(['auth', 'permission:use-pos'])->prefix('pos')->name('pos.')->group(function () {
+    Route::get('/', Pos\Register::class)->name('sale');
+    Route::get('/returns', Pos\Returns::class)->middleware('permission:process-refunds')->name('returns');
+    Route::get('/receipt/{order}', function (\App\Models\Order $order) {
+        abort_unless(auth()->user()->can('view', $order), 403);
+
+        return view('pos.receipt-print', ['order' => $order->load(['items', 'payments.splits', 'location', 'createdBy'])]);
+    })->name('receipt.print');
 });
