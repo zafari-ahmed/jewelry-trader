@@ -67,6 +67,11 @@ Route::middleware('guest')->group(function () {
 
 Route::post('/logout', [LoginController::class, 'destroy'])->middleware('auth')->name('logout');
 
+Route::middleware('auth')->prefix('two-factor')->name('two-factor.')->group(function () {
+    Route::get('/setup', \App\Livewire\Auth\TwoFactorSetup::class)->name('setup');
+    Route::get('/challenge', \App\Livewire\Auth\TwoFactorChallenge::class)->name('challenge');
+});
+
 /*
 |--------------------------------------------------------------------------
 | Admin panel
@@ -85,8 +90,8 @@ Route::middleware('auth')->prefix('admin')->name('admin.')->group(function () {
     Route::get('/review', Inventory\ReviewQueue::class)->middleware('permission:view-products')->name('review');
     Route::view('/override', 'admin.override')->name('override');
     Route::view('/commission', 'admin.commission')->name('commission');
-    Route::view('/audit', 'admin.audit')->name('audit');
-    Route::view('/roles', 'admin.roles')->name('roles');
+    Route::get('/audit', \App\Livewire\Admin\AuditLogViewer::class)->middleware('permission:view-audit-log')->name('audit');
+    Route::get('/roles', \App\Livewire\Admin\RolesPermissions::class)->middleware('permission:manage-roles')->name('roles');
 
     Route::prefix('settings')->name('settings')->group(function () {
         Route::view('/', 'admin.settings.index')->middleware('permission:manage-settings|view-settings');

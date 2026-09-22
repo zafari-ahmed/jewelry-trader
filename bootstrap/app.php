@@ -14,6 +14,12 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->validateCsrfTokens(except: ['webhooks/*']);
 
+        // MFA is enforced on every authenticated web request, so no route can
+        // be reached by a user who owes a second factor (Module 8).
+        $middleware->appendToGroup('web', [
+            \App\Http\Middleware\RequireTwoFactor::class,
+        ]);
+
         $middleware->alias([
             'permission' => \Spatie\Permission\Middleware\PermissionMiddleware::class,
             'role' => \Spatie\Permission\Middleware\RoleMiddleware::class,

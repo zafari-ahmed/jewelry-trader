@@ -28,7 +28,7 @@ class ConcurrentSaleTest extends TestCase
     {
         // These rows are committed, not rolled back: leaving them behind would
         // corrupt the sequential order-number test that runs later.
-        foreach (['payments', 'order_items', 'orders', 'inventory_stock', 'pricing', 'products', 'locations'] as $table) {
+        foreach (['payments', 'order_items', 'orders', 'inventory_stock', 'pricing', 'products', 'locations', 'audit_logs', 'settings'] as $table) {
             DB::statement('SET FOREIGN_KEY_CHECKS=0');
             DB::table($table)->delete();
             DB::statement('SET FOREIGN_KEY_CHECKS=1');

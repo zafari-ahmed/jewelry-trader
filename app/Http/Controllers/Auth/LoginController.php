@@ -47,6 +47,9 @@ class LoginController extends Controller
 
         $request->session()->regenerate();
 
+        // A new session owes a fresh second factor.
+        $request->session()->forget('two_factor_passed_at');
+
         // Session lifetime is a business setting, not infrastructure (rule 3.1).
         config(['session.lifetime' => Setting::get('security.session_timeout_minutes', 120)]);
 

@@ -143,3 +143,17 @@ CLAUDE.md remains the specification; this file records where reality diverged fr
 | Customer guard | Customers authenticate on their own `customer` guard against the `customers` table; `password` is deliberately **not** mass-assignable. A guest who bought earlier claims that record on registration, keeping their history. | Staff and customers are different populations |
 | Cart re-validated on read | The session cart drops anything no longer publicly visible, so a piece sold at the counter disappears from a web bag rather than reaching checkout. | One-of-a-kind stock |
 | Alpine started once | Livewire bundles its own Alpine; this bundle starts Alpine only on pages without Livewire. Two instances were running on every Livewire page. | Found via console warnings |
+
+## Module 8 — Security: RBAC, MFA, Audit
+
+| # | Decision | Rationale |
+|---|---|---|
+| MFA enforced by middleware | `RequireTwoFactor` runs on the whole `web` group, so no route can be reached by a user who owes a second factor — Super Admin included. The routes that *satisfy* the requirement (setup, challenge, logout) are the only exemptions. | Module 8 acceptance: MFA cannot be bypassed by any role |
+| Which roles need MFA | Read from `security.mfa_required_roles`; changing it takes effect on the next request. Tested by turning it on for a role mid-test. | Rule 3.1 |
+| Secret handling | `two_factor_secret` and `two_factor_recovery_codes` use encrypted casts; recovery codes are additionally **hashed**, so a database leak yields nothing usable. Codes are shown once, at enrolment. | Rule 3.2 |
+| QR code | Rendered inline as SVG by `bacon/bacon-qr-code`; the secret never reaches a third-party image service. | Privacy |
+| A new session re-challenges | Login clears `two_factor_passed_at`, so enrolment alone does not grant standing access. | Spec: "login is blocked without a valid code thereafter" |
+| Role matrix as a test | `RolePermissionMatrixTest` asserts all nine protected actions for all six roles as one comparison. A permission moved in the seeder without thinking fails here. | Module 8 acceptance: one policy test per role per action |
+| Retention per category | `audit:purge` (daily at 03:15) applies `security.audit_retention_days` to general activity and `security.audit_retention_days_financial` to financial entries. | IRS 7-year recordkeeping |
+| audit_logs.created_at writable | Needed to backdate entries when testing retention and for any future import; the trail is append-only by use, not by column locking. | Testability |
+| Test isolation | `ConcurrentSaleTest` uses `DatabaseTruncation` (it needs committed rows for real locks) and now clears `audit_logs` and `settings` too — leftovers were breaking retention counts in later tests. | Found only when running the full suite |

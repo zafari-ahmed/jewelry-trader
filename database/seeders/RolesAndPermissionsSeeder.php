@@ -30,6 +30,7 @@ class RolesAndPermissionsSeeder extends Seeder
                 'manage-inventory-transfers', 'approve-inventory-transfers',
                 'view-all-locations',
                 'use-pos', 'apply-discount-above-threshold',
+                'view-audit-log',
             ],
             'sales-staff' => [
                 'view-products', 'manage-products',
@@ -51,6 +52,8 @@ class RolesAndPermissionsSeeder extends Seeder
                 'view-settings',
                 'view-products', 'view-orders', 'view-customers',
                 'view-all-locations',
+                // Financial records are their remit, so the trail is too.
+                'view-audit-log',
             ],
             'customer-service' => [
                 'view-products', 'view-orders', 'view-customers',
@@ -95,6 +98,11 @@ class RolesAndPermissionsSeeder extends Seeder
             // Module 6 — point of sale
             'use-pos',
             'apply-discount-above-threshold',
+
+            // Module 8 — security
+            'view-audit-log',
+            'manage-roles',
+            'manage-mfa-settings',
         ];
     }
 

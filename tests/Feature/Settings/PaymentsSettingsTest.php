@@ -28,6 +28,9 @@ class PaymentsSettingsTest extends TestCase
 
         $this->superAdmin = User::factory()->create();
         $this->superAdmin->assignRole(RolesAndPermissionsSeeder::SUPER_ADMIN);
+
+        // MFA enforcement has its own tests; this one is about secrets.
+        Setting::set('security.mfa_required_roles', []);
     }
 
     public function test_a_super_admin_can_rotate_a_stripe_key_from_the_ui(): void

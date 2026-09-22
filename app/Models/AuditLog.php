@@ -13,6 +13,9 @@ class AuditLog extends Model
     protected $fillable = [
         'user_id', 'action', 'category', 'auditable_type', 'auditable_id',
         'old_values', 'new_values', 'ip_address', 'user_agent',
+        // Writable so entries can be backdated when importing or testing
+        // retention; the trail itself is append-only in practice.
+        'created_at',
     ];
 
     protected $casts = [
