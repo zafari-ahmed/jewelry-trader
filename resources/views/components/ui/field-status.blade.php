@@ -3,7 +3,7 @@
   traffic-light field system: dot + label color + control tone + helper line.
 --}}
 @props([
-    'color' => 'green',   // red | yellow | green | gray | blue
+    'color' => 'green',   // red | yellow | green | gray | blue | neutral
     'label' => null,
     'required' => false,
     'helper' => null,
@@ -15,13 +15,15 @@
         'green' => ['dot' => 'bg-status-valid', 'label' => 'text-status-valid', 'helper' => 'text-muted'],
         'gray' => ['dot' => 'bg-status-na', 'label' => 'text-status-na', 'helper' => 'text-status-na'],
         'blue' => ['dot' => 'bg-status-override', 'label' => 'text-status-override', 'helper' => 'text-status-override'],
+        // Optional and empty: a plain field, no status dot to report.
+        'neutral' => ['dot' => null, 'label' => 'text-ink', 'helper' => 'text-muted'],
     ];
     $tone = $map[$color] ?? $map['green'];
 @endphp
 <div {{ $attributes->only('class') }}>
     @if ($label)
         <label class="mb-5 flex items-center gap-7 text-label font-semibold {{ $tone['label'] }}">
-            <span class="size-8 rounded-full {{ $tone['dot'] }}"></span>{{ $label }}@if ($required)<span class="text-status-required">*</span>@endif
+            @if ($tone['dot'])<span class="size-8 rounded-full {{ $tone['dot'] }}"></span>@endif{{ $label }}@if ($required)<span class="text-status-required">*</span>@endif
         </label>
     @endif
     {{ $slot }}

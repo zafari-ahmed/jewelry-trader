@@ -16,7 +16,7 @@ class Product extends Model
 
     protected $fillable = [
         'sku', 'title', 'subtitle', 'category', 'subcategory', 'brand', 'style_period',
-        'metal_type', 'weight_grams', 'measurements', 'condition_notes',
+        'metal_type', 'weight_grams', 'measurements', 'attributes', 'condition_notes',
         'internal_description', 'customer_description', 'seo_description',
         'marketplace_description', 'social_description', 'status',
         'manually_overridden_fields', 'created_by', 'approved_by', 'submitted_for_review_at',
@@ -24,9 +24,18 @@ class Product extends Model
 
     protected $casts = [
         'manually_overridden_fields' => 'array',
+        'attributes' => 'array',
         'submitted_for_review_at' => 'datetime',
         'weight_grams' => 'decimal:3',
     ];
+
+    /** Minutes from record creation to submit-for-review (Module 5 metric). */
+    public function intakeMinutes(): ?float
+    {
+        return $this->submitted_for_review_at
+            ? round($this->created_at->diffInSeconds($this->submitted_for_review_at) / 60, 1)
+            : null;
+    }
 
     public function images(): HasMany
     {

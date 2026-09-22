@@ -16,6 +16,7 @@ class DatabaseSeeder extends Seeder
             SettingsSeeder::class,
             PaymentGatewaySeeder::class,
             AiProviderSeeder::class,
+            FieldColorRuleSeeder::class,
         ]);
 
         if (app()->environment('local', 'testing')) {

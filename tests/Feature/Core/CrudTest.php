@@ -3,7 +3,7 @@
 namespace Tests\Feature\Core;
 
 use App\Livewire\Customers\CustomerList;
-use App\Livewire\Inventory\ProductForm;
+use App\Livewire\Inventory\ProductIntake;
 use App\Livewire\Inventory\ProductList;
 use App\Livewire\Orders\OrderList;
 use App\Models\Customer;
@@ -43,15 +43,15 @@ class CrudTest extends TestCase
     public function test_a_product_can_be_created_with_pricing_and_stock(): void
     {
         Livewire::actingAs($this->manager)
-            ->test(ProductForm::class)
-            ->set('form.sku', 'EST-9001')
-            ->set('form.title', 'Edwardian Diamond Cluster Ring')
-            ->set('form.category', 'rings')
-            ->set('form.metal_type', '950 Platinum')
-            ->set('pricing.retail_price', '6800.00')
-            ->set('pricing.acquisition_value', '3100.00')
-            ->set('locationId', (string) $this->location->id)
-            ->call('save')
+            ->test(ProductIntake::class)
+            ->set('values.sku', 'EST-9001')
+            ->set('values.title', 'Edwardian Diamond Cluster Ring')
+            ->set('values.category', 'rings')
+            ->set('values.metal_type', '950 Platinum')
+            ->set('values.retail_price', '6800.00')
+            ->set('values.acquisition_value', '3100.00')
+            ->set('values.location_id', (string) $this->location->id)
+            ->call('saveDraft')
             ->assertHasNoErrors();
 
         $product = Product::where('sku', 'EST-9001')->firstOrFail();
@@ -67,11 +67,11 @@ class CrudTest extends TestCase
         Product::factory()->create(['sku' => 'EST-9002']);
 
         Livewire::actingAs($this->manager)
-            ->test(ProductForm::class)
-            ->set('form.sku', 'EST-9002')
-            ->set('form.title', 'Another ring')
-            ->call('save')
-            ->assertHasErrors('form.sku');
+            ->test(ProductIntake::class)
+            ->set('values.sku', 'EST-9002')
+            ->set('values.title', 'Another ring')
+            ->call('saveDraft')
+            ->assertHasErrors('values.sku');
     }
 
     public function test_editing_a_price_appends_history_rather_than_overwriting(): void
@@ -81,9 +81,9 @@ class CrudTest extends TestCase
         \App\Models\Pricing::factory()->create(['product_id' => $product->id, 'retail_price_cents' => 725000]);
 
         Livewire::actingAs($this->manager)
-            ->test(ProductForm::class, ['product' => $product])
-            ->set('pricing.retail_price', '6800.00')
-            ->call('save')
+            ->test(ProductIntake::class, ['product' => $product])
+            ->set('values.retail_price', '6800.00')
+            ->call('saveDraft')
             ->assertHasNoErrors();
 
         $this->assertSame(2, $product->pricing()->count());
@@ -95,9 +95,7 @@ class CrudTest extends TestCase
         $product = Product::factory()->create();
         InventoryStock::factory()->create(['product_id' => $product->id, 'location_id' => $this->location->id]);
 
-        Livewire::actingAs($this->manager)
-            ->test(ProductForm::class, ['product' => $product])
-            ->call('delete');
+        $product->delete();
 
         $this->assertDatabaseMissing('products', ['id' => $product->id]);
     }
@@ -199,11 +197,11 @@ class CrudTest extends TestCase
         $customerService->assignRole('customer-service');
 
         // Customer Service may view orders but not create or edit inventory.
-        Livewire::actingAs($customerService)->test(ProductForm::class)->assertForbidden();
+        Livewire::actingAs($customerService)->test(ProductIntake::class)->assertForbidden();
 
         $accountant = User::factory()->create(['location_id' => $this->location->id]);
         $accountant->assignRole('accountant');
 
-        Livewire::actingAs($accountant)->test(ProductForm::class)->assertForbidden();
+        Livewire::actingAs($accountant)->test(ProductIntake::class)->assertForbidden();
     }
 }

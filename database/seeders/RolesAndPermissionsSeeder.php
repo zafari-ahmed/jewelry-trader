@@ -83,6 +83,9 @@ class RolesAndPermissionsSeeder extends Seeder
             // Cross-location visibility; without it a user sees only their own
             // location's inventory and orders (rule 3.7).
             'view-all-locations',
+
+            // Module 5 — colour-coded field system
+            'manage-field-rules',
         ];
     }
 

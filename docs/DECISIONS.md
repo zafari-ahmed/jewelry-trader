@@ -98,3 +98,18 @@ CLAUDE.md remains the specification; this file records where reality diverged fr
 | Order numbers | `ORD-{year}-{000001}`, sequential per year, derived from the highest existing number. | Spec format |
 | Product form scope | `ProductForm` is plain CRUD; Module 5 replaces the screen with the photo upload and colour-coded field workflow writing the same tables. | Avoids building the intake UI twice |
 | Component widths | `x-ui.input/select/textarea` default to `w-full` unless the caller passes a width class. | Filter bars need inline widths; forms need full width |
+
+## Module 5 — Inventory Creation + Colour-Coded Fields
+
+| # | Decision | Rationale |
+|---|---|---|
+| **Sixth state: `neutral`** | The spec names five colours. Green is explicitly *computed* ("once a valid value is entered"), so a rule stored as green means "optional, nothing special" — and an empty optional field must not render green, or an untouched record looks finished. Such fields render `neutral`: no status dot, plain border, counted separately in completeness. | Found by a completeness test that counted 9 complete fields on a record with 4 values |
+| Field values without columns | Rules are editable in Settings, so a Super Admin can add a field name that has no products column (ring size, chain length, movement type). Those values are stored in `products.attributes` (JSON). | A migration per new field would defeat config-driven rules |
+| Category overrides | `field_color_rules.category` is null for defaults; a row naming a category slug overrides it. Categories are a managed table, per the earlier answer. | "A ring needs a size, a brooch doesn't" |
+| Gray is never required | Saving a gray rule forces `is_required` false. | A field that is not applicable cannot block submission |
+| Rule cache | All rules cached under one key, flushed on every write. | The intake form reads every rule on every render; a Settings change must still apply immediately |
+| Server-side gate | `ProductIntakeService::submitForReview()` re-runs the required-field check and throws; the Livewire disabled button is a convenience. Tested by calling the service directly, bypassing the UI. | Module 5 acceptance: enforced server-side, not just client-side |
+| Photo rules | 5–15 is shown as guidance and never blocks submission; no photo type is mandatory (per the earlier answer). Photos store originals — no thumbnails, since this host has no image driver. | docs/DECISIONS.md pre-flight |
+| Intake metric | `created_at → submitted_for_review_at`, surfaced on the review queue as median / slowest / count, with the median tile turning red above five minutes. | Module 5 acceptance: "surfaced as a metric to managers" |
+| Approve ≠ list | Two separate actions and two statuses; listing is refused unless the item is approved. | Spec: an item can be approved for the record without being published |
+| ProductForm removed | Module 4's plain CRUD form is deleted, replaced by `ProductIntake`. The static `admin/inventory-create` and `admin/review` views are removed too. | One intake screen, not two |

@@ -51,11 +51,11 @@ Route::post('/logout', [LoginController::class, 'destroy'])->middleware('auth')-
 Route::middleware('auth')->prefix('admin')->name('admin.')->group(function () {
     Route::view('/', 'admin.dashboard')->name('dashboard');
     Route::get('/inventory', Inventory\ProductList::class)->middleware('permission:view-products')->name('inventory');
-    Route::get('/inventory/create', Inventory\ProductForm::class)->middleware('permission:manage-products')->name('inventory.create');
-    Route::get('/inventory/{product}/edit', Inventory\ProductForm::class)->middleware('permission:view-products')->name('inventory.edit');
+    Route::get('/inventory/create', Inventory\ProductIntake::class)->middleware('permission:manage-products')->name('inventory.create');
+    Route::get('/inventory/{product}/edit', Inventory\ProductIntake::class)->middleware('permission:view-products')->name('inventory.edit');
     Route::get('/customers', Customers\CustomerList::class)->middleware('permission:view-customers')->name('customers');
     Route::get('/orders', Orders\OrderList::class)->middleware('permission:view-orders')->name('orders');
-    Route::view('/review', 'admin.review')->name('review');
+    Route::get('/review', Inventory\ReviewQueue::class)->middleware('permission:view-products')->name('review');
     Route::view('/override', 'admin.override')->name('override');
     Route::view('/commission', 'admin.commission')->name('commission');
     Route::view('/audit', 'admin.audit')->name('audit');
@@ -72,6 +72,7 @@ Route::middleware('auth')->prefix('admin')->name('admin.')->group(function () {
             Route::get('/security', Settings\Security::class)->middleware('permission:manage-security-config')->name('.security');
             Route::get('/commission', Settings\Commission::class)->middleware('permission:manage-commission-config')->name('.commission');
             Route::get('/flags', Settings\FeatureFlags::class)->middleware('permission:manage-feature-flags')->name('.flags');
+            Route::get('/field-rules', Settings\FieldRules::class)->middleware('permission:manage-field-rules')->name('.field-rules');
         });
     });
 });

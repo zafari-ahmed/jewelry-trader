@@ -15,6 +15,7 @@
             ['S', 'Security', 'Two-factor, session policy, audit retention.', null, route('admin.settings.security')],
             ['C', 'Commission', 'Rate tiers, split rules, payout schedule.', null, route('admin.settings.commission')],
             ['F', 'Feature Flags', 'Rental, Salesperson Storefront, Quarterly Audit.', $flagsOn ? 'listed' : 'draft', route('admin.settings.flags')],
+            ['R', 'Field Rules', 'Which item fields are required, suggested or not applicable — per category.', null, route('admin.settings.field-rules')],
         ] as [$initial, $title, $description, $badge, $href])
             <a href="{{ $href ?? '#' }}" class="flex flex-col rounded-surface border border-border-card bg-surface px-20 py-18 transition-colors hover:border-gold">
                 <div class="flex size-38 items-center justify-center rounded-surface border border-hairline font-serif text-meta text-gold-ink">{{ $initial }}</div>
