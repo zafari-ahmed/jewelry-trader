@@ -82,7 +82,8 @@ CLAUDE.md remains the specification; this file records where reality diverged fr
 | Webhook secret | Verified against the secret for the key pair currently in use (`payments.test_mode` decides). A bad signature is logged as a **security** event and rejected before the body is read. | Rotation with no deploy; bad signatures are hostile until proven otherwise |
 | Stripe as refund truth | `charge.refunded` raises `amount_refunded` to match Stripe, so a refund issued from the Stripe dashboard is reflected here. | Refunds can originate outside this application |
 | order_id foreign key | `payments.order_id` is indexed with no FK — `orders` arrives in Module 4, which adds the constraint. | Same as the AI tables |
-| **Not yet verified** | The live-charge acceptance criterion (real Stripe test charge, refund, exchange) is **unverified**: no Stripe test keys have been provided. Everything below that boundary is covered by the in-memory double. | Needs `pk_test_…`/`sk_test_…` entered at Settings → Payments |
+| **Verified against Stripe** | Closed on 2026-09-22: `php artisan payments:verify` ran a real test-mode charge, a partial refund, the remainder, a card+cash split, and a split refund — all passed with the stored credentials. The command refuses to run while `payments.test_mode` is off, so it can never move real money. Re-run it after any key rotation. | Module 3 acceptance |
+| Key prefix validation | The Payments form rejects a key whose prefix does not match the field (`pk_`/`sk_`/`whsec_`, live vs test). | A publishable key pasted into the secret field would otherwise surface only as a cryptic gateway error at checkout — which happened |
 
 ## Module 4 — Core Platform
 
