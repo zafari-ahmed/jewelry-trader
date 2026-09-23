@@ -1,0 +1,750 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Jewelry Trader — Application Overview</title>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy: #1C1F2E; --navy-panel: #262B3D; --navy-line: #3A4058;
+    --gold: #C9A24B; --gold-tint: #E4CE8C; --gold-ink: #8A6A0B;
+    --ivory: #F7F4EE; --ivory-raised: #FBFAF7; --surface: #FFFFFF;
+    --rule: #F0EBE0; --border-card: #E3DCCE;
+    --ink: #24242A; --ink-2: #45454C; --muted: #6B6B72;
+    --red: #C0392B; --yellow: #D4A017; --green: #2E7D32; --gray: #9CA3AF; --blue: #2563EB;
+    --hairline: rgba(201,162,75,.45);
+  }
+
+  @page { size: A4; margin: 13mm 13mm 13mm; }
+  @page :first { margin: 0; }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0; font-family: 'Source Sans 3', Calibri, sans-serif;
+    font-size: 9.3pt; line-height: 1.45; color: var(--ink);
+    -webkit-print-color-adjust: exact; print-color-adjust: exact;
+  }
+
+  h1, h2, h3 { font-family: 'Source Serif 4', Cambria, serif; font-weight: 600; margin: 0; }
+  h4 { font-family: 'Source Sans 3', sans-serif; font-size: 9.3pt; font-weight: 700; margin: 3mm 0 1.2mm; }
+  p { margin: 0 0 2.2mm; }
+  ul { margin: 0 0 2.6mm; padding-left: 4.5mm; }
+  li { margin-bottom: 1mm; }
+  a { color: var(--gold-ink); text-decoration: none; border-bottom: 1px solid var(--hairline); }
+  .mono { font-family: ui-monospace, Menlo, monospace; font-size: 8.4pt; }
+
+  /* ---------- Cover ---------- */
+  .cover {
+    height: 297mm; padding: 32mm 24mm; background: var(--navy); color: var(--ivory);
+    display: flex; flex-direction: column; page-break-after: always;
+  }
+  .cover .mark { font-family: 'Source Serif 4', serif; font-size: 13pt; letter-spacing: .28em; text-transform: uppercase; }
+  .cover .mark .t { color: var(--gold); display: block; }
+  .cover .eyebrow { margin-top: 4mm; font-size: 7.4pt; letter-spacing: .2em; text-transform: uppercase; color: #8A8FA3; }
+  .cover h1 { margin-top: auto; font-size: 36pt; line-height: 1.08; letter-spacing: -.01em; }
+  .cover .sub { margin-top: 7mm; font-size: 12.5pt; color: #B9BDCB; max-width: 122mm; line-height: 1.5; }
+  .cover .rule { margin: 10mm 0 0; height: 1px; background: var(--hairline); }
+  .cover .pillars { display: flex; gap: 10mm; margin-top: 8mm; }
+  .cover .pillar { flex: 1; }
+  .cover .pillar .t { font-family: 'Source Serif 4', serif; font-size: 11pt; color: var(--gold-tint); }
+  .cover .pillar .d { font-size: 8.2pt; color: #8A8FA3; margin-top: 1.5mm; line-height: 1.45; }
+
+  /* ---------- Structure ---------- */
+  .section { page-break-before: always; }
+  .section-head { border-bottom: 1px solid var(--hairline); padding-bottom: 2.4mm; margin-bottom: 4mm; }
+  .section-head .num { font-size: 7.2pt; letter-spacing: .18em; text-transform: uppercase; color: var(--gold-ink); }
+  .section-head h2 { font-size: 18pt; margin-top: 1.2mm; }
+  .section-head .lede { margin-top: 1.6mm; font-size: 9.8pt; color: var(--ink-2); max-width: 158mm; }
+
+  h3 { font-size: 11.4pt; margin: 4.2mm 0 1.8mm; }
+
+  table { width: 100%; border-collapse: collapse; margin: 1.6mm 0 3mm; font-size: 8.5pt; }
+  th {
+    text-align: left; font-size: 6.9pt; letter-spacing: .12em; text-transform: uppercase;
+    color: var(--muted); font-weight: 600; padding: 1.6mm 2.2mm; border-bottom: 1px solid var(--hairline);
+  }
+  td { padding: 1.6mm 2.2mm; border-bottom: 1px solid var(--rule); vertical-align: top; }
+  tr { page-break-inside: avoid; }
+
+  .card { border: 1px solid var(--border-card); background: var(--surface); padding: 3.2mm 3.6mm; margin: 2.4mm 0; page-break-inside: avoid; }
+  .card.tint { background: var(--ivory-raised); }
+  .card > h4:first-child { margin-top: 0; }
+  .grid2 { display: flex; gap: 3.5mm; }
+  .grid2 > * { flex: 1; }
+  .grid3 { display: flex; gap: 3.5mm; }
+  .grid3 > * { flex: 1; }
+
+  .callout { border-left: 2px solid var(--gold); padding: .8mm 0 .8mm 3.6mm; margin: 2.4mm 0; color: var(--ink-2); }
+  .tiny { font-size: 8pt; color: var(--muted); }
+
+  .dot { display: inline-block; width: 2.4mm; height: 2.4mm; border-radius: 50%; margin-right: 1.6mm; }
+  .d-red { background: var(--red); } .d-yellow { background: var(--yellow); }
+  .d-green { background: var(--green); } .d-gray { background: var(--gray); } .d-blue { background: var(--blue); }
+
+  .feature-grid { display: flex; flex-wrap: wrap; gap: 2.4mm; }
+  .feature { width: calc(33.333% - 1.8mm); border: 1px solid var(--border-card); padding: 2mm 2.4mm; page-break-inside: avoid; }
+  .feature .t { font-weight: 700; font-size: 8.4pt; }
+  .feature .d { font-size: 7.4pt; color: var(--muted); margin-top: .6mm; line-height: 1.33; }
+
+  .tick { color: var(--green); font-weight: 700; }
+  figcaption { font-size: 7.6pt; color: var(--muted); margin-top: 1.5mm; text-align: center; }
+  figure { margin: 0 0 4mm; page-break-inside: avoid; }
+</style>
+</head>
+<body>
+
+<!-- ============ COVER ============ -->
+<div class="cover">
+  <div>
+    <div class="mark">Jewelry<span class="t">Trader</span></div>
+    <div class="eyebrow">Estate &amp; Fine Jewelry</div>
+  </div>
+
+  <h1>Application<br>Overview</h1>
+  <div class="sub">One system for the shop counter, the stockroom and the website — and for everything that has to be recorded in between.</div>
+
+  <div class="rule"></div>
+  <div class="pillars">
+    <div class="pillar">
+      <div class="t">Every piece, tracked</div>
+      <div class="d">From the moment it arrives to the moment it sells — or comes back.</div>
+    </div>
+    <div class="pillar">
+      <div class="t">Sold once, never twice</div>
+      <div class="d">One-of-a-kind stock cannot be sold twice, in the shop or online.</div>
+    </div>
+    <div class="pillar">
+      <div class="t">Nothing unexplained</div>
+      <div class="d">Every price change, discount and refund carries a name and a reason.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ 1. WHAT IT DOES ============ -->
+<div class="section" style="page-break-before: avoid;">
+  <div class="section-head">
+    <div class="num">One</div>
+    <h2>What the system does</h2>
+    <div class="lede">A piece is photographed and catalogued once. From then on, the same record serves the appraiser, the salesperson at the counter, the customer browsing online, and the bookkeeper at month end.</div>
+  </div>
+
+  <p>Jewelry Trader is built for dealers in antique, vintage, estate, designer and fine jewelry — where almost every item is unique, values are high, and provenance matters. It runs across several shops and several salespeople without the stock records drifting apart.</p>
+
+  <h3>Where the work happens</h3>
+  <table>
+    <tr><th style="width:36mm">Area</th><th style="width:26mm">Address</th><th>Who uses it, and for what</th></tr>
+    <tr>
+      <td><strong>Admin</strong></td>
+      <td><a href="http://127.0.0.1:8123/admin" class="mono">/admin</a></td>
+      <td>Managers, appraisers and bookkeepers. Stock, intake, approvals, orders, customers, reports and settings.</td>
+    </tr>
+    <tr>
+      <td><strong>The register</strong></td>
+      <td><a href="http://127.0.0.1:8123/pos" class="mono">/pos</a></td>
+      <td>Sales staff at the counter. A full-screen till: search, cart, payment, returns and receipts.</td>
+    </tr>
+    <tr>
+      <td><strong>The shop window</strong></td>
+      <td><a href="http://127.0.0.1:8123/" class="mono">/</a></td>
+      <td>Customers. Browse the collection, view a piece, buy it, and see their order history.</td>
+    </tr>
+    <tr>
+      <td><strong>The collection</strong></td>
+      <td><a href="http://127.0.0.1:8123/collection" class="mono">/collection</a></td>
+      <td>The public catalogue, with filters for category, period, metal and price.</td>
+    </tr>
+  </table>
+  <p class="tiny">Addresses shown are on the current installation; they become your own web address once the system is published.</p>
+
+  <h3>What makes it different from a general-purpose till</h3>
+  <div class="grid2">
+    <div class="card">
+      <h4>Built for unique stock</h4>
+      <p class="tiny">Most retail software assumes ten of everything. Here each piece is singular, so the system guarantees it cannot be sold twice — the shop and the website share one stock record, checked at the moment of payment.</p>
+    </div>
+    <div class="card">
+      <h4>Built for provenance</h4>
+      <p class="tiny">Condition, restoration history, hallmarks, gemstone detail and appraisal values travel with the piece, and price history is kept rather than overwritten.</p>
+    </div>
+  </div>
+  <div class="grid2">
+    <div class="card">
+      <h4>Built for accountability</h4>
+      <p class="tiny">High-value trade attracts scrutiny. Every change is recorded against a person with a time and a reason, and the riskiest actions need a second person's approval.</p>
+    </div>
+    <div class="card">
+      <h4>Built to be adjusted by you</h4>
+      <p class="tiny">Tax rates, discount limits, commission structures, what each category must record, return windows and receipt wording are all settings — changed by your own team, without a developer.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ============ 2. FLOWCHART: LIFECYCLE ============ -->
+<div class="section">
+  <div class="section-head">
+    <div class="num">Two</div>
+    <h2>How a piece moves through the business</h2>
+    <div class="lede">The path every item follows, from the moment it is acquired to the moment it leaves — and what happens if it comes back.</div>
+  </div>
+
+  <figure>
+  <svg viewBox="0 0 700 400" width="100%" xmlns="http://www.w3.org/2000/svg" font-family="'Source Sans 3', sans-serif">
+    <defs>
+      <marker id="ar" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto">
+        <path d="M0,0 L9,4.5 L0,9 z" fill="#C9A24B"/>
+      </marker>
+    </defs>
+
+    <!-- Lane labels -->
+    <text x="0" y="24" font-size="9" fill="#8A6A0B" letter-spacing="1.6">INTAKE</text>
+    <text x="0" y="134" font-size="9" fill="#8A6A0B" letter-spacing="1.6">REVIEW</text>
+    <text x="0" y="244" font-size="9" fill="#8A6A0B" letter-spacing="1.6">SELLING</text>
+    <text x="0" y="354" font-size="9" fill="#8A6A0B" letter-spacing="1.6">AFTER</text>
+    <line x1="0" y1="32" x2="700" y2="32" stroke="#F0EBE0"/>
+    <line x1="0" y1="142" x2="700" y2="142" stroke="#F0EBE0"/>
+    <line x1="0" y1="252" x2="700" y2="252" stroke="#F0EBE0"/>
+    <line x1="0" y1="362" x2="700" y2="362" stroke="#F0EBE0"/>
+
+    <!-- Row 1: intake -->
+    <g>
+      <rect x="70" y="46" width="130" height="52" fill="#FFFFFF" stroke="#E3DCCE"/>
+      <text x="135" y="68" font-size="11" font-weight="700" text-anchor="middle" fill="#24242A">Piece acquired</text>
+      <text x="135" y="84" font-size="9" text-anchor="middle" fill="#6B6B72">Photographed, 5–15 shots</text>
+
+      <line x1="200" y1="72" x2="252" y2="72" stroke="#C9A24B" stroke-width="1.4" marker-end="url(#ar)"/>
+
+      <rect x="255" y="46" width="130" height="52" fill="#FFFFFF" stroke="#E3DCCE"/>
+      <text x="320" y="68" font-size="11" font-weight="700" text-anchor="middle" fill="#24242A">Catalogued</text>
+      <text x="320" y="84" font-size="9" text-anchor="middle" fill="#6B6B72">Colour-coded fields</text>
+
+      <line x1="385" y1="72" x2="437" y2="72" stroke="#C9A24B" stroke-width="1.4" marker-end="url(#ar)"/>
+
+      <rect x="440" y="46" width="130" height="52" fill="#FDF6F5" stroke="#C0392B"/>
+      <text x="505" y="66" font-size="11" font-weight="700" text-anchor="middle" fill="#C0392B">Required fields</text>
+      <text x="505" y="82" font-size="9" text-anchor="middle" fill="#C0392B">must be complete</text>
+    </g>
+
+    <!-- down into review -->
+    <path d="M505,98 L505,120 L320,120 L320,152" fill="none" stroke="#C9A24B" stroke-width="1.4" marker-end="url(#ar)"/>
+
+    <!-- Row 2: review -->
+    <g>
+      <rect x="255" y="156" width="130" height="52" fill="#FBF4E2" stroke="#D4A017"/>
+      <text x="320" y="178" font-size="11" font-weight="700" text-anchor="middle" fill="#8A6A0B">Awaiting review</text>
+      <text x="320" y="194" font-size="9" text-anchor="middle" fill="#8A6A0B">A second pair of eyes</text>
+
+      <line x1="385" y1="182" x2="437" y2="182" stroke="#C9A24B" stroke-width="1.4" marker-end="url(#ar)"/>
+
+      <rect x="440" y="156" width="130" height="52" fill="#FFFFFF" stroke="#E3DCCE"/>
+      <text x="505" y="178" font-size="11" font-weight="700" text-anchor="middle" fill="#24242A">Approved</text>
+      <text x="505" y="194" font-size="9" text-anchor="middle" fill="#6B6B72">On the books, not yet for sale</text>
+
+      <!-- returned to submitter -->
+      <path d="M255,170 L215,170 L215,128 L320,128" fill="none" stroke="#9CA3AF" stroke-width="1.2" stroke-dasharray="4 3" marker-end="url(#ar)"/>
+      <text x="222" y="124" font-size="8.5" fill="#6B6B72">sent back for more detail</text>
+    </g>
+
+    <!-- down into selling -->
+    <path d="M505,208 L505,240 L135,240 L135,262" fill="none" stroke="#C9A24B" stroke-width="1.4" marker-end="url(#ar)"/>
+
+    <!-- Row 3: selling -->
+    <g>
+      <rect x="70" y="266" width="130" height="52" fill="#EEF5EE" stroke="#2E7D32"/>
+      <text x="135" y="288" font-size="11" font-weight="700" text-anchor="middle" fill="#2E7D32">Listed for sale</text>
+      <text x="135" y="304" font-size="9" text-anchor="middle" fill="#2E7D32">Counter and website</text>
+
+      <line x1="200" y1="292" x2="252" y2="292" stroke="#C9A24B" stroke-width="1.4" marker-end="url(#ar)"/>
+
+      <rect x="255" y="266" width="130" height="52" fill="#FFFFFF" stroke="#E3DCCE"/>
+      <text x="320" y="286" font-size="11" font-weight="700" text-anchor="middle" fill="#24242A">Sold</text>
+      <text x="320" y="302" font-size="9" text-anchor="middle" fill="#6B6B72">Stock reserved the instant it is paid</text>
+
+      <line x1="385" y1="292" x2="437" y2="292" stroke="#C9A24B" stroke-width="1.4" marker-end="url(#ar)"/>
+
+      <rect x="440" y="266" width="130" height="52" fill="#FFFFFF" stroke="#E3DCCE"/>
+      <text x="505" y="286" font-size="11" font-weight="700" text-anchor="middle" fill="#24242A">Commission earned</text>
+      <text x="505" y="302" font-size="9" text-anchor="middle" fill="#6B6B72">Calculated automatically</text>
+
+      <!-- locked branch -->
+      <rect x="590" y="266" width="105" height="52" fill="#FFFFFF" stroke="#C0392B" stroke-dasharray="4 3"/>
+      <text x="642" y="286" font-size="10" font-weight="700" text-anchor="middle" fill="#C0392B">Or locked</text>
+      <text x="642" y="300" font-size="8" text-anchor="middle" fill="#C0392B">valuation, repair,</text>
+      <text x="642" y="310" font-size="8" text-anchor="middle" fill="#C0392B">dispute, legal hold</text>
+      <path d="M200,292 L570,292" fill="none" stroke="#C0392B" stroke-width="1.1" stroke-dasharray="4 3"/>
+      <path d="M570,292 L586,292" fill="none" stroke="#C0392B" stroke-width="1.1" stroke-dasharray="4 3"/>
+    </g>
+
+    <!-- down into after -->
+    <path d="M320,318 L320,345 L200,345 L200,372" fill="none" stroke="#C9A24B" stroke-width="1.4" marker-end="url(#ar)"/>
+
+    <!-- Row 4: after -->
+    <g>
+      <rect x="135" y="376" width="130" height="20" fill="#FFFFFF" stroke="#E3DCCE"/>
+      <text x="200" y="390" font-size="9.5" font-weight="700" text-anchor="middle" fill="#24242A">Returned within window</text>
+
+      <line x1="265" y1="386" x2="307" y2="386" stroke="#C9A24B" stroke-width="1.4" marker-end="url(#ar)"/>
+
+      <rect x="310" y="376" width="120" height="20" fill="#FFFFFF" stroke="#E3DCCE"/>
+      <text x="370" y="390" font-size="9.5" font-weight="700" text-anchor="middle" fill="#24242A">Refunded or exchanged</text>
+
+      <line x1="430" y1="386" x2="472" y2="386" stroke="#C9A24B" stroke-width="1.4" marker-end="url(#ar)"/>
+
+      <rect x="475" y="376" width="140" height="20" fill="#EEF5EE" stroke="#2E7D32"/>
+      <text x="545" y="390" font-size="9.5" font-weight="700" text-anchor="middle" fill="#2E7D32">Back on the shelf, listed again</text>
+    </g>
+  </svg>
+  <figcaption>The life of a piece. Dashed paths are the exceptions: sent back for more detail, or held off sale.</figcaption>
+  </figure>
+
+  <div class="grid3">
+    <div class="card">
+      <h4>Two sets of eyes</h4>
+      <p class="tiny">Whoever catalogues a piece cannot publish it alone. A reviewer checks the record, then approves it — and listing it for sale is a second, separate decision.</p>
+    </div>
+    <div class="card">
+      <h4>Sold means sold</h4>
+      <p class="tiny">The moment payment succeeds, the piece is claimed. Two customers cannot buy the same ring, even if one is at the counter and the other is online at the same second.</p>
+    </div>
+    <div class="card">
+      <h4>Returns close the loop</h4>
+      <p class="tiny">A returned piece goes back on the shelf and reappears for sale automatically, with the money returned to however the customer paid.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ============ 3. THE ITEM RECORD ============ -->
+<div class="section">
+  <div class="section-head">
+    <div class="num">Three</div>
+    <h2>The item record</h2>
+    <div class="lede">What the system holds about a piece — and how staff can see, at a glance, what is finished and what still needs work.</div>
+  </div>
+
+  <h3>The traffic-light system</h3>
+  <p>Every field on an item carries a colour. Staff do not have to remember what a bracelet needs versus what a ring needs — the record shows them.</p>
+
+  <table>
+    <tr><th style="width:24mm">Colour</th><th style="width:42mm">Meaning</th><th>What it does</th></tr>
+    <tr><td><span class="dot d-red"></span><strong>Red</strong></td><td>Required, still empty</td><td>The piece cannot be submitted until it is filled in.</td></tr>
+    <tr><td><span class="dot d-yellow"></span><strong>Yellow</strong></td><td>Worth verifying</td><td>Filled in, but flagged as needing a second look.</td></tr>
+    <tr><td><span class="dot d-green"></span><strong>Green</strong></td><td>Complete</td><td>Turns green by itself the moment a valid value is entered.</td></tr>
+    <tr><td><span class="dot d-gray"></span><strong>Gray</strong></td><td>Not applicable</td><td>Greyed out for this kind of item — chain length on a ring, for instance.</td></tr>
+    <tr><td><span class="dot d-blue"></span><strong>Blue</strong></td><td>Changed by a person</td><td>Marks where someone overrode a value, so the change is visible.</td></tr>
+  </table>
+
+  <div class="callout"><strong>What each category requires is yours to decide.</strong> A ring can demand a size, a necklace a chain length, a watch a movement type — set from the settings screen, by your own staff, taking effect immediately.</div>
+
+  <h3>What is captured</h3>
+  <div class="grid2">
+    <div class="card">
+      <h4>Identity and materials</h4>
+      <p class="tiny">Reference number, title, category, maker or brand, style period, metal type and purity, weight, measurements, hallmark.</p>
+    </div>
+    <div class="card">
+      <h4>Condition and history</h4>
+      <p class="tiny">Condition and restoration notes, internal remarks kept away from customers, and a provenance trail showing who did what, and when.</p>
+    </div>
+  </div>
+  <div class="grid2">
+    <div class="card">
+      <h4>Gemstones</h4>
+      <p class="tiny">Stone type, shape, cut, colour, estimated carat weight and setting style — several stones per piece, with the principal stone marked.</p>
+    </div>
+    <div class="card">
+      <h4>Photography</h4>
+      <p class="tiny">Each shot tagged by what it shows — front, back, side, hallmark, gemstone, clasp, movement, signature, packaging, certificate — and one chosen as the image customers see first.</p>
+    </div>
+  </div>
+  <div class="grid2">
+    <div class="card">
+      <h4>Valuation</h4>
+      <p class="tiny">Acquisition cost, retail price, insurance value, negotiation floor and promotional price. Changing a price keeps the old one on record rather than erasing it.</p>
+    </div>
+    <div class="card">
+      <h4>Descriptions</h4>
+      <p class="tiny">Separate wording for the customer, for search engines, for marketplaces and for social media — so each audience reads copy written for it.</p>
+    </div>
+  </div>
+
+  <h3>Moving stock between shops</h3>
+  <p>A transfer is requested, approved by the manager of the shop sending it, then confirmed on arrival. The piece is marked in transit in between, so it cannot be sold by either shop while it is in a courier's hands.</p>
+</div>
+
+<!-- ============ 4. AT THE COUNTER ============ -->
+<div class="section">
+  <div class="section-head">
+    <div class="num">Four</div>
+    <h2>At the counter</h2>
+    <div class="lede">A full-screen till designed so an ordinary sale takes well under two minutes, with the awkward cases handled properly rather than worked around.</div>
+  </div>
+
+  <figure>
+  <svg viewBox="0 0 700 250" width="100%" xmlns="http://www.w3.org/2000/svg" font-family="'Source Sans 3', sans-serif">
+    <defs>
+      <marker id="ar2" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto">
+        <path d="M0,0 L9,4.5 L0,9 z" fill="#C9A24B"/>
+      </marker>
+    </defs>
+
+    <rect x="0" y="0" width="700" height="250" fill="#1C1F2E"/>
+
+    <text x="24" y="28" font-size="9.5" fill="#8A8FA3" letter-spacing="1.8">A SALE, START TO FINISH</text>
+
+    <!-- steps -->
+    <g>
+      <rect x="24" y="46" width="118" height="58" fill="#262B3D" stroke="#3A4058"/>
+      <text x="83" y="70" font-size="11" font-weight="700" text-anchor="middle" fill="#F7F4EE">Find</text>
+      <text x="83" y="86" font-size="8.5" text-anchor="middle" fill="#B9BDCB">Scan or search</text>
+
+      <line x1="142" y1="75" x2="172" y2="75" stroke="#C9A24B" stroke-width="1.4" marker-end="url(#ar2)"/>
+
+      <rect x="175" y="46" width="118" height="58" fill="#262B3D" stroke="#3A4058"/>
+      <text x="234" y="70" font-size="11" font-weight="700" text-anchor="middle" fill="#F7F4EE">Add</text>
+      <text x="234" y="86" font-size="8.5" text-anchor="middle" fill="#B9BDCB">Pieces and services</text>
+
+      <line x1="293" y1="75" x2="323" y2="75" stroke="#C9A24B" stroke-width="1.4" marker-end="url(#ar2)"/>
+
+      <rect x="326" y="46" width="118" height="58" fill="#262B3D" stroke="#3A4058"/>
+      <text x="385" y="70" font-size="11" font-weight="700" text-anchor="middle" fill="#F7F4EE">Charge</text>
+      <text x="385" y="86" font-size="8.5" text-anchor="middle" fill="#B9BDCB">Card, cash or both</text>
+
+      <line x1="444" y1="75" x2="474" y2="75" stroke="#C9A24B" stroke-width="1.4" marker-end="url(#ar2)"/>
+
+      <rect x="477" y="46" width="199" height="58" fill="#C9A24B" stroke="#C9A24B"/>
+      <text x="576" y="70" font-size="11" font-weight="700" text-anchor="middle" fill="#1C1F2E">Receipt</text>
+      <text x="576" y="86" font-size="8.5" text-anchor="middle" fill="#1C1F2E">On screen, printed or emailed</text>
+    </g>
+
+    <!-- what happens underneath -->
+    <text x="24" y="136" font-size="9.5" fill="#8A8FA3" letter-spacing="1.8">WHAT THE SYSTEM DOES AT THAT MOMENT</text>
+
+    <g font-size="8.8" fill="#B9BDCB">
+      <rect x="24" y="150" width="152" height="74" fill="none" stroke="#3A4058"/>
+      <text x="36" y="170" fill="#E4CE8C" font-weight="700" font-size="9.5">Claims the stock</text>
+      <text x="36" y="186">The piece is marked sold</text>
+      <text x="36" y="200">before the receipt prints, so</text>
+      <text x="36" y="214">nobody else can buy it.</text>
+
+      <rect x="188" y="150" width="152" height="74" fill="none" stroke="#3A4058"/>
+      <text x="200" y="170" fill="#E4CE8C" font-weight="700" font-size="9.5">Applies the right tax</text>
+      <text x="200" y="186">Taken from the shop's own</text>
+      <text x="200" y="200">state rate and stored on the</text>
+      <text x="200" y="214">order as charged.</text>
+
+      <rect x="352" y="150" width="152" height="74" fill="none" stroke="#3A4058"/>
+      <text x="364" y="170" fill="#E4CE8C" font-weight="700" font-size="9.5">Records who sold it</text>
+      <text x="364" y="186">Commission is worked out in</text>
+      <text x="364" y="200">the background, never holding</text>
+      <text x="364" y="214">up the customer.</text>
+
+      <rect x="516" y="150" width="160" height="74" fill="none" stroke="#3A4058"/>
+      <text x="528" y="170" fill="#E4CE8C" font-weight="700" font-size="9.5">Writes it all down</text>
+      <text x="528" y="186">The sale, the discount and</text>
+      <text x="528" y="200">the person behind both go</text>
+      <text x="528" y="214">into the record.</text>
+    </g>
+  </svg>
+  <figcaption>The four steps a salesperson takes, and the four things the system does while they take them.</figcaption>
+  </figure>
+
+  <h3>Handled properly</h3>
+  <table>
+    <tr><th style="width:44mm">Situation</th><th>How it works</th></tr>
+    <tr><td><strong>Services and repairs</strong></td><td>Ring sizing, cleaning or a workshop job can be added as a line on the sale without being stock.</td></tr>
+    <tr><td><strong>Paying two ways</strong></td><td>Part card, part cash, in any combination. The system will not let the parts add up to anything but the correct total, and works out the change.</td></tr>
+    <tr><td><strong>Discounts</strong></td><td>By percentage or a fixed amount, per line. Past the limit you set, the sale needs a manager's authority.</td></tr>
+    <tr><td><strong>Returns</strong></td><td>Look up the original sale, tick what is coming back. The refund includes the tax the customer paid and goes back to the card they used.</td></tr>
+    <tr><td><strong>Exchanges</strong></td><td>Swap one piece for another in a single transaction — only the difference changes hands, in either direction.</td></tr>
+    <tr><td><strong>Late returns</strong></td><td>Past the return window you have set, the sale needs a manager's approval rather than being quietly refused.</td></tr>
+  </table>
+
+  <p>Receipts appear on screen, print on standard 80&nbsp;mm till rolls, and are emailed to the customer when an address is on file. The shop's details, the return window and the footer wording all come from your settings.</p>
+</div>
+
+<!-- ============ 5. ONLINE ============ -->
+<div class="section">
+  <div class="section-head">
+    <div class="num">Five</div>
+    <h2>The website</h2>
+    <div class="lede">The same stock, the same prices, the same records — presented to customers, and kept in step with the shop floor automatically.</div>
+  </div>
+
+  <figure>
+  <svg viewBox="0 0 700 230" width="100%" xmlns="http://www.w3.org/2000/svg" font-family="'Source Sans 3', sans-serif">
+    <defs>
+      <marker id="ar3" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto">
+        <path d="M0,0 L9,4.5 L0,9 z" fill="#C9A24B"/>
+      </marker>
+    </defs>
+
+    <text x="0" y="16" font-size="9" fill="#8A6A0B" letter-spacing="1.6">WHAT THE CUSTOMER DOES</text>
+
+    <g>
+      <rect x="0" y="28" width="126" height="46" fill="#FFFFFF" stroke="#E3DCCE"/>
+      <text x="63" y="50" font-size="10.5" font-weight="700" text-anchor="middle" fill="#24242A">Browses</text>
+      <text x="63" y="64" font-size="8.5" text-anchor="middle" fill="#6B6B72">Filters and search</text>
+
+      <line x1="126" y1="51" x2="156" y2="51" stroke="#C9A24B" stroke-width="1.4" marker-end="url(#ar3)"/>
+
+      <rect x="159" y="28" width="126" height="46" fill="#FFFFFF" stroke="#E3DCCE"/>
+      <text x="222" y="50" font-size="10.5" font-weight="700" text-anchor="middle" fill="#24242A">Views a piece</text>
+      <text x="222" y="64" font-size="8.5" text-anchor="middle" fill="#6B6B72">Photos and detail</text>
+
+      <line x1="285" y1="51" x2="315" y2="51" stroke="#C9A24B" stroke-width="1.4" marker-end="url(#ar3)"/>
+
+      <rect x="318" y="28" width="126" height="46" fill="#FFFFFF" stroke="#E3DCCE"/>
+      <text x="381" y="50" font-size="10.5" font-weight="700" text-anchor="middle" fill="#24242A">Adds to bag</text>
+      <text x="381" y="64" font-size="8.5" text-anchor="middle" fill="#6B6B72">No account needed</text>
+
+      <line x1="444" y1="51" x2="474" y2="51" stroke="#C9A24B" stroke-width="1.4" marker-end="url(#ar3)"/>
+
+      <rect x="477" y="28" width="223" height="46" fill="#1C1F2E" stroke="#1C1F2E"/>
+      <text x="588" y="50" font-size="10.5" font-weight="700" text-anchor="middle" fill="#F7F4EE">Pays by card</text>
+      <text x="588" y="64" font-size="8.5" text-anchor="middle" fill="#B9BDCB">Details go straight to the card processor</text>
+    </g>
+
+    <line x1="0" y1="96" x2="700" y2="96" stroke="#F0EBE0"/>
+    <text x="0" y="118" font-size="9" fill="#8A6A0B" letter-spacing="1.6">WHAT HAPPENS BEHIND IT</text>
+
+    <g font-size="8.6" fill="#45454C">
+      <rect x="0" y="130" width="168" height="86" fill="#FBFAF7" stroke="#E3DCCE"/>
+      <text x="12" y="150" font-weight="700" font-size="9.6" fill="#24242A">Only what is truly</text>
+      <text x="12" y="163" font-weight="700" font-size="9.6" fill="#24242A">for sale is shown</text>
+      <text x="12" y="181">Drafts, pieces awaiting</text>
+      <text x="12" y="194">review, sold items and</text>
+      <text x="12" y="207">held items never appear.</text>
+
+      <rect x="180" y="130" width="168" height="86" fill="#FBFAF7" stroke="#E3DCCE"/>
+      <text x="192" y="150" font-weight="700" font-size="9.6" fill="#24242A">Tax follows the</text>
+      <text x="192" y="163" font-weight="700" font-size="9.6" fill="#24242A">delivery address</text>
+      <text x="192" y="181">Worked out from the state</text>
+      <text x="192" y="194">the piece is going to, and</text>
+      <text x="192" y="207">recorded on the order.</text>
+
+      <rect x="360" y="130" width="168" height="86" fill="#FBFAF7" stroke="#E3DCCE"/>
+      <text x="372" y="150" font-weight="700" font-size="9.6" fill="#24242A">The payment is</text>
+      <text x="372" y="163" font-weight="700" font-size="9.6" fill="#24242A">checked, not trusted</text>
+      <text x="372" y="181">The shop confirms with the</text>
+      <text x="372" y="194">card processor directly</text>
+      <text x="372" y="207">before the order completes.</text>
+
+      <rect x="540" y="130" width="160" height="86" fill="#FBFAF7" stroke="#E3DCCE"/>
+      <text x="552" y="150" font-weight="700" font-size="9.6" fill="#24242A">One customer</text>
+      <text x="552" y="163" font-weight="700" font-size="9.6" fill="#24242A">record, shared</text>
+      <text x="552" y="181">The same person buying in</text>
+      <text x="552" y="194">store and online is one</text>
+      <text x="552" y="207">record, not two.</text>
+    </g>
+  </svg>
+  <figcaption>The customer's path, and the four safeguards working underneath it.</figcaption>
+  </figure>
+
+  <div class="grid2">
+    <div class="card">
+      <h4>Customers keep their history</h4>
+      <p class="tiny">Someone can buy as a guest, then create an account later with the same email — and their earlier purchases are already there, not lost.</p>
+    </div>
+    <div class="card">
+      <h4>Card details never reach the shop</h4>
+      <p class="tiny">Card numbers are entered directly with the payment processor, in a form styled to match the shop. The business never holds them, which keeps card-security obligations at their lightest.</p>
+    </div>
+  </div>
+
+  <div class="callout"><strong>Sold in the shop, gone from the website.</strong> If a piece sells at the counter while someone has it in their online basket, it disappears from that basket rather than allowing a sale that cannot be honoured.</div>
+</div>
+
+<!-- ============ 6. COMMISSION ============ -->
+<div class="section">
+  <div class="section-head">
+    <div class="num">Six</div>
+    <h2>Commission and pay</h2>
+    <div class="lede">Four ways to structure commission, worked out automatically on every sale, and reported in a form payroll can use.</div>
+  </div>
+
+  <h3>The four structures</h3>
+  <table>
+    <tr><th style="width:30mm">Structure</th><th style="width:52mm">How it is worked out</th><th>Example on a $1,000 sale</th></tr>
+    <tr><td><strong>On sales</strong></td><td>A flat percentage of the sale</td><td>At 5% — <strong>$50.00</strong></td></tr>
+    <tr><td><strong>On profit</strong></td><td>A percentage of what the piece made over what it cost</td><td>Bought at $450, at 20% of margin — <strong>$110.00</strong></td></tr>
+    <tr><td><strong>Tiered</strong></td><td>The rate rises once a salesperson passes a threshold</td><td>4% under $5,000, 6% above</td></tr>
+    <tr><td><strong>Shared</strong></td><td>A pool split between everyone involved in the sale</td><td>At 5%, split 60/40 — <strong>$30.00 and $20.00</strong></td></tr>
+  </table>
+
+  <h3>The rules it follows</h3>
+  <ul>
+    <li><strong>Sales tax is never commissionable</strong> — it was never the shop's money.</li>
+    <li><strong>Discounts reduce commission proportionally</strong>, so discounting costs the salesperson as well as the shop.</li>
+    <li><strong>A shared pool always adds up exactly.</strong> Where a split does not divide evenly, the odd cents are distributed rather than lost — the parts always total the pool to the penny.</li>
+    <li><strong>It never delays a customer.</strong> The calculation happens after the sale completes, in the background.</li>
+    <li><strong>Anyone without their own agreement</strong> falls back to the standard arrangement you have configured.</li>
+  </ul>
+
+  <div class="card tint">
+    <h4>Built around California wage law</h4>
+    <table style="margin:1.5mm 0 0">
+      <tr><td style="width:34mm"><strong>Written agreements</strong></td><td class="tiny">Each salesperson's actual agreed terms are stored alongside the numbers, because the rate alone is not the agreement.</td></tr>
+      <tr><td><strong>No clawbacks</strong></td><td class="tiny">Nothing automatically takes money back from commission already earned. A refund leaves the commission standing; any reduction must be raised, reasoned and approved by a manager.</td></tr>
+      <tr><td style="border-bottom:0"><strong>Payment timing</strong></td><td class="tiny" style="border-bottom:0">Approving a commission and paying it are recorded as separate, dated steps, so wage timing can be evidenced.</td></tr>
+    </table>
+  </div>
+
+  <h3>Reporting</h3>
+  <p>Daily, weekly or monthly, filtered by salesperson, shop and status. Salespeople see their own figures; managers and bookkeepers see everyone's. The export for payroll can be shaped to whatever columns your payroll provider expects, without waiting on a developer.</p>
+</div>
+
+<!-- ============ 7. TRUST ============ -->
+<div class="section">
+  <div class="section-head">
+    <div class="num">Seven</div>
+    <h2>Control and accountability</h2>
+    <div class="lede">Who can do what, what needs a second person, and the record that sits behind all of it.</div>
+  </div>
+
+  <h3>Six kinds of staff account</h3>
+  <table>
+    <tr><th style="width:42mm">Role</th><th>What they can do</th></tr>
+    <tr><td><strong>Owner / Super Admin</strong></td><td>Everything, including settings, staff accounts and approvals.</td></tr>
+    <tr><td><strong>Shop Manager</strong></td><td>Stock, orders, approvals, discounts above the staff limit, and reports for their shop.</td></tr>
+    <tr><td><strong>Sales Staff</strong></td><td>The counter, creating and editing stock subject to approval, and their own commission.</td></tr>
+    <tr><td><strong>Appraiser</strong></td><td>Cataloguing and approving pieces for sale. No selling.</td></tr>
+    <tr><td><strong>Bookkeeper</strong></td><td>Financial and commission reports, payment records, payroll export. No stock edits, no selling.</td></tr>
+    <tr><td><strong>Customer Service</strong></td><td>Orders, customers and returns. No discounting, no price changes.</td></tr>
+  </table>
+  <p class="tiny">These are starting points, not fixed. You can create your own roles and choose exactly what each can do.</p>
+
+  <h3>Protections around the risky actions</h3>
+  <div class="grid2">
+    <div class="card">
+      <h4>Two-factor sign-in</h4>
+      <p class="tiny">You choose which roles must use an authenticator app. Those staff are enrolled on first sign-in and challenged every time after. Nobody is exempt — not even the owner's account.</p>
+    </div>
+    <div class="card">
+      <h4>A second challenge for the riskiest actions</h4>
+      <p class="tiny">Approving an override or changing payment settings asks for a private symbol challenge only trusted staff know the answers to. Every attempt, successful or not, is recorded.</p>
+    </div>
+  </div>
+  <div class="grid2">
+    <div class="card">
+      <h4>Overrides need a reason and approval</h4>
+      <p class="tiny">Selling below the floor price, discounting past the limit, releasing a held piece or accepting a late return all require a written reason and a second person's approval — including when the owner does it themselves.</p>
+    </div>
+    <div class="card">
+      <h4>Holds on individual pieces</h4>
+      <p class="tiny">A piece can be held from sale, from editing, from the website, or frozen entirely — for a valuation, a repair, a consignment dispute or a legal hold — with the reason shown to any member of staff who tries.</p>
+    </div>
+  </div>
+
+  <h3>The record behind everything</h3>
+  <p>Every change to a piece, an order, a payment, a customer or a setting is recorded automatically: who did it, when, from where, and what the value was before and after. Sign-ins, failed sign-ins and refused approvals are recorded too.</p>
+  <p>Financial records are kept for seven years to meet tax recordkeeping expectations, while general day-to-day activity is kept for a shorter, configurable period.</p>
+</div>
+
+<!-- ============ 8. FEATURE LIST ============ -->
+<div class="section">
+  <div class="section-head">
+    <div class="num">Eight</div>
+    <h2>Feature list</h2>
+    <div class="lede">Everything delivered and working, at a glance.</div>
+  </div>
+
+  <h3>Stock and cataloguing</h3>
+  <div class="feature-grid">
+    <div class="feature"><div class="t"><span class="tick">✓</span> Guided intake</div><div class="d">Photographs, then fields, then submit — with progress shown as you go.</div></div>
+    <div class="feature"><div class="t"><span class="tick">✓</span> Colour-coded fields</div><div class="d">Required, verify, complete, not applicable and changed-by-hand.</div></div>
+    <div class="feature"><div class="t"><span class="tick">✓</span> Rules per category</div><div class="d">Decide what a ring must have versus a brooch, yourself.</div></div>
+    <div class="feature"><div class="t"><span class="tick">✓</span> Photography by type</div><div class="d">Ten shot types, with a chosen hero image.</div></div>
+    <div class="feature"><div class="t"><span class="tick">✓</span> Gemstone detail</div><div class="d">Several stones per piece, with the principal stone marked.</div></div>
+    <div class="feature"><div class="t"><span class="tick">✓</span> Price history</div><div class="d">Every price the piece has carried, kept rather than overwritten.</div></div>
+    <div class="feature"><div class="t"><span class="tick">✓</span> Review and approval</div><div class="d">Approve for the record; list for sale as a separate decision.</div></div>
+    <div class="feature"><div class="t"><span class="tick">✓</span> Multi-shop stock</div><div class="d">Every piece belongs to a shop, with transfers and approvals.</div></div>
+    <div class="feature"><div class="t"><span class="tick">✓</span> Intake speed tracking</div><div class="d">How long cataloguing takes, shown to managers.</div></div>
+    <div class="feature"><div class="t"><span class="tick">✓</span> Search and filtering</div><div class="d">By reference, title, maker, shop, status and category.</div></div>
+  </div>
+
+  <h3>Selling</h3>
+  <div class="feature-grid">
+    <div class="feature"><div class="t"><span class="tick">✓</span> Full-screen till</div><div class="d">Large targets, minimal clicks, built for a counter.</div></div>
+    <div class="feature"><div class="t"><span class="tick">✓</span> Card, cash or split</div><div class="d">Any combination, with change calculated.</div></div>
+    <div class="feature"><div class="t"><span class="tick">✓</span> Services on a sale</div><div class="d">Sizing, repairs and workshop work as line items.</div></div>
+    <div class="feature"><div class="t"><span class="tick">✓</span> Discounts with limits</div><div class="d">Percentage or amount, capped until a manager approves.</div></div>
+    <div class="feature"><div class="t"><span class="tick">✓</span> Returns and refunds</div><div class="d">Tax included, back to the original payment method.</div></div>
+    <div class="feature"><div class="t"><span class="tick">✓</span> Exchanges</div><div class="d">One transaction; only the difference changes hands.</div></div>
+    <div class="feature"><div class="t"><span class="tick">✓</span> Receipts</div><div class="d">On screen, on a till roll, and by email.</div></div>
+    <div class="feature"><div class="t"><span class="tick">✓</span> Automatic tax</div><div class="d">Per shop, by state, recorded as charged.</div></div>
+  </div>
+
+  <h3>Online</h3>
+  <div class="feature-grid">
+    <div class="feature"><div class="t"><span class="tick">✓</span> Public catalogue</div><div class="d">Filter by category, period, metal and price; sort by price or newest.</div></div>
+    <div class="feature"><div class="t"><span class="tick">✓</span> Keyword search</div><div class="d">Across titles, makers, periods, metals and descriptions.</div></div>
+    <div class="feature"><div class="t"><span class="tick">✓</span> Piece pages</div><div class="d">Gallery, full specification and gemstone detail.</div></div>
+    <div class="feature"><div class="t"><span class="tick">✓</span> Guest checkout</div><div class="d">No account required to buy.</div></div>
+    <div class="feature"><div class="t"><span class="tick">✓</span> Customer accounts</div><div class="d">Order history and saved address, claimable after a guest purchase.</div></div>
+    <div class="feature"><div class="t"><span class="tick">✓</span> Live stock accuracy</div><div class="d">Sold pieces vanish from baskets and listings at once.</div></div>
+  </div>
+
+  <h3>Money, people and oversight</h3>
+  <div class="feature-grid">
+    <div class="feature"><div class="t"><span class="tick">✓</span> Four commission structures</div><div class="d">Sales, profit, tiered and shared.</div></div>
+    <div class="feature"><div class="t"><span class="tick">✓</span> Per-person agreements</div><div class="d">With the written terms stored alongside.</div></div>
+    <div class="feature"><div class="t"><span class="tick">✓</span> Commission reporting</div><div class="d">Daily, weekly, monthly, by person and shop.</div></div>
+    <div class="feature"><div class="t"><span class="tick">✓</span> Payroll export</div><div class="d">Shaped to your payroll provider's format.</div></div>
+    <div class="feature"><div class="t"><span class="tick">✓</span> Six staff roles</div><div class="d">Plus custom roles you define yourself.</div></div>
+    <div class="feature"><div class="t"><span class="tick">✓</span> Two-factor sign-in</div><div class="d">Required for whichever roles you choose.</div></div>
+    <div class="feature"><div class="t"><span class="tick">✓</span> Full activity record</div><div class="d">Searchable, with before-and-after values.</div></div>
+    <div class="feature"><div class="t"><span class="tick">✓</span> Overrides and holds</div><div class="d">Reasoned, approved and recorded.</div></div>
+  </div>
+</div>
+
+<!-- ============ 9. FUTURE ============ -->
+<div class="section">
+  <div class="section-head">
+    <div class="num">Nine</div>
+    <h2>Prepared for what comes next</h2>
+    <div class="lede">Four capabilities are already accounted for in the design, so adding them later is building on the foundation rather than disturbing it.</div>
+  </div>
+
+  <table>
+    <tr><th style="width:46mm">Capability</th><th>What it will do</th><th style="width:44mm">Already in place</th></tr>
+    <tr>
+      <td><strong>Assisted cataloguing</strong></td>
+      <td>Suggest metal, period and stone detail from the intake photographs, draft customer descriptions, and propose a price band from comparable sales.</td>
+      <td>The colours that mark a suggestion, a confirmation and a human correction already exist and already behave correctly.</td>
+    </tr>
+    <tr>
+      <td><strong>Natural-language search</strong></td>
+      <td>Let customers search the way they speak — “art deco sapphire under five thousand”.</td>
+      <td>Search sits behind a single point that can be swapped without changing the website.</td>
+    </tr>
+    <tr>
+      <td><strong>Rentals</strong></td>
+      <td>Short-term hire of showcase pieces, with deposits, deductible options and return inspection.</td>
+      <td>Agreements and claims are accounted for, and a piece can already be held back from rental specifically.</td>
+    </tr>
+    <tr>
+      <td><strong>Salesperson shopfronts</strong></td>
+      <td>A personal storefront per salesperson, with their own branding and commission on what they refer.</td>
+      <td>Shared commission already supports splitting a sale between people.</td>
+    </tr>
+    <tr>
+      <td><strong>Quarterly stock audit</strong></td>
+      <td>Scheduled physical counts per shop, with variance reports and exceptions to investigate.</td>
+      <td>Every stock movement is already recorded — which is exactly the data a reconciliation reads.</td>
+    </tr>
+  </table>
+
+  <div class="card tint">
+    <h4>Why that matters commercially</h4>
+    <p>Each of these was designed for from the start rather than bolted on afterwards. The parts of the system they will touch — how a suggestion is marked, how stock is held, how a sale is shared between people, how movements are recorded — already work the way those features will need them to.</p>
+    <p style="margin-bottom:0">In practice that means a shorter, lower-risk piece of work when you decide to add one, and no disruption to what is already running in the shop.</p>
+  </div>
+
+  <div style="margin-top:8mm; padding-top:3mm; border-top:1px solid var(--hairline); display:flex; justify-content:space-between; font-size:7.6pt; color:var(--muted);">
+    <div>Jewelry Trader · Application Overview</div>
+    <div>September 2026</div>
+  </div>
+</div>
+
+</body>
+</html>
