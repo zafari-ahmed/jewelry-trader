@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Jewelry Trader — Phase 1 Handbook</title>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy: #1C1F2E;
+    --navy-panel: #262B3D;
+    --gold: #C9A24B;
+    --gold-tint: #E4CE8C;
+    --gold-ink: #8A6A0B;
+    --ivory: #F7F4EE;
+    --ivory-raised: #FBFAF7;
+    --surface: #FFFFFF;
+    --rule: #F0EBE0;
+    --border-card: #E3DCCE;
+    --ink: #24242A;
+    --ink-2: #45454C;
+    --muted: #6B6B72;
+    --red: #C0392B;
+    --yellow: #D4A017;
+    --green: #2E7D32;
+    --gray: #9CA3AF;
+    --blue: #2563EB;
+    --hairline: rgba(201,162,75,.45);
+  }
+
+  @page { size: A4; margin: 13mm 13mm 13mm; }
+  @page :first { margin: 0; }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    font-family: 'Source Sans 3', Calibri, sans-serif;
+    font-size: 9.1pt;
+    line-height: 1.42;
+    color: var(--ink);
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  h1, h2, h3, h4 { font-family: 'Source Serif 4', Cambria, serif; font-weight: 600; margin: 0; }
+
+  /* ---------- Cover ---------- */
+  .cover {
+    height: 297mm; padding: 30mm 24mm; background: var(--navy); color: var(--ivory);
+    display: flex; flex-direction: column; page-break-after: always;
+  }
+  .cover .mark { font-family: 'Source Serif 4', serif; font-size: 13pt; letter-spacing: .28em; text-transform: uppercase; }
+  .cover .mark .t { color: var(--gold); display: block; }
+  .cover .eyebrow { margin-top: 4mm; font-size: 7.4pt; letter-spacing: .2em; text-transform: uppercase; color: #8A8FA3; }
+  .cover h1 { margin-top: auto; font-size: 34pt; line-height: 1.1; letter-spacing: -.01em; }
+  .cover .sub { margin-top: 6mm; font-size: 12pt; color: #B9BDCB; max-width: 120mm; line-height: 1.5; }
+  .cover .rule { margin: 9mm 0; height: 1px; background: var(--hairline); }
+  .cover .facts { display: flex; gap: 14mm; }
+  .cover .fact .n { font-family: 'Source Serif 4', serif; font-size: 20pt; font-weight: 700; color: var(--gold-tint); }
+  .cover .fact .l { font-size: 7.4pt; letter-spacing: .14em; text-transform: uppercase; color: #8A8FA3; margin-top: 1mm; }
+  .cover .foot { margin-top: 10mm; font-size: 8pt; color: #8A8FA3; }
+
+  /* ---------- Structure ---------- */
+  .section { page-break-before: always; }
+  .section-head { border-bottom: 1px solid var(--hairline); padding-bottom: 2.4mm; margin-bottom: 4mm; }
+  .section-head .num { font-size: 7.4pt; letter-spacing: .18em; text-transform: uppercase; color: var(--gold-ink); }
+  .section-head h2 { font-size: 17.5pt; margin-top: 1.2mm; }
+  .section-head .lede { margin-top: 1.6mm; font-size: 9.6pt; color: var(--ink-2); max-width: 155mm; }
+
+  h3 { font-size: 11.2pt; margin: 4.6mm 0 2mm; }
+  h4 { font-family: 'Source Sans 3', sans-serif; font-size: 9.1pt; font-weight: 700; margin: 3mm 0 1.2mm; }
+  p { margin: 0 0 2mm; }
+  ul { margin: 0 0 2.4mm; padding-left: 4.5mm; }
+  li { margin-bottom: .9mm; }
+  strong { font-weight: 700; }
+  code, .mono { font-family: ui-monospace, Menlo, monospace; font-size: 8.4pt; }
+
+  table { width: 100%; border-collapse: collapse; margin: 1.6mm 0 3mm; font-size: 8.4pt; }
+  th {
+    text-align: left; font-size: 6.9pt; letter-spacing: .12em; text-transform: uppercase;
+    color: var(--muted); font-weight: 600; padding: 1.5mm 2.2mm; border-bottom: 1px solid var(--hairline);
+  }
+  td { padding: 1.5mm 2.2mm; border-bottom: 1px solid var(--rule); vertical-align: top; }
+  tr { page-break-inside: avoid; }
+  td.num { white-space: nowrap; font-family: ui-monospace, Menlo, monospace; font-size: 8.2pt; }
+
+  .card {
+    border: 1px solid var(--border-card); background: var(--surface);
+    padding: 3mm 3.4mm; margin: 2.4mm 0; page-break-inside: avoid;
+  }
+  .card > h4:first-child { margin-top: 0; }
+  .card.tint { background: var(--ivory-raised); }
+  .card.flag { border-color: var(--red); }
+  .card.flag h4 { color: var(--red); }
+
+  .grid2 { display: flex; gap: 4mm; }
+  .grid2 > * { flex: 1; }
+
+  .kv { display: flex; gap: 3mm; padding: 1.2mm 0; border-bottom: 1px solid var(--rule); font-size: 8.8pt; }
+  .kv:last-child { border-bottom: 0; }
+  .kv .k { width: 42mm; flex-shrink: 0; color: var(--muted); }
+
+  .dot { display: inline-block; width: 2.4mm; height: 2.4mm; border-radius: 50%; margin-right: 1.6mm; vertical-align: baseline; }
+  .d-red { background: var(--red); } .d-yellow { background: var(--yellow); }
+  .d-green { background: var(--green); } .d-gray { background: var(--gray); }
+  .d-blue { background: var(--blue); }
+
+  .pill {
+    display: inline-block; font-size: 7pt; font-weight: 600; letter-spacing: .06em; text-transform: uppercase;
+    padding: .6mm 2mm; border: 1px solid; border-radius: 2px;
+  }
+  .pill.ok { color: var(--green); border-color: var(--green); background: #EEF5EE; }
+  .pill.warn { color: var(--gold-ink); border-color: var(--yellow); background: #FBF4E2; }
+  .pill.no { color: var(--red); border-color: var(--red); background: #F9EDEB; }
+
+  .steps { counter-reset: s; }
+  .step { position: relative; padding-left: 8.5mm; margin-bottom: 2.6mm; page-break-inside: avoid; }
+  .step::before {
+    counter-increment: s; content: counter(s);
+    position: absolute; left: 0; top: 0; width: 6mm; height: 6mm;
+    border: 1px solid var(--gold); color: var(--gold-ink); border-radius: 50%;
+    font-size: 8pt; display: flex; align-items: center; justify-content: center;
+  }
+  .step h4 { margin: .6mm 0 1mm; }
+
+  .flow { display: flex; align-items: stretch; gap: 0; margin: 2.4mm 0 3mm; }
+  .flow .node {
+    flex: 1; border: 1px solid var(--border-card); background: var(--surface);
+    padding: 2.5mm; text-align: center; font-size: 8pt;
+  }
+  .flow .node .t { font-weight: 700; display: block; margin-bottom: .8mm; }
+  .flow .node .d { color: var(--muted); font-size: 7.4pt; line-height: 1.35; }
+  .flow .arrow { width: 5mm; display: flex; align-items: center; justify-content: center; color: var(--gold); font-size: 10pt; }
+
+  .callout { border-left: 2px solid var(--gold); padding: .8mm 0 .8mm 3.6mm; margin: 2.4mm 0; color: var(--ink-2); }
+  .tiny { font-size: 8pt; color: var(--muted); }
+  .no-break { page-break-inside: avoid; }
+</style>
+</head>
+<body>
+
+<!-- ============ COVER ============ -->
+<div class="cover">
+  <div>
+    <div class="mark">Jewelry<span class="t">Trader</span></div>
+    <div class="eyebrow">Estate &amp; Fine Jewelry · Point of Sale, Inventory &amp; E-Commerce</div>
+  </div>
+
+  <h1>Phase&nbsp;1<br>Application Handbook</h1>
+  <div class="sub">How the system works, what it does, and how to run it — written against the delivered build, not the plan.</div>
+
+  <div class="rule"></div>
+
+  <div class="facts">
+    <div class="fact"><div class="n">12</div><div class="l">Modules delivered</div></div>
+    <div class="fact"><div class="n">316</div><div class="l">Tests passing</div></div>
+    <div class="fact"><div class="n">47</div><div class="l">Database tables</div></div>
+    <div class="fact"><div class="n">34</div><div class="l">Permissions</div></div>
+  </div>
+
+  <div class="foot">Prepared 23 September 2026 · Laravel 13 · PHP 8.3 · MySQL 8 · Stripe verified in test mode</div>
+</div>
+
+<!-- ============ 1. OVERVIEW ============ -->
+<div class="section" style="page-break-before: avoid;">
+  <div class="section-head">
+    <div class="num">Section 1</div>
+    <h2>What this application is</h2>
+    <div class="lede">One system covering the whole life of a piece: intake and appraisal, the shop counter, the public storefront, and the money that follows — wages, refunds and the audit trail behind them.</div>
+  </div>
+
+  <p>Jewelry Trader serves dealers in antique, vintage, estate, designer and fine jewelry, across several store locations and several salespeople. A piece is photographed and catalogued once, then travels through review, listing, sale and — if it comes back — return, with every step recorded against the person who took it.</p>
+
+  <h3>The defining characteristic</h3>
+  <p><strong>Almost nothing is hardcoded.</strong> Payment providers, commission structures, tax rates, required-field rules, discount ceilings, retention windows and feature availability are all configured from the admin panel by a Super Admin. No code change, no redeploy.</p>
+
+  <div class="card tint">
+    <h4>What that means in practice</h4>
+    <div class="kv"><div class="k">Stripe keys</div><div>Stored encrypted in the database, rotated through a form. Not in <span class="mono">.env</span>.</div></div>
+    <div class="kv"><div class="k">Which fields are mandatory</div><div>A table of rules, editable per item category. A ring can require a size; a brooch cannot.</div></div>
+    <div class="kv"><div class="k">Commission structure</div><div>Four plan types, per-salesperson assignment, with a configurable fallback.</div></div>
+    <div class="kv"><div class="k">Sales tax</div><div>Per location, US state-based, recorded on each order as charged.</div></div>
+    <div class="kv"><div class="k">What <span class="mono">.env</span> holds</div><div>Database credentials, mail transport, app key. Infrastructure only — verified.</div></div>
+  </div>
+
+  <h3>The four surfaces</h3>
+  <table>
+    <tr><th style="width:30mm">Surface</th><th>Who uses it</th><th>What it does</th></tr>
+    <tr><td><strong>Admin panel</strong></td><td>Managers, appraisers, accountants</td><td>Inventory, intake, review, orders, customers, settings, audit, roles, commissions, overrides</td></tr>
+    <tr><td><strong>Point of Sale</strong></td><td>Sales staff at the counter</td><td>Full-screen register: search, cart, discounts, split payment, returns, exchanges, receipts</td></tr>
+    <tr><td><strong>Storefront</strong></td><td>The public</td><td>Browse, filter, search, bag, checkout, customer accounts and order history</td></tr>
+    <tr><td><strong>Background</strong></td><td>Nobody — it just runs</td><td>Commission calculation, audit retention purge, receipt email</td></tr>
+  </table>
+
+  <div class="callout"><strong>One codebase, one payment path.</strong> The register and the storefront both create orders through the same service and take money through the same gateway factory. A change to how money is handled happens once.</div>
+</div>
+
+<!-- ============ 2. GETTING STARTED ============ -->
+<div class="section">
+  <div class="section-head">
+    <div class="num">Section 2</div>
+    <h2>Getting started</h2>
+    <div class="lede">From a fresh clone to a working till, and the order in which to set things up.</div>
+  </div>
+
+  <h3>Installation</h3>
+  <div class="steps">
+    <div class="step">
+      <h4>Install dependencies and build assets</h4>
+      <p class="mono">composer install &nbsp;·&nbsp; npm install &nbsp;·&nbsp; npm run build</p>
+    </div>
+    <div class="step">
+      <h4>Point the application at a database</h4>
+      <p>Copy <span class="mono">.env.example</span> to <span class="mono">.env</span>, set the database credentials, then run <span class="mono">php artisan key:generate</span>.</p>
+    </div>
+    <div class="step">
+      <h4>Create the schema and seed it</h4>
+      <p class="mono">php artisan migrate --seed</p>
+      <p class="tiny">Seeds six roles with 34 permissions, 45 settings at their defaults, four locations, the Stripe gateway row, 29 field rules across six categories, and placeholder step-up symbols.</p>
+    </div>
+    <div class="step">
+      <h4>Link storage and start</h4>
+      <p class="mono">php artisan storage:link &nbsp;·&nbsp; php artisan serve</p>
+    </div>
+    <div class="step">
+      <h4>Run the queue worker</h4>
+      <p class="mono">php artisan queue:work</p>
+      <p class="tiny">Commission calculation runs here. Without a worker, sales still complete — commissions simply wait in the queue.</p>
+    </div>
+  </div>
+
+  <h3>First-run configuration, in order</h3>
+  <table>
+    <tr><th style="width:8mm"></th><th style="width:44mm">Where</th><th>What to do</th></tr>
+    <tr><td class="num">1</td><td>Settings → General</td><td>Company name, timezone, receipt footer text.</td></tr>
+    <tr><td class="num">2</td><td>Settings → Locations</td><td>Your real stores, each with its state and tax rate. Keep the <strong>Web</strong> location: online orders belong to it.</td></tr>
+    <tr><td class="num">3</td><td>Settings → Payments</td><td>Paste the Stripe <em>test</em> keys, leave Test mode on. Live keys go in the separate live fields when you are ready.</td></tr>
+    <tr><td class="num">4</td><td>Terminal</td><td><span class="mono">php artisan payments:verify</span> — runs a real charge, refund and split against Stripe test mode and reports pass or fail.</td></tr>
+    <tr><td class="num">5</td><td>Settings → Security</td><td>Which roles must use two-factor; session timeout; password policy; retention windows.</td></tr>
+    <tr><td class="num">6</td><td>Settings → Field Rules</td><td>Adjust what each category requires before an item can be submitted.</td></tr>
+    <tr><td class="num">7</td><td>Settings → Commission</td><td>The default plan used for any salesperson without an individual agreement.</td></tr>
+    <tr><td class="num">8</td><td>Roles &amp; Permissions</td><td>Create staff accounts, assign roles and home locations.</td></tr>
+  </table>
+
+  <div class="card flag">
+    <h4>Do this before going live</h4>
+    <p><strong>Replace the seeded step-up answers.</strong> The installer seeds three symbols with the answers <span class="mono">change-me-one</span>, <span class="mono">change-me-two</span>, <span class="mono">change-me-three</span>. That challenge guards override approval and payment-key changes. A seeded secret is not a secret.</p>
+  </div>
+</div>
+
+<!-- ============ 3. ITEMS ============ -->
+<div class="section">
+  <div class="section-head">
+    <div class="num">Section 3</div>
+    <h2>Items: intake, the colour system, and review</h2>
+    <div class="lede">The centrepiece workflow. A piece goes from a pile of photographs to a listed item, with the record showing at a glance what is finished and what is not.</div>
+  </div>
+
+  <h3>The journey of a piece</h3>
+  <div class="flow">
+    <div class="node"><span class="t">Draft</span><span class="d">Photographed and being catalogued</span></div>
+    <div class="arrow">→</div>
+    <div class="node"><span class="t">Pending review</span><span class="d">Submitted; required fields complete</span></div>
+    <div class="arrow">→</div>
+    <div class="node"><span class="t">Approved</span><span class="d">Accepted for the record</span></div>
+    <div class="arrow">→</div>
+    <div class="node"><span class="t">Listed</span><span class="d">Published for sale</span></div>
+    <div class="arrow">→</div>
+    <div class="node"><span class="t">Sold</span><span class="d">Claimed by an order</span></div>
+  </div>
+
+  <p><strong>Approve and List are deliberately two separate actions.</strong> A piece can be approved for the record — catalogued, appraised, documented — without being published for sale. Listing is a second, explicit decision.</p>
+
+  <h3>The colour-coded field system</h3>
+  <p>Every field on an item record carries a status colour. The colours are configuration, held in a rules table and editable per category from Settings, so what a ring must have differs from what a brooch must have.</p>
+
+  <table>
+    <tr><th style="width:26mm">Colour</th><th style="width:44mm">Meaning</th><th>Behaviour today</th></tr>
+    <tr><td><span class="dot d-red"></span><strong>Red</strong></td><td>Required, still empty</td><td>Blocks submission. Enforced on the server, not only in the browser.</td></tr>
+    <tr><td><span class="dot d-yellow"></span><strong>Yellow</strong></td><td>Normally AI-suggested</td><td>An ordinary editable field, marked “AI suggestion available in a future update”.</td></tr>
+    <tr><td><span class="dot d-green"></span><strong>Green</strong></td><td>Complete and valid</td><td>Computed the moment a valid value is entered. Never configured directly.</td></tr>
+    <tr><td><span class="dot d-gray"></span><strong>Gray</strong></td><td>Not applicable</td><td>Disabled for this category — chain length on a ring, for instance.</td></tr>
+    <tr><td><span class="dot d-blue"></span><strong>Blue</strong></td><td>Human override</td><td>Recorded on the item, so Phase 2's correction log has real data from day one.</td></tr>
+    <tr><td style="color:var(--muted)">○ <strong>Neutral</strong></td><td>Optional, untouched</td><td>A sixth state added in build: an empty optional field shows no status, so an unfinished record cannot look complete.</td></tr>
+  </table>
+
+  <h3>What is recorded about an item</h3>
+  <div class="grid2">
+    <div class="card">
+      <h4>Identity &amp; materials</h4>
+      <p class="tiny">SKU, title, subtitle, category and subcategory, brand or maker, style period, metal type and purity, weight in grams, measurements, hallmark text, plus any category-specific field a Super Admin adds later.</p>
+    </div>
+    <div class="card">
+      <h4>Condition &amp; description</h4>
+      <p class="tiny">Condition and restoration notes, internal notes, customer description, and separate SEO, marketplace and social descriptions.</p>
+    </div>
+  </div>
+  <div class="grid2">
+    <div class="card">
+      <h4>Gemstones</h4>
+      <p class="tiny">Stone type, shape, cut, colour, estimated carat weight, setting style, and which stone is the principal one. Several stones per piece.</p>
+    </div>
+    <div class="card">
+      <h4>Photographs</h4>
+      <p class="tiny">Each tagged by type — front, back, side, hallmark, gemstone, clasp, movement, signature, packaging, certificate — with one chosen as the hero shot used on the storefront.</p>
+    </div>
+  </div>
+  <div class="grid2">
+    <div class="card">
+      <h4>Pricing (append-only history)</h4>
+      <p class="tiny">Acquisition cost, retail price, insurance value, negotiation floor, promotional price. A price change writes a new row rather than overwriting, so what a piece was previously offered at survives.</p>
+    </div>
+    <div class="card">
+      <h4>Stock &amp; provenance</h4>
+      <p class="tiny">Which location holds it and in what state (in stock, reserved, sold, transferred); who created, submitted and approved it, and when.</p>
+    </div>
+  </div>
+
+  <div class="callout">
+    <strong>A field that has no column still works.</strong> Because a Super Admin can invent a new field rule — say <span class="mono">movement_type</span> for watches — values for fields that have no database column are stored as item attributes. Adding a required field to a category needs no developer.
+  </div>
+
+  <h3>Speed, measured rather than assumed</h3>
+  <p>The specification asks for photo upload through submit-for-review in well under five minutes. Each item records the elapsed time between creation and submission, and the review queue shows managers the <strong>median</strong> and <strong>slowest</strong> intake times, with the median turning red if it drifts above five minutes.</p>
+
+  <h3>Moving stock between locations</h3>
+  <p>A transfer is requested, approved by the <strong>sending</strong> location's manager, then completed on arrival. Stock does not move until completion, and an approved transfer marks the piece in transit so it cannot also be sold. The stock row moves; it is never duplicated.</p>
+</div>
+
+<!-- ============ 4. POS ============ -->
+<div class="section">
+  <div class="section-head">
+    <div class="num">Section 4</div>
+    <h2>The counter: sales, returns and exchanges</h2>
+    <div class="lede">A full-screen register with the happy path kept to a minimum number of clicks. Target: a complete sale in under two minutes.</div>
+  </div>
+
+  <h3>Taking a sale</h3>
+  <div class="steps">
+    <div class="step"><h4>Find the piece</h4><p>Search by SKU, title or maker, or scan a tag. Only listed, in-stock, unlocked items appear.</p></div>
+    <div class="step"><h4>Build the sale</h4><p>Add pieces, plus any <strong>custom line item</strong> — ring sizing, repairs, a workshop service — which needs no inventory record. Discount a line by percentage or fixed amount.</p></div>
+    <div class="step"><h4>Take payment</h4><p>Card, cash, or a split across several tenders. Reaching payment pre-fills a single card tender for the full amount, so the common sale is search → add → charge.</p></div>
+    <div class="step"><h4>Finish</h4><p>Receipt on screen, printable on 80&nbsp;mm thermal stock, and emailed when a customer address is on file. Change due is calculated and shown for cash.</p></div>
+  </div>
+
+  <h3>Rules the register enforces</h3>
+  <table>
+    <tr><th style="width:52mm">Rule</th><th>How it behaves</th></tr>
+    <tr><td>Tenders must equal the total</td><td>The Charge button stays disabled, and the server re-checks. A part-paid order can never be marked paid.</td></tr>
+    <tr><td>Discount ceiling</td><td>Above the configured percentage, the discount is refused unless the user holds the approval permission. Checked in code, not by hiding a button.</td></tr>
+    <tr><td>One-of-a-kind stock</td><td>The same piece cannot be added twice, and a piece sold elsewhere cannot be added at all.</td></tr>
+    <tr><td>The sold-once guarantee</td><td>Paying locks the stock row and flips it to sold inside the same transaction as the order and the payment.</td></tr>
+    <tr><td>Locked items</td><td>A piece under a sales or full lock cannot be sold, from any surface.</td></tr>
+  </table>
+
+  <h3>Returns and exchanges</h3>
+  <p>Look up the original sale by order number, tick the items coming back, and choose a refund or an exchange.</p>
+  <ul>
+    <li><strong>Refunds</strong> return the line's discounted value <em>plus the tax charged on it</em>, capped at what remains refundable. Card refunds reverse through Stripe; cash is unrestricted. The piece goes back on the shelf and returns to listed.</li>
+    <li><strong>Exchanges</strong> are a return and a replacement sale in one transaction. Only the difference changes hands — the customer pays the excess, or is refunded it if the replacement is cheaper.</li>
+    <li><strong>Outside the return window</strong> (30 days by default, configurable) a refund is refused unless the user has override authority.</li>
+  </ul>
+</div>
+
+<!-- ============ 5. STOREFRONT ============ -->
+<div class="section">
+  <div class="section-head">
+    <div class="num">Section 5</div>
+    <h2>The public storefront</h2>
+    <div class="lede">The same catalogue, the same stock, the same payment path — seen from the customer's side.</div>
+  </div>
+
+  <div class="grid2">
+    <div class="card">
+      <h4>Browsing</h4>
+      <p class="tiny">Keyword search across title, maker, period, metal and description. Filters for category, period, metal and price range; sorting by newest or price. Facets are drawn only from pieces the public can actually see.</p>
+    </div>
+    <div class="card">
+      <h4>The piece</h4>
+      <p class="tiny">Image gallery with the hero shot first, customer description, specification table, gemstone details, price, and add-to-bag.</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <h4>The visibility guarantee</h4>
+    <p>Only pieces that are <strong>listed</strong>, <strong>in stock</strong> and <strong>not locked</strong> ever appear publicly. Draft, pending, approved-but-unlisted, archived, sold and reserved pieces are invisible — not merely hidden from the listing, but unreachable by guessing the URL. Seven hidden states are covered by tests.</p>
+  </div>
+
+  <h3>Checkout</h3>
+  <p>Guests may check out without an account. Card details are entered in Stripe's Payment Element, themed with the shop's own colours and typography, and confirmed by the browser directly with Stripe — <strong>card data never reaches this application</strong>. The server then re-reads the payment from Stripe before recording it, and refuses any amount that does not match the order. The browser is never trusted about whether money moved.</p>
+
+  <p>Sales tax follows the delivery address's state. A state with no store charges nothing rather than guessing.</p>
+
+  <h3>Customer accounts</h3>
+  <p>Customers sign in on their own separate account system — a customer session can never carry staff permissions. A guest who bought earlier and later registers with the same email <strong>claims that record</strong>, keeping their order history rather than starting a second one. POS and storefront share one customer record throughout, matched on email.</p>
+
+  <div class="callout"><strong>A piece sold at the counter disappears from web bags.</strong> The cart re-checks availability on every view, so a one-of-a-kind item sold in the shop cannot reach checkout online.</div>
+</div>
+
+<!-- ============ 6. MONEY ============ -->
+<div class="section">
+  <div class="section-head">
+    <div class="num">Section 6</div>
+    <h2>Payments</h2>
+    <div class="lede">One gateway abstraction, keys held in the database, and every figure in whole cents.</div>
+  </div>
+
+  <h3>How payments are structured</h3>
+  <table>
+    <tr><th style="width:42mm">Capability</th><th>Detail</th></tr>
+    <tr><td>Card</td><td>Charged through Stripe. At the counter today this uses Stripe's test token — see the open items in Section 10.</td></tr>
+    <tr><td>Cash</td><td>Recorded with no gateway call; change due calculated from the amount tendered.</td></tr>
+    <tr><td>Split</td><td>Several tenders on one sale, in any mix. The parts must sum exactly to the total.</td></tr>
+    <tr><td>Refunds</td><td>Full or partial, drawn from card tenders first since cash is unrestricted.</td></tr>
+    <tr><td>Capture &amp; void</td><td>Authorise, then settle for less or release entirely — backing the exchange flow.</td></tr>
+    <tr><td>Webhooks</td><td>Signed endpoint verified against the stored secret, so a refund issued in the Stripe dashboard is reflected here.</td></tr>
+  </table>
+
+  <div class="card tint">
+    <h4>Three decisions worth knowing</h4>
+    <p><strong>Money moves before it is recorded.</strong> A gateway call cannot be rolled back, so charges happen outside the database transaction and records are written inside it. The reverse order would let a rolled-back transaction hide a real charge.</p>
+    <p><strong>A failed split reverses what already succeeded.</strong> If the second tender is declined, the first card is refunded automatically. A customer is never left charged for a sale that did not complete.</p>
+    <p><strong>Switching provider is a data change.</strong> Gateways are rows naming a driver class. Adding PayPal later is a row plus a class — the code that takes payment does not change.</p>
+  </div>
+
+  <h3>Verifying the keys</h3>
+  <p>Running <span class="mono">php artisan payments:verify</span> performs a real charge, a partial refund, the remainder, a card-and-cash split and a split refund against the configured gateway, reporting each. It refuses to run while Test mode is off, so it can never move real money. Run it after every key rotation.</p>
+</div>
+
+<!-- ============ 7. COMMISSION ============ -->
+<div class="section">
+  <div class="section-head">
+    <div class="num">Section 7</div>
+    <h2>Commission and payroll</h2>
+    <div class="lede">Four plan structures, calculated away from the till, with California wage law shaping the design.</div>
+  </div>
+
+  <h3>The four plan types</h3>
+  <table>
+    <tr><th style="width:32mm">Type</th><th style="width:52mm">Basis</th><th>Worked example</th></tr>
+    <tr><td><strong>Sales-based</strong></td><td>Flat percentage of the sale</td><td>5% of a $1,000 sale = <strong>$50.00</strong></td></tr>
+    <tr><td><strong>Profit-based</strong></td><td>Percentage of margin over acquisition cost</td><td>20% of ($1,000 − $450) = <strong>$110.00</strong></td></tr>
+    <tr><td><strong>Tiered</strong></td><td>Rate rises at configured thresholds</td><td>4% below $5,000; 6% of an $8,000 sale = <strong>$480.00</strong></td></tr>
+    <tr><td><strong>Split</strong></td><td>A pool divided across several staff</td><td>5% of $1,000 split 60/40 = <strong>$30.00 / $20.00</strong></td></tr>
+  </table>
+
+  <h3>How it is calculated</h3>
+  <ul>
+    <li><strong>Tax is never commissionable.</strong> Every plan works from subtotal less discount — sales tax was never the shop's money.</li>
+    <li><strong>Discounts reduce the commissionable value</strong>, so a discounted sale earns proportionally less.</li>
+    <li><strong>The logged-in salesperson earns it.</strong> Web sales attribute to nobody.</li>
+    <li><strong>It runs in the background</strong>, queued after the sale commits. Commission arithmetic never sits between a customer's card and their receipt, and never runs for a sale that rolled back.</li>
+    <li><strong>A salesperson without an individual agreement</strong> falls back to the default plan configured in Settings.</li>
+  </ul>
+
+  <div class="card">
+    <h4>The rounding problem, solved deliberately</h4>
+    <p>The classic split-commission bug is rounding: three people sharing a pool that will not divide evenly, and a cent goes missing. Shares are floored, then the remainder is handed out one cent at a time to the largest fractional parts. The parts always sum <em>exactly</em> to the pool — checked across forty pool-and-share combinations, including deliberately awkward ones.</p>
+  </div>
+
+  <h3>California compliance, built in</h3>
+  <table>
+    <tr><th style="width:26mm">Statute</th><th>What the system does</th></tr>
+    <tr><td><strong>§2751</strong><div class="tiny">Written agreements</div></td><td>Each staff assignment stores the agreed terms — text or an uploaded document — alongside the numeric plan. The plan alone is not the agreement, and the system distinguishes the two.</td></tr>
+    <tr><td><strong>§221</strong><div class="tiny">No unlawful deductions</div></td><td><strong>Nothing deducts from an earned commission.</strong> A refund leaves the record standing. Any reduction must go through an override — reasoned, approved and logged.</td></tr>
+    <tr><td><strong>§204</strong><div class="tiny">Wage timing</div></td><td>Approval and payment are recorded as separate, timestamped steps, so wage timing is auditable.</td></tr>
+  </table>
+
+  <h3>Reporting and payroll export</h3>
+  <p>Daily, weekly or monthly, filtered by salesperson, location and status. Staff see only their own figures; managers and accountants see everyone's. Export to CSV is a separate permission.</p>
+  <p>The export's <strong>column mapping is configurable</strong>, because the target payroll system's format is not yet known. Changing which columns appear, and what each contains, is a settings change. A column pointing at something the system does not recognise exports a visible marker rather than a silent blank.</p>
+</div>
+
+<!-- ============ 8. SECURITY ============ -->
+<div class="section">
+  <div class="section-head">
+    <div class="num">Section 8</div>
+    <h2>Security, permissions and the audit trail</h2>
+    <div class="lede">Six roles, thirty-four granular permissions, two-factor authentication nobody can skip, and a record of everything.</div>
+  </div>
+
+  <h3>The six roles</h3>
+  <table>
+    <tr><th style="width:44mm">Role</th><th style="width:16mm">Perms</th><th>Remit</th></tr>
+    <tr><td><strong>Super Admin</strong></td><td class="num">34</td><td>Everything, including settings, roles and overrides</td></tr>
+    <tr><td><strong>Store Manager</strong></td><td class="num">21</td><td>Inventory, orders, approvals, discounts above the staff ceiling, audit, commission reports</td></tr>
+    <tr><td><strong>Sales Staff</strong></td><td class="num">11</td><td>The register, creating and editing inventory subject to approval, own commission</td></tr>
+    <tr><td><strong>Inventory Specialist</strong></td><td class="num">7</td><td>Create, edit and approve inventory for listing. No sales.</td></tr>
+    <tr><td><strong>Accountant</strong></td><td class="num">9</td><td>Financial and commission reports, payment records, payroll export, audit. No inventory edits, no sales.</td></tr>
+    <tr><td><strong>Customer Service</strong></td><td class="num">7</td><td>View orders and customers, process returns. No discounting, no pricing edits.</td></tr>
+  </table>
+  <p class="tiny">Nothing in the code checks a role by name — only permissions — so a Super Admin can compose a custom role from the Roles &amp; Permissions page and it behaves exactly like a built-in one.</p>
+
+  <h3>Multi-factor authentication</h3>
+  <p>Which roles must use it is a setting. A user in one of those roles is sent to enrolment on first sign-in and challenged on every sign-in thereafter. Enrolment issues ten single-use recovery codes, shown once. <strong>No role is exempt, including Super Admin</strong> — the requirement is enforced across every authenticated page, not route by route.</p>
+  <p class="tiny">The authenticator secret is encrypted at rest; recovery codes are additionally hashed, so a database leak yields nothing usable. The enrolment QR code is drawn on the server — the secret never reaches a third party.</p>
+
+  <h3>The audit trail</h3>
+  <p>Every create, update and delete on products, orders, payments, settings, users, customers, locations, transfers, overrides and locks is recorded automatically — who, what, when, before and after, with IP address and browser. Logging is attached to the models themselves, so a new code path cannot forget to call it.</p>
+  <ul>
+    <li><strong>Secrets are masked.</strong> A Stripe key rotation is recorded as a change, with the value redacted. A gateway switch stays readable.</li>
+    <li><strong>Non-model events too:</strong> sign-in, failed sign-in, MFA passes and failures, step-up attempts, webhook rejections.</li>
+    <li><strong>Retention is split by category.</strong> General activity keeps for two years; financial records keep for seven, reflecting IRS recordkeeping. Both are configurable, and a scheduled job applies them nightly.</li>
+  </ul>
+
+  <h3>Overrides</h3>
+  <p>Deliberately high-friction, because this exists for fraud prevention. A reason is <strong>required</strong>, and nothing takes effect until someone with approval authority approves it. A Super Admin overriding their own request still goes through both steps, and the trail records that they approved their own request.</p>
+
+  <h3>Inventory locks</h3>
+  <table>
+    <tr><th style="width:24mm">Lock</th><th>Blocks</th><th>Leaves working</th></tr>
+    <tr><td><strong>Full</strong></td><td>Sale, edit, rental, storefront display</td><td>Nothing — the piece is frozen</td></tr>
+    <tr><td><strong>Sales</strong></td><td>Sale and rental</td><td>Editing: re-photography, re-appraisal</td></tr>
+    <tr><td><strong>Edit</strong></td><td>Editing the record</td><td>Selling — for use mid-dispute</td></tr>
+    <tr><td><strong>View</strong></td><td>Storefront and POS visibility</td><td>Internal access, for a legal hold</td></tr>
+    <tr><td><strong>Rental</strong></td><td>Rental only</td><td>Everything else (Phase 2 relevance)</td></tr>
+  </table>
+  <p class="tiny">Locks are enforced in the services that sell, edit and transfer — so the register, the storefront and any future integration are all covered by one check. The reason is free text: valuation hold, repair, consignment dispute, legal hold.</p>
+
+  <h3>The step-up challenge</h3>
+  <p>High-risk actions — approving an override, changing payment keys, disabling MFA enforcement — require a second challenge: two or three symbols whose answers only trusted staff know. Both the symbol set and the list of actions it guards are configurable, and every attempt, pass or fail, is logged.</p>
+  <div class="callout">This is a second factor with a house style. The security comes from the answers being a shared secret, not from the symbols themselves — so answers are hashed, and the mechanism can be swapped for a standard authenticator step-up with a configuration change.</div>
+</div>
+
+<!-- ============ 9. COMPLIANCE ============ -->
+<div class="section">
+  <div class="section-head">
+    <div class="num">Section 9</div>
+    <h2>Against the specification</h2>
+    <div class="lede">Every acceptance criterion in the brief, and where it stands in the delivered build.</div>
+  </div>
+
+  <table>
+    <tr><th style="width:74mm">Definition of done</th><th style="width:20mm">Status</th><th>Evidence</th></tr>
+    <tr><td>Every Super-Admin setting lives in Settings, not <span class="mono">.env</span></td><td><span class="pill ok">Met</span></td><td>45 settings across 7 groups; <span class="mono">.env</span> holds infrastructure only</td></tr>
+    <tr><td>Stripe works for card, cash, split, refunds, exchanges</td><td><span class="pill ok">Met</span></td><td>Verified against live Stripe test keys, not only mocks</td></tr>
+    <tr><td>Zero hardcoded AI vendor references</td><td><span class="pill ok">Met</span></td><td>Enforced by a test scanning the whole codebase</td></tr>
+    <tr><td>All six roles enforce permissions at the policy layer</td><td><span class="pill ok">Met</span></td><td>Nine protected actions × six roles asserted as one matrix</td></tr>
+    <tr><td>MFA and audit cannot be bypassed by any role</td><td><span class="pill ok">Met</span></td><td>Middleware across every authenticated page; Super Admin included</td></tr>
+    <tr><td>Location scoping restricts cross-location visibility</td><td><span class="pill ok">Met</span></td><td>Tested against a user <em>without</em> the cross-location permission</td></tr>
+    <tr><td>Photo upload → submit for review under five minutes</td><td><span class="pill ok">Met</span></td><td>Measured per item; median and slowest shown to managers</td></tr>
+    <tr><td>A POS sale completes in under two minutes</td><td><span class="pill ok">Met</span></td><td>Tested, and driven end to end through the browser</td></tr>
+    <tr><td>All Phase 2 flags exist, default off, visible in Settings</td><td><span class="pill ok">Met</span></td><td>Three flags, each with tables and a nav placeholder</td></tr>
+    <tr><td>No arbitrary styling values anywhere</td><td><span class="pill ok">Met</span></td><td>Design tokens only; off-system values fail the build</td></tr>
+  </table>
+
+  <h3>Deliberate departures from the brief</h3>
+  <p>Each was raised at the time and agreed. None changes what the system does.</p>
+  <table>
+    <tr><th style="width:44mm">The brief said</th><th>What was built, and why</th></tr>
+    <tr><td>Laravel 11</td><td><strong>Laravel 13.</strong> Version 11 is past security support and shipped with three known advisories, including a high-severity one, fixed only in later versions.</td></tr>
+    <tr><td>Redis and Horizon</td><td><strong>Database queue.</strong> Redis is not installed on this host; the brief permits the fallback.</td></tr>
+    <tr><td>Tokens in <span class="mono">tailwind.config.js</span></td><td><strong>CSS-based tokens.</strong> That file does not exist in the current styling framework; the discipline it protects is enforced in the equivalent place.</td></tr>
+    <tr><td>A “Reveal” button for the Stripe secret</td><td><strong>Not built.</strong> It contradicted the rule that secrets are never echoed back. Keys are write-only after saving; rotation replaces them.</td></tr>
+    <tr><td>Five field colours</td><td><strong>Six.</strong> Green is computed from a value, so an empty optional field needed a neutral state — otherwise an untouched record looked finished.</td></tr>
+    <tr><td>The design's role names and lock names</td><td><strong>The specification's.</strong> Confirmed with you; the design's lock names became the free-text reason.</td></tr>
+  </table>
+
+  <h3>Bugs found by running the system, not by testing it</h3>
+  <p>Recorded because each would otherwise have reached production.</p>
+  <ul>
+    <li><strong>Sales tax rounding.</strong> The tax column was too narrow for a real US rate: New York's 8.875% became 8.88%, overcharging roughly three cents in every hundred dollars, on every sale.</li>
+    <li><strong>Online orders never completing.</strong> Web orders belong to a Web location while stock sits in a physical shop, so payment succeeded but the order stayed unpaid and the piece stayed for sale.</li>
+    <li><strong>Invisible text</strong> in the sign-in and register fields — white on white.</li>
+    <li><strong>A test double that was too generous</strong>, reporting unconfirmed card payments as successful. Correcting it turned a quietly passing test into a real one.</li>
+  </ul>
+</div>
+
+<!-- ============ 10. OPEN ITEMS ============ -->
+<div class="section">
+  <div class="section-head">
+    <div class="num">Section 10</div>
+    <h2>Open items and what comes next</h2>
+    <div class="lede">What still needs doing before the counter opens, and what Phase 2 is already prepared for.</div>
+  </div>
+
+  <h3>Before going live</h3>
+  <table>
+    <tr><th style="width:52mm">Item</th><th style="width:20mm">Priority</th><th>Detail</th></tr>
+    <tr><td><strong>Replace step-up answers</strong></td><td><span class="pill no">Blocking</span></td><td>Seeded placeholders guard override approval and payment-key changes.</td></tr>
+    <tr><td><strong>Card entry at the counter</strong></td><td><span class="pill no">Blocking</span></td><td>The register currently passes Stripe's test token. The themed card form is built and working on the storefront; the same component needs mounting on the register. No card reader is in scope, as agreed.</td></tr>
+    <tr><td><strong>Mailgun credentials</strong></td><td><span class="pill warn">Needed</span></td><td>Blank, so receipt emails will not send. Everything else about receipts works.</td></tr>
+    <tr><td><strong>Live Stripe keys</strong></td><td><span class="pill warn">Needed</span></td><td>Separate fields already exist; switch Test mode off when ready.</td></tr>
+    <tr><td><strong>Image library</strong></td><td><span class="pill warn">Optional</span></td><td>Without it, photographs are stored at full size and no thumbnails are generated.</td></tr>
+    <tr><td><strong>Webhook endpoint</strong></td><td><span class="pill warn">Optional</span></td><td>Needs a public URL. Only affects refunds issued from the Stripe dashboard.</td></tr>
+    <tr><td><strong>Queue worker &amp; scheduler</strong></td><td><span class="pill warn">Needed</span></td><td>Must run continuously in production for commissions and nightly retention.</td></tr>
+  </table>
+
+  <h3>Phase 2, already seamed</h3>
+  <p>Each is switched off, with its tables and integration points already in place, so activation means building behaviour rather than reshaping the system.</p>
+  <table>
+    <tr><th style="width:44mm">Feature</th><th>What already exists</th></tr>
+    <tr><td><strong>AI assistance</strong><div class="tiny">Photo analysis, descriptions, pricing, search</div></td><td>Provider interfaces, a results store, and a correction log that captures what a human changed a suggestion to. The yellow/green/blue field colours already carry the meaning AI will need. The codebase contains no vendor references at all — providers are data rows.</td></tr>
+    <tr><td><strong>Rental services</strong></td><td>Agreement and claim tables; the rental lock type already exists on inventory.</td></tr>
+    <tr><td><strong>Salesperson storefronts</strong></td><td>Storefront and inventory-request tables; commission already supports split attribution, which is how a referred sale will be shared.</td></tr>
+    <tr><td><strong>Quarterly audit</strong></td><td>Report and exception tables; every stock movement is already logged, which is the data a reconciliation reads.</td></tr>
+  </table>
+
+  <div class="card tint no-break">
+    <h4>Where the detail lives</h4>
+    <p>Every business rule you answered during the build, and every place the delivered system departs from the brief, is recorded in <span class="mono">docs/DECISIONS.md</span> in the repository — with the reasoning, so nothing has to be reconstructed from memory.</p>
+    <p class="tiny" style="margin-bottom:0">The build history is twelve module commits plus two fixes, each with its own description of what changed and why.</p>
+  </div>
+
+  <div style="margin-top:6mm; padding-top:3mm; border-top:1px solid var(--hairline); display:flex; justify-content:space-between; font-size:7.6pt; color:var(--muted);">
+    <div>Jewelry Trader · Phase 1 Application Handbook</div>
+    <div>23 September 2026</div>
+  </div>
+</div>
+
+</body>
+</html>
