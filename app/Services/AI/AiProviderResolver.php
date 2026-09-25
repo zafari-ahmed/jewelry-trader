@@ -23,14 +23,17 @@ class AiProviderResolver
      * @param  class-string  $contract
      * @param  class-string  $nullImplementation
      * @param  string  $capabilityFlag  e.g. ai.vision
+     * @param  class-string|null  $defaultImplementation  used when no provider row names a driver
      */
-    public function resolve(string $contract, string $nullImplementation, string $capabilityFlag): object
+    public function resolve(string $contract, string $nullImplementation, string $capabilityFlag, ?string $defaultImplementation = null): object
     {
         if (! Setting::enabled('ai.enabled') || ! Setting::enabled($capabilityFlag)) {
             return $this->container->make($nullImplementation);
         }
 
-        $driver = $this->driverFor($contract);
+        // A provider row may name its own driver class; otherwise the
+        // configuration-driven implementation is used.
+        $driver = $this->driverFor($contract) ?? $defaultImplementation;
 
         if ($driver === null) {
             return $this->container->make($nullImplementation);

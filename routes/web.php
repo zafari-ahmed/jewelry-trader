@@ -109,6 +109,7 @@ Route::middleware('auth')->prefix('admin')->name('admin.')->group(function () {
             Route::get('/commission', Settings\Commission::class)->middleware('permission:manage-commission-config')->name('.commission');
             Route::get('/flags', Settings\FeatureFlags::class)->middleware('permission:manage-feature-flags')->name('.flags');
             Route::get('/field-rules', Settings\FieldRules::class)->middleware('permission:manage-field-rules')->name('.field-rules');
+            Route::get('/pricing', Settings\Pricing::class)->name('.pricing');
         });
     });
 });

@@ -26,12 +26,14 @@ class AppServiceProvider extends ServiceProvider
         // The only place the Stripe SDK is bound; tests swap this for a double.
         $this->app->bind(StripeApi::class, StripeApiClient::class);
 
-        // Phase 1 searches by keyword; Module 2's AiSearchProvider becomes an
-        // alternate binding in Phase 2 with no change to calling code.
-        $this->app->bind(
-            \App\Services\Search\Contracts\ProductSearchService::class,
-            \App\Services\Search\KeywordProductSearch::class,
-        );
+        // Keyword search by default; natural language when that capability is
+        // switched on. The contract is identical either way, so nothing that
+        // searches has to know which is in use.
+        $this->app->bind(\App\Services\Search\Contracts\ProductSearchService::class, function ($app) {
+            return \App\Models\Setting::enabled('ai.enabled') && \App\Models\Setting::enabled('ai.search')
+                ? $app->make(\App\Services\AI\Providers\HttpSearchProvider::class)
+                : $app->make(\App\Services\Search\KeywordProductSearch::class);
+        });
     }
 
     /**

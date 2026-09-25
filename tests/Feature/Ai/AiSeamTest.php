@@ -9,6 +9,7 @@ use App\Services\AI\AiAnalysisResult;
 use App\Services\AI\Contracts\AiSearchProvider;
 use App\Services\AI\Contracts\AiTextProvider;
 use App\Services\AI\Contracts\AiVisionProvider;
+use App\Services\AI\Providers\HttpVisionProvider;
 use App\Services\AI\Providers\NullAiSearchProvider;
 use App\Services\AI\Providers\NullAiTextProvider;
 use App\Services\AI\Providers\NullAiVisionProvider;
@@ -63,12 +64,33 @@ class AiSeamTest extends TestCase
         app(AiSearchProvider::class)->search('edwardian ring under 5k');
     }
 
-    public function test_a_capability_flag_alone_does_not_activate_a_provider(): void
+    public function test_turning_a_capability_on_activates_the_configurable_provider(): void
     {
         Setting::set('ai.enabled', true);
         Setting::set('ai.vision', true);
 
-        // No provider row is configured, so the seam still refuses.
+        // AI cataloguing is Phase 1, so a capability that is switched on
+        // resolves to the real, configuration-driven provider.
+        $this->assertInstanceOf(HttpVisionProvider::class, app(AiVisionProvider::class));
+    }
+
+    public function test_an_enabled_capability_with_no_endpoint_refuses_with_a_clear_message(): void
+    {
+        Setting::set('ai.enabled', true);
+        Setting::set('ai.vision', true);
+        Setting::set('ai.vision_model', 'some-model');
+
+        // Better a plain instruction than a silent no-op.
+        $this->expectExceptionMessage('No AI endpoint is configured');
+
+        app(AiVisionProvider::class)->analyze(['front.jpg'], 'full');
+    }
+
+    public function test_a_capability_left_off_still_refuses(): void
+    {
+        Setting::set('ai.enabled', true);
+        Setting::set('ai.vision', false);
+
         $this->assertInstanceOf(NullAiVisionProvider::class, app(AiVisionProvider::class));
     }
 
@@ -87,7 +109,7 @@ class AiSeamTest extends TestCase
         $this->assertInstanceOf(FakeVisionProvider::class, app(AiVisionProvider::class));
     }
 
-    public function test_a_provider_row_whose_class_is_missing_falls_back_to_null(): void
+    public function test_a_provider_row_naming_a_missing_class_falls_back_to_the_configurable_provider(): void
     {
         AiProvider::query()->create([
             'name' => 'Broken', 'slug' => 'broken',
@@ -99,6 +121,7 @@ class AiSeamTest extends TestCase
         Setting::set('ai.vision', true);
         Setting::set('ai.provider', 'broken');
 
-        $this->assertInstanceOf(NullAiVisionProvider::class, app(AiVisionProvider::class));
+        // A typo in a bespoke driver must not take cataloguing offline.
+        $this->assertInstanceOf(HttpVisionProvider::class, app(AiVisionProvider::class));
     }
 }

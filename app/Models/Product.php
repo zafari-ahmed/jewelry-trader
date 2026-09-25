@@ -20,11 +20,13 @@ class Product extends Model
         'metal_type', 'weight_grams', 'measurements', 'attributes', 'condition_notes',
         'internal_description', 'customer_description', 'seo_description',
         'marketplace_description', 'social_description', 'status',
-        'manually_overridden_fields', 'created_by', 'approved_by', 'submitted_for_review_at',
+        'manually_overridden_fields', 'ai_suggested_fields',
+        'created_by', 'approved_by', 'submitted_for_review_at',
     ];
 
     protected $casts = [
         'manually_overridden_fields' => 'array',
+        'ai_suggested_fields' => 'array',
         'attributes' => 'array',
         'submitted_for_review_at' => 'datetime',
         'weight_grams' => 'decimal:3',

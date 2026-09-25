@@ -268,6 +268,9 @@
  | Base. Mirrors the <style> block each design file carries in its <helmet>.
  */
 @layer base {
+    /* Prevents a flash of the open mobile drawer before Alpine initialises. */
+    [x-cloak] { display: none !important; }
+
     body {
         margin: 0;
         background: var(--color-ivory);

@@ -2,7 +2,20 @@
     <aside class="flex flex-col gap-22">
         <div>
             <x-ui.eyebrow ruled>Search</x-ui.eyebrow>
-            <x-ui.input wire:model.live.debounce.350ms="q" placeholder="Ring, Edwardian, platinum…" class="mt-12" />
+            <x-ui.input wire:model.live.debounce.450ms="q" placeholder="Try: art deco sapphire under 8000" class="mt-12" />
+
+            @if ($this->understoodFilters)
+                <div class="mt-10 rounded-surface border border-border-card bg-ivory-raised px-11 py-9">
+                    <div class="text-caption text-muted">Understood as</div>
+                    <div class="mt-4 flex flex-wrap gap-7">
+                        @foreach ($this->understoodFilters as $key => $value)
+                            <span class="rounded-surface border border-hairline px-7 py-3 text-caption text-gold-ink">
+                                {{ str($key)->replace('_', ' ')->headline() }}: {{ is_array($value) ? implode(', ', $value) : $value }}
+                            </span>
+                        @endforeach
+                    </div>
+                </div>
+            @endif
         </div>
 
         @foreach ([['category', 'Category', $categories], ['period', 'Period', $periods], ['metal', 'Metal', $metals]] as [$field, $label, $options])

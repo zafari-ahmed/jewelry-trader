@@ -38,9 +38,14 @@ class AiAutoFill extends Component
         }
 
         try {
-            // Module 5 passes this product's uploaded photo paths.
+            // The intake screen drives the real analysis; this button is the
+            // entry point left on screens that have no photographs to hand.
             app(AiVisionProvider::class)->analyze([], 'classification');
         } catch (FeatureNotEnabledException $e) {
+            $this->message = $e->getMessage();
+            $this->messageTone = 'suggested';
+        } catch (\Throwable $e) {
+            // A missing endpoint or key is a setting to fix, not a crash.
             $this->message = $e->getMessage();
             $this->messageTone = 'suggested';
         }

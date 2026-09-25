@@ -7,6 +7,7 @@ use App\Models\FieldColorRule;
 use App\Models\Location;
 use App\Models\Product;
 use App\Models\ProductImage;
+use App\Services\AI\AiCatalogueService;
 use App\Services\Inventory\FieldColorResolver;
 use App\Services\Inventory\ProductIntakeService;
 use Illuminate\Support\Facades\Gate;
@@ -40,6 +41,15 @@ class ProductIntake extends Component
     public ?string $flash = null;
 
     public ?string $error = null;
+
+    /** Set while the assistant is working, so the UI can say so. */
+    public bool $analysing = false;
+
+    /** The suggested price, with its workings, once one has been produced. */
+    public ?array $priceSuggestion = null;
+
+    /** Values as the assistant proposed them, to detect a human's edit. */
+    public array $suggestedValues = [];
 
     public function mount(?Product $product = null): void
     {
@@ -77,6 +87,8 @@ class ProductIntake extends Component
             $this->values['category'] ?? null,
             $this->values,
             $this->product?->manually_overridden_fields ?? [],
+            FieldColorResolver::MODEL,
+            $this->product?->ai_suggested_fields ?? [],
         );
     }
 
@@ -87,7 +99,193 @@ class ProductIntake extends Component
             $rule,
             $this->values[$rule['field_name']] ?? null,
             $this->product?->manually_overridden_fields ?? [],
+            $this->product?->ai_suggested_fields ?? [],
         );
+    }
+
+    #[Computed]
+    public function aiAvailable(): bool
+    {
+        return app(AiCatalogueService::class)->isAvailable();
+    }
+
+    public function isSuggested(string $field): bool
+    {
+        return in_array($field, $this->product?->ai_suggested_fields ?? [], true);
+    }
+
+    /**
+     * Read the photographs and fill the record with suggestions.
+     *
+     * Nothing is decided here: every value lands yellow for a person to accept
+     * or replace, and the price is a band with its workings attached.
+     */
+    public function analysePhotos(): void
+    {
+        $this->reset('error', 'flash');
+
+        $product = $this->ensureProduct();
+
+        if ($product->images()->count() === 0) {
+            $this->error = 'Take at least one photograph before running the analysis.';
+
+            return;
+        }
+
+        $catalogue = app(AiCatalogueService::class);
+
+        try {
+            $analysis = $catalogue->analysePhotos($product);
+        } catch (\Throwable $e) {
+            $this->error = $e->getMessage();
+
+            return;
+        }
+
+        if ($analysis['values'] === []) {
+            $this->error = 'The photographs were not clear enough for a dependable suggestion. Add more angles, or catalogue by hand.';
+
+            return;
+        }
+
+        // Only fill what a person has not already answered themselves.
+        $filled = [];
+
+        foreach ($analysis['values'] as $field => $value) {
+            if (filled($this->values[$field] ?? null) && ! $this->isSuggested($field)) {
+                continue;
+            }
+
+            $this->values[$field] = $value;
+            $this->suggestedValues[$field] = $value;
+            $filled[] = $field;
+        }
+
+        $catalogue->markSuggested($product, $filled);
+
+        $this->priceSuggestion = $catalogue
+            ->suggestPrice($this->values, $analysis['gemstones'])
+            ->toArray();
+
+        $this->product = $product->fresh(['images', 'currentPricing', 'stock']);
+        $this->flash = count($filled).' '.str('field')->plural(count($filled))
+            .' suggested from the photographs · '.$analysis['result']->confidenceScore.'% confidence. Check each one.';
+    }
+
+    /** Draft the five descriptions from what the record now says. */
+    public function generateDescriptions(): void
+    {
+        $this->reset('error', 'flash');
+
+        $product = $this->ensureProduct();
+
+        try {
+            $descriptions = app(AiCatalogueService::class)->describe(array_filter([
+                'title' => $this->values['title'] ?? null,
+                'category' => $this->values['category'] ?? null,
+                'style_period' => $this->values['style_period'] ?? null,
+                'metal_type' => $this->values['metal_type'] ?? null,
+                'measurements' => $this->values['measurements'] ?? null,
+                'brand' => $this->values['brand'] ?? null,
+                'condition_notes' => $this->values['condition_notes'] ?? null,
+            ]));
+        } catch (\Throwable $e) {
+            $this->error = $e->getMessage();
+
+            return;
+        }
+
+        if ($descriptions === []) {
+            $this->error = 'No usable description came back. Try again, or write it by hand.';
+
+            return;
+        }
+
+        foreach ($descriptions as $field => $value) {
+            $this->values[$field] = $value;
+            $this->suggestedValues[$field] = $value;
+        }
+
+        app(AiCatalogueService::class)->markSuggested($product, array_keys($descriptions));
+
+        $this->product = $product->fresh();
+        $this->flash = count($descriptions).' descriptions drafted. Read them before submitting.';
+    }
+
+    /** Price the piece from the rate table, showing the workings. */
+    public function suggestPrice(): void
+    {
+        $this->reset('error', 'flash');
+
+        $gemstones = $this->product?->gemstones()->get()->map->toArray()->all() ?? [];
+
+        $suggestion = app(AiCatalogueService::class)->suggestPrice($this->values, $gemstones);
+
+        if (! $suggestion->hasValue()) {
+            $this->error = 'A price needs at least a metal and a weight: '.implode(', ', $suggestion->missing).'.';
+
+            return;
+        }
+
+        $this->priceSuggestion = $suggestion->toArray();
+    }
+
+    /** Take the suggested retail price into the record. */
+    public function applySuggestedPrice(): void
+    {
+        if (! $this->priceSuggestion) {
+            return;
+        }
+
+        $product = $this->ensureProduct();
+
+        foreach ([
+            'retail_price' => $this->priceSuggestion['retail_cents'],
+            'insurance_value' => $this->priceSuggestion['insurance_cents'],
+            'negotiation_min' => $this->priceSuggestion['negotiation_floor_cents'],
+        ] as $field => $cents) {
+            $this->values[$field] = number_format($cents / 100, 2, '.', '');
+            $this->suggestedValues[$field] = $this->values[$field];
+        }
+
+        app(AiCatalogueService::class)->markSuggested($product, ['retail_price', 'insurance_value', 'negotiation_min']);
+
+        $this->product = $product->fresh();
+        $this->flash = 'Suggested prices applied. They stay marked as suggestions until you accept them.';
+    }
+
+    /** A person agreed with the suggestion as it stands. */
+    public function acceptSuggestion(string $field): void
+    {
+        if (! $this->product?->exists) {
+            return;
+        }
+
+        app(AiCatalogueService::class)->acceptSuggestion($this->product, $field);
+
+        unset($this->suggestedValues[$field]);
+        $this->product = $this->product->fresh();
+    }
+
+    /** A person rejected the suggestion: the field is cleared for them to fill. */
+    public function rejectSuggestion(string $field): void
+    {
+        if (! $this->product?->exists) {
+            return;
+        }
+
+        app(AiCatalogueService::class)->recordCorrection(
+            $this->product,
+            $field,
+            $this->suggestedValues[$field] ?? ($this->values[$field] ?? null),
+            null,
+            auth()->id(),
+            'Rejected at intake',
+        );
+
+        $this->values[$field] = '';
+        unset($this->suggestedValues[$field]);
+        $this->product = $this->product->fresh();
     }
 
     public function goToStep(int $step): void
@@ -173,6 +371,28 @@ class ProductIntake extends Component
         $this->step = 3;
     }
 
+    /**
+     * Log any suggestion a person changed rather than accepted. This is what
+     * turns day-to-day corrections into a record of where the assistant is
+     * weak.
+     */
+    private function captureCorrections(Product $product): void
+    {
+        $catalogue = app(AiCatalogueService::class);
+
+        foreach ($this->suggestedValues as $field => $suggested) {
+            $current = $this->values[$field] ?? null;
+
+            if ((string) $current === (string) $suggested) {
+                continue;
+            }
+
+            $catalogue->recordCorrection($product, $field, $suggested, $current, auth()->id());
+
+            unset($this->suggestedValues[$field]);
+        }
+    }
+
     private function persist(): Product
     {
         $this->product?->exists
@@ -188,6 +408,11 @@ class ProductIntake extends Component
         ], attributes: ['values.sku' => 'SKU', 'values.title' => 'item title']);
 
         $this->product = app(ProductIntakeService::class)->save($this->product, $this->values, auth()->id());
+
+        if ($this->suggestedValues !== []) {
+            $this->captureCorrections($this->product);
+            $this->product = $this->product->fresh();
+        }
 
         return $this->product;
     }

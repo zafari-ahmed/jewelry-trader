@@ -195,3 +195,27 @@ CLAUDE.md remains the specification; this file records where reality diverged fr
 | Index naming | `storefront_inventory_requests`' unique index is named explicitly; the generated name exceeded MySQL's 64-character limit and failed *after* creating the table, leaving a half-applied migration. | Found by running it |
 | Money columns | `rental_agreements.deposit_amount_cents` follows the same minor-units convention as every other money column. | Consistency with payments, orders, pricing |
 | A test that no logic shipped | `PlaceholderTest` asserts that no Phase 2 service class exists, so "tables and flags only" stays true as the codebase grows. | §6 boundary |
+
+## Client clarification — AI cataloguing moved into Phase 1
+
+Raised by the client on 2026-09-25: assisted cataloguing (photo → analysis →
+descriptions → price → approval) is their **primary competitive advantage** and
+must ship in Phase 1, on tablets and phones. The build brief (CLAUDE.md §0,
+Module 2, §6, Module 7) placed all AI capability in Phase 2 and forbade
+implementing it. The brief and the client's own documentation disagreed; the
+client's requirement wins.
+
+| # | Decision | Rationale |
+|---|---|---|
+| **Vendor-neutral by construction** | The providers speak the common chat-completions shape, with endpoint, key and model held as settings. `NoVendorReferencesTest` still passes: the codebase names no AI service anywhere. | Satisfies the client's requirement 1 *and* the original acceptance criterion; scoping did not need to wait on their provider choice |
+| Pricing is arithmetic, not a guess | `PricingEngine` prices from a rate table the business maintains (metal per gram, gemstone per carat, brand/period/condition multipliers, retail multiplier). A model reads photographs; it never invents money. Every suggestion carries its workings. | A language model cannot know today's platinum price. This is explainable and defensible to a customer, and a market feed can replace the rate table later without touching callers |
+| Suggestions are never decisions | `products.ai_suggested_fields` records which fields hold an unverified suggestion. Such a field renders **yellow whatever its value**, turns green when accepted, and blue when replaced — with the change written to `ai_correction_log`. | The colour system already meant this; now it is enforced by data rather than convention |
+| Confidence floor | A reading below `ai.min_confidence` (default 40%) suggests nothing. | Better silence than sending staff to correct guesswork |
+| Never overwrites a person | Analysis fills only fields that are empty or already hold a suggestion. | A human's answer outranks the machine's |
+| Search interprets, never selects | Natural-language search turns a sentence into the filters the catalogue already applies; the model never chooses which records come back, so the "listed and in stock" guarantee is untouched. A failing service falls back to keyword search. | A search box must not break because a model is slow |
+| Prompts are settings | `ai.vision_prompt` and `ai.description_prompt` are editable in Settings. | House style is a business decision, not a deploy |
+| Mobile | Admin navigation collapses behind a menu on small screens — it previously pushed the work area 1,102px down a 375px-wide phone. A dedicated "Take a photo" control uses the device camera directly. | Field staff catalogue on the device, per the client's workflow |
+
+**Still open:** which provider and model the client chooses, and whether a
+market-data feed should eventually replace the rate table. Neither blocks the
+build; both are settings.

@@ -29,17 +29,32 @@ class AiAutoFillButtonTest extends TestCase
             ->assertDontSee('Available in Phase 2');
     }
 
-    public function test_clicking_it_with_the_flag_on_reaches_the_null_provider_and_is_refused(): void
+    public function test_a_capability_switched_on_but_unconfigured_says_what_is_missing(): void
     {
         Setting::set('ai.enabled', true);
         Setting::set('ai.vision', true);
 
-        // Correct Phase 1 behaviour: the seam resolves, the call is refused,
-        // and the refusal surfaces to the user rather than failing silently.
+        // Assistance is on but no provider has been entered: the message names
+        // the setting to fix rather than failing silently or crashing.
         Livewire::test(AiAutoFill::class)
             ->call('autoFill')
             ->assertSet('messageTone', 'suggested')
-            ->assertSee('is not enabled');
+            ->assertSee('No AI endpoint is configured');
+    }
+
+    public function test_a_configured_capability_reaches_the_provider(): void
+    {
+        Setting::set('ai.enabled', true);
+        Setting::set('ai.vision', true);
+        Setting::set('ai.endpoint', 'https://ai.example.test/v1');
+        Setting::set('ai.api_key', 'test-key');
+        Setting::set('ai.vision_model', 'vision-model');
+
+        // No photographs were passed, so the provider refuses on that ground —
+        // which proves the call reached it.
+        Livewire::test(AiAutoFill::class)
+            ->call('autoFill')
+            ->assertSee('photograph');
     }
 
     public function test_clicking_it_with_the_flag_off_never_reaches_a_provider(): void

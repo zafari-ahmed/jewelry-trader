@@ -1,12 +1,13 @@
 @php $current = request()->route()?->getName(); @endphp
-<nav class="flex w-full shrink-0 flex-col gap-22 bg-navy px-14 py-20 lg:min-h-screen lg:max-w-sidebar">
-    <div>
+<nav x-cloak :class="nav ? 'flex' : 'hidden'"
+    class="w-full shrink-0 flex-col gap-22 bg-navy px-14 py-20 lg:!flex lg:min-h-screen lg:max-w-sidebar">
+    <div class="hidden lg:block">
         <div class="font-serif text-card-title font-semibold uppercase tracking-brand text-ivory">Jewelry</div>
         <div class="font-serif text-card-title font-semibold uppercase tracking-brand text-gold">Trader</div>
         <div class="mt-6 text-tiny uppercase tracking-eyebrow-lg text-navy-eyebrow">Estate &amp; Fine Jewelry</div>
     </div>
 
-    <div class="flex flex-col gap-3">
+    <div class="flex flex-col gap-3" @click="nav = false">
         <x-ui.eyebrow tone="navy" class="mt-8 mb-4 pl-12">Operations</x-ui.eyebrow>
         <x-ui.nav-item :href="route('admin.dashboard')" :active="$current === 'admin.dashboard'">Dashboard</x-ui.nav-item>
         <x-ui.nav-item :href="route('admin.inventory')" :active="$current === 'admin.inventory'">Inventory</x-ui.nav-item>

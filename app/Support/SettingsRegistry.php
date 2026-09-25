@@ -23,6 +23,7 @@ class SettingsRegistry
             self::ai(),
             self::security(),
             self::commission(),
+            self::pricing(),
             self::features(),
         );
     }
@@ -98,6 +99,19 @@ class SettingsRegistry
             'ai.description_model' => ['type' => 'string', 'default' => null, 'label' => 'Description model'],
             'ai.pricing_model' => ['type' => 'string', 'default' => null, 'label' => 'Pricing model'],
             'ai.search_model' => ['type' => 'string', 'default' => null, 'label' => 'Search model'],
+
+            // Connection details. Vendor-neutral: any service speaking the
+            // common chat-completions shape works, so switching provider is a
+            // settings change rather than a code change (requirement 1).
+            'ai.endpoint' => ['type' => 'string', 'default' => null, 'label' => 'API endpoint', 'help' => 'Base URL of the provider, e.g. https://…/v1'],
+            'ai.timeout_seconds' => ['type' => 'integer', 'default' => 45, 'label' => 'Request timeout (seconds)'],
+            'ai.max_output_tokens' => ['type' => 'integer', 'default' => 1200, 'label' => 'Maximum response length'],
+            'ai.min_confidence' => ['type' => 'integer', 'default' => 40, 'label' => 'Minimum confidence to suggest (%)', 'help' => 'Below this, a suggestion is discarded rather than shown.'],
+
+            // Prompts live in settings so wording can be tuned by the business
+            // without a deploy.
+            'ai.vision_prompt' => ['type' => 'string', 'default' => 'You are cataloguing a piece of antique, estate or fine jewelry from photographs for a specialist dealer. Identify only what the images actually support, and say so when uncertain.', 'label' => 'Photo analysis instructions'],
+            'ai.description_prompt' => ['type' => 'string', 'default' => 'Write for a specialist estate jewelry dealer. Be precise and restrained: no invented provenance, no superlatives, no claims the attributes do not support.', 'label' => 'Description instructions'],
         ];
     }
 
@@ -134,6 +148,49 @@ class SettingsRegistry
                 'employee_id' => 'user.id', 'employee_name' => 'user.name',
                 'period_end' => 'period_end', 'amount' => 'amount',
             ], 'label' => 'Payroll export column mapping'],
+        ];
+    }
+
+    /**
+     * The pricing factors and weight engine (requirement 7).
+     *
+     * Deliberately explainable rather than a single opaque number: each factor
+     * is a rate the business maintains, so a suggested price can be shown as a
+     * breakdown and defended to a customer.
+     */
+    public static function pricing(): array
+    {
+        return [
+            'pricing.metal_rates_per_gram' => ['type' => 'json', 'default' => [
+                '950 platinum' => 28.50, '900 platinum' => 27.00,
+                '24k' => 82.00, '22k' => 75.00, '18k' => 61.50, '14k' => 47.80, '9k' => 30.70,
+                'sterling silver' => 0.85,
+            ], 'label' => 'Metal value per gram', 'help' => 'Scrap or melt value used as the floor of a suggestion.'],
+
+            'pricing.gemstone_rates_per_carat' => ['type' => 'json', 'default' => [
+                'diamond' => 2400.00, 'ruby' => 1800.00, 'sapphire' => 1100.00,
+                'emerald' => 1500.00, 'pearl' => 120.00, 'garnet' => 90.00, 'opal' => 180.00,
+            ], 'label' => 'Gemstone value per carat'],
+
+            'pricing.brand_premiums' => ['type' => 'json', 'default' => [
+                'cartier' => 2.60, 'van cleef & arpels' => 2.60, 'tiffany & co.' => 1.90,
+                'bulgari' => 1.80, 'boucheron' => 1.70,
+            ], 'label' => 'Brand multiplier'],
+
+            'pricing.period_premiums' => ['type' => 'json', 'default' => [
+                'georgian' => 1.60, 'victorian' => 1.30, 'edwardian' => 1.35,
+                'art deco' => 1.45, 'art nouveau' => 1.40, 'retro' => 1.15, 'mid-century' => 1.10,
+            ], 'label' => 'Period multiplier'],
+
+            'pricing.condition_adjustments' => ['type' => 'json', 'default' => [
+                'excellent' => 1.00, 'very good' => 0.92, 'good' => 0.82,
+                'fair' => 0.65, 'restored' => 0.75, 'damaged' => 0.45,
+            ], 'label' => 'Condition multiplier'],
+
+            'pricing.retail_multiplier' => ['type' => 'string', 'default' => '2.4', 'label' => 'Retail multiplier', 'help' => 'Applied to intrinsic value to reach a retail asking price.'],
+            'pricing.suggestion_band_percent' => ['type' => 'integer', 'default' => 15, 'label' => 'Suggestion band (±%)'],
+            'pricing.insurance_multiplier' => ['type' => 'string', 'default' => '1.15', 'label' => 'Insurance value multiplier'],
+            'pricing.negotiation_floor_percent' => ['type' => 'integer', 'default' => 85, 'label' => 'Negotiation floor (% of retail)'],
         ];
     }
 

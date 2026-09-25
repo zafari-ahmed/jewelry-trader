@@ -53,7 +53,7 @@ class FieldColorResolver
      *
      * @param  array<string, mixed>  $rule
      */
-    public function colorFor(array $rule, mixed $value, array $overriddenFields = []): string
+    public function colorFor(array $rule, mixed $value, array $overriddenFields = [], array $suggestedFields = []): string
     {
         if ($rule['color'] === 'gray') {
             return 'gray';
@@ -61,6 +61,12 @@ class FieldColorResolver
 
         if (in_array($rule['field_name'], $overriddenFields, true)) {
             return 'blue';
+        }
+
+        // An unverified suggestion stays yellow however complete it looks, so
+        // nobody mistakes the machine's answer for a person's.
+        if (in_array($rule['field_name'], $suggestedFields, true)) {
+            return 'yellow';
         }
 
         if ($this->hasValue($value)) {
@@ -78,6 +84,9 @@ class FieldColorResolver
     /**
      * Required fields still empty. Submission is blocked while this is
      * non-empty — checked server-side, never only in the browser.
+     *
+     * A suggestion counts as filled: the reviewer is the gate on accuracy,
+     * not the submit button.
      *
      * @param  array<string, mixed>  $values
      * @return array<int, string> field names
@@ -102,14 +111,14 @@ class FieldColorResolver
      *
      * @return array{complete:int, missing:int, awaiting:int, overridden:int, not_applicable:int, optional:int, percent:int}
      */
-    public function completeness(?string $category, array $values, array $overriddenFields = [], string $model = self::MODEL): array
+    public function completeness(?string $category, array $values, array $overriddenFields = [], string $model = self::MODEL, array $suggestedFields = []): array
     {
         $counts = ['complete' => 0, 'missing' => 0, 'awaiting' => 0, 'overridden' => 0, 'not_applicable' => 0, 'optional' => 0];
 
         $rules = $this->rulesFor($category, $model);
 
         foreach ($rules as $rule) {
-            $color = $this->colorFor($rule, $values[$rule['field_name']] ?? null, $overriddenFields);
+            $color = $this->colorFor($rule, $values[$rule['field_name']] ?? null, $overriddenFields, $suggestedFields);
 
             match ($color) {
                 'green' => $counts['complete']++,

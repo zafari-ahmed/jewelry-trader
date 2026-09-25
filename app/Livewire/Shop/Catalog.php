@@ -3,7 +3,10 @@
 namespace App\Livewire\Shop;
 
 use App\Models\Product;
+use App\Models\Setting;
+use App\Services\AI\Providers\HttpSearchProvider;
 use App\Services\Search\KeywordProductSearch;
+use Livewire\Attributes\Computed;
 use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -36,16 +39,44 @@ class Catalog extends Component
         $this->reset(['q', 'category', 'period', 'metal', 'minPrice', 'maxPrice', 'sort']);
     }
 
+    /**
+     * Natural-language search reads the shopper's sentence and fills in the
+     * filters the catalogue already understands. It never chooses which
+     * records come back, so the "listed and in stock" guarantee is untouched.
+     */
+    #[Computed]
+    public function interpretation(): array
+    {
+        if (trim($this->q) === '' || ! Setting::enabled('ai.enabled') || ! Setting::enabled('ai.search')) {
+            return [];
+        }
+
+        return array_filter(app(HttpSearchProvider::class)->interpret($this->q), 'filled');
+    }
+
+    /**
+     * The interpreted filters minus the search terms, for showing the shopper
+     * what was understood. Kept separate from the query: stripping terms from
+     * what is searched would send the whole raw sentence to keyword matching.
+     */
+    #[Computed]
+    public function understoodFilters(): array
+    {
+        return array_diff_key($this->interpretation, array_flip(['terms']));
+    }
+
     public function render()
     {
+        $understood = $this->interpretation;
+
         $products = app(KeywordProductSearch::class)
-            ->query($this->q, [
-                'category' => $this->category,
-                'style_period' => $this->period,
-                'metal_type' => $this->metal,
-                'min_price' => $this->minPrice,
-                'max_price' => $this->maxPrice,
-                'sort' => $this->sort,
+            ->query($understood['terms'] ?? $this->q, [
+                'category' => $this->category ?: ($understood['category'] ?? ''),
+                'style_period' => $this->period ?: ($understood['style_period'] ?? ''),
+                'metal_type' => $this->metal ?: ($understood['metal_type'] ?? ''),
+                'min_price' => $this->minPrice ?: ($understood['min_price'] ?? ''),
+                'max_price' => $this->maxPrice ?: ($understood['max_price'] ?? ''),
+                'sort' => $this->sort !== 'newest' ? $this->sort : ($understood['sort'] ?? 'newest'),
             ])
             ->paginate(12);
 
