@@ -23,6 +23,16 @@ class ProductIntakeService
         'marketplace_description', 'social_description',
     ];
 
+    /**
+     * Step 1 of the craftsman's formula, entered in dollars and held on the
+     * product in cents. These are costs of the piece itself, so they belong on
+     * the record rather than in the price history, which tracks asking prices.
+     */
+    public const COSTS = [
+        'labor_cost' => 'labor_cost_cents',
+        'material_cost' => 'material_cost_cents',
+    ];
+
     /** Money fields, stored as cents on the pricing history. */
     public const PRICING = [
         'acquisition_value' => 'acquisition_value_cents',
@@ -35,7 +45,7 @@ class ProductIntakeService
     public function __construct(private FieldColorResolver $colors) {}
 
     /** @param array<string, mixed> $values */
-    public function save(?Product $product, array $values, ?int $userId = null): Product
+    public function save(?Product $product, array $values, ?int $userId = null, ?array $working = null): Product
     {
         // An edit lock holds during a dispute: the record is frozen but the
         // piece may still be sellable, depending on its other locks.
@@ -43,13 +53,21 @@ class ProductIntakeService
             throw new RuntimeException("{$product->sku} is locked for editing: ".$product->lockReasonFor('edit'));
         }
 
-        return DB::transaction(function () use ($product, $values, $userId) {
+        return DB::transaction(function () use ($product, $values, $userId, $working) {
             $columns = array_intersect_key($values, array_flip(self::COLUMNS));
             $columns['weight_grams'] = ($columns['weight_grams'] ?? '') === '' ? null : $columns['weight_grams'];
+
+            foreach (self::COSTS as $field => $column) {
+                $entered = $values[$field] ?? null;
+                $columns[$column] = ($entered === null || $entered === '')
+                    ? null
+                    : (int) round(((float) $entered) * 100);
+            }
 
             $extras = array_diff_key(
                 $values,
                 array_flip(self::COLUMNS),
+                self::COSTS,
                 self::PRICING,
                 array_flip(['location_id']),
             );
@@ -64,7 +82,7 @@ class ProductIntakeService
                 ]);
             }
 
-            $this->savePricing($product, $values, $userId);
+            $this->savePricing($product, $values, $userId, $working);
             $this->savePlacement($product, $values);
 
             return $product->fresh(['currentPricing', 'stock', 'images']);
@@ -126,6 +144,11 @@ class ProductIntakeService
     {
         $values = $product->only(self::COLUMNS) + ($product->attributes ?? []);
 
+        foreach (self::COSTS as $field => $column) {
+            $cents = $product->{$column};
+            $values[$field] = $cents === null ? '' : number_format($cents / 100, 2, '.', '');
+        }
+
         $pricing = $product->currentPricing()->first();
 
         foreach (self::PRICING as $field => $column) {
@@ -138,7 +161,10 @@ class ProductIntakeService
         return $values;
     }
 
-    private function savePricing(Product $product, array $values, ?int $userId): void
+    /**
+     * @param  array|null  $working  the arithmetic behind this price, when it came from the engine
+     */
+    private function savePricing(Product $product, array $values, ?int $userId, ?array $working = null): void
     {
         $row = [];
 
@@ -153,10 +179,16 @@ class ProductIntakeService
 
         $current = $product->currentPricing()->first();
 
-        // Append only when something actually changed.
+        // Append only when something actually changed. The working travels with
+        // the figure, so a price can still be explained years later, after
+        // every rate behind it has moved.
         foreach ($row as $column => $value) {
             if ($current?->{$column} !== $value) {
-                Pricing::create($row + ['product_id' => $product->id, 'priced_by' => $userId]);
+                Pricing::create($row + [
+                    'product_id' => $product->id,
+                    'priced_by' => $userId,
+                    'working' => $working,
+                ]);
 
                 return;
             }

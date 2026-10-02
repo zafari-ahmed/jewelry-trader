@@ -164,7 +164,7 @@ class ProductIntake extends Component
         $catalogue->markSuggested($product, $filled);
 
         $this->priceSuggestion = $catalogue
-            ->suggestPrice($this->values, $analysis['gemstones'])
+            ->suggestPrice($this->pricingAttributes(), $analysis['gemstones'])
             ->toArray();
 
         $this->product = $product->fresh(['images', 'currentPricing', 'stock']);
@@ -212,14 +212,39 @@ class ProductIntake extends Component
         $this->flash = count($descriptions).' descriptions drafted. Read them before submitting.';
     }
 
-    /** Price the piece from the rate table, showing the workings. */
+    /**
+     * What the formula needs, in the units it works in.
+     *
+     * The form holds money in dollars because that is how a person types it;
+     * the engine works in cents because that is how money is counted without
+     * rounding drift.
+     *
+     * @return array<string, mixed>
+     */
+    private function pricingAttributes(): array
+    {
+        $attributes = $this->values;
+
+        foreach (['labor_cost' => 'labor_cost_cents', 'material_cost' => 'material_cost_cents'] as $field => $key) {
+            $entered = $this->values[$field] ?? '';
+            $attributes[$key] = $entered === '' ? 0 : (int) round(((float) $entered) * 100);
+        }
+
+        // Layer 4 prices a piece that has been sitting differently from one
+        // that arrived this morning.
+        $attributes['days_in_stock'] = (int) ($this->product?->created_at?->diffInDays(now()) ?? 0);
+
+        return $attributes;
+    }
+
+    /** Price the piece by the craftsman's formula, showing every step. */
     public function suggestPrice(): void
     {
         $this->reset('error', 'flash');
 
         $gemstones = $this->product?->gemstones()->get()->map->toArray()->all() ?? [];
 
-        $suggestion = app(AiCatalogueService::class)->suggestPrice($this->values, $gemstones);
+        $suggestion = app(AiCatalogueService::class)->suggestPrice($this->pricingAttributes(), $gemstones);
 
         if (! $suggestion->hasValue()) {
             $this->error = 'A price needs at least a metal and a weight: '.implode(', ', $suggestion->missing).'.';
@@ -403,11 +428,20 @@ class ProductIntake extends Component
             'values.sku' => ['required', 'string', 'max:64', 'unique:products,sku'.($this->product?->id ? ','.$this->product->id : '')],
             'values.title' => ['required', 'string', 'max:255'],
             'values.weight_grams' => ['nullable', 'numeric', 'min:0'],
+            'values.labor_cost' => ['nullable', 'numeric', 'min:0'],
+            'values.material_cost' => ['nullable', 'numeric', 'min:0'],
             'values.retail_price' => ['nullable', 'numeric', 'min:0'],
             'values.acquisition_value' => ['nullable', 'numeric', 'min:0'],
         ], attributes: ['values.sku' => 'SKU', 'values.title' => 'item title']);
 
-        $this->product = app(ProductIntakeService::class)->save($this->product, $this->values, auth()->id());
+        // The working travels with the price it produced, so the figure can
+        // still be explained after the rates behind it have moved.
+        $this->product = app(ProductIntakeService::class)->save(
+            $this->product,
+            $this->values,
+            auth()->id(),
+            $this->priceSuggestion,
+        );
 
         if ($this->suggestedValues !== []) {
             $this->captureCorrections($this->product);

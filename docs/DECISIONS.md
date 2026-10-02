@@ -219,3 +219,80 @@ client's requirement wins.
 **Still open:** which provider and model the client chooses, and whether a
 market-data feed should eventually replace the rate table. Neither blocks the
 build; both are settings.
+
+## The craftsman's price determination formula
+
+Supplied by the client on 2026-10-02 as a 16-page specification, with the
+instruction that it become the base calculation engine: *"This formula is the
+floor. Every price the system calculates starts here."*
+
+### What was built
+
+The four steps, in a fixed order, each compounding on the one before:
+
+| Step | What it determines | How |
+|---|---|---|
+| 1 | Determining factors | labour cost + material cost |
+| 2 | Basic price | ÷ (100% − overhead% − design%) |
+| 3 | Wholesale / cost price | ÷ (100% − wholesale agent commission%) |
+| 4 | Retail price | ÷ (100% − retail agent commission%), then rounded up |
+
+Subtract-and-divide throughout, never add — the markup lands on the final
+price rather than on the starting one. Both of the specification's worked
+examples are pinned as tests (`CraftsmanFormulaTest`): $4.00 → $10.50, and
+$1,380 → $3,608.00.
+
+### Answers to the client's six questions (§8.0)
+
+| # | Question | Answer |
+|---|---|---|
+| 1 | Integrate as the base engine beneath the existing layers? | Yes. `CraftsmanFormula` always runs; `PricingEngine` orchestrates the layers around it |
+| 2 | Percentages configurable per category? | Yes — `pricing.formula.category_overrides`, seeded with their four categories |
+| 3 | Full workings displayed to staff? | Yes — every step is a `PricingLine` with its own arithmetic, shown on the intake screen and filed with the price |
+| 4 | Each step independently toggled? | Yes. A step that is off passes the price through and the working says so |
+| 5 | Output feeds the AI pricing engine? | Yes — Layers 3 and 4 apply to the formula's output, never inside it |
+| 6 | Retail rounding configurable? | Yes — on/off plus the increment |
+
+### Where the layers sit, and one correction to the specification
+
+The specification's stack diagram and §7.0 place Layer 2 (live metal rates)
+*below* the formula, feeding the material cost — "Material cost pulls from
+Layer 1 (Base) or Layer 2 (API)". Its §4.2 worked example instead shows the
+live-rate adjustment as a flat +$45 applied *after* Step 4.
+
+Built per §7.0: **the live feed sets the material rate in Step 1.** A metals
+feed reports what metal costs, and material cost is a Step 1 input; applying
+it after a retail markup would mean a 3.75% move in platinum moved the shelf
+price by 3.75% of *retail*, which is roughly eight times the real exposure.
+
+Noted for the client: their §4.2 final figure of $6,945.00 does not reconcile
+with the arithmetic either way — the stated layers give about $6,949 applying
+the adjustment at the end, or about $7,129 applying it in Step 1. The
+difference is presentational, not structural, but the number in their document
+should not be treated as a test case.
+
+### Other decisions
+
+| Decision | Rationale |
+|---|---|
+| Layer 3 multiplier defaults rebased | They previously scaled intrinsic metal value; they now scale a retail price derived from cost. Cartier at ×2.60 made sense against melt value and is absurd against retail. Defaults are now the client's own figures — maker 1.35, Art Deco 1.25, excellent condition 1.05 |
+| A markup ≥ 95% refuses its step | Dividing by zero or by a negative has no meaning here. The step is skipped, the working says why, and the settings form refuses the combination before it can be saved |
+| Rounding is **up**, not to nearest | $10.46 → $10.50, as specified. Rounding to nearest would let the presentation rule quietly cost margin |
+| Costs live on the item record | `products.labor_cost_cents` and `material_cost_cents`. Both optional: labour falls back to a per-category standard, materials to the rate table. A figure entered by a person always outranks the table |
+| The working is filed with the price | `pricing.working` holds the steps, the layers and the percentages as they stood. Rates move; without this, a price set last year could never be explained again |
+| The live feed fails soft, always | Unreachable, slow, or quoting a metal we do not hold → fall back to the base table and say so in the working. Pricing a piece must never depend on somebody else's uptime |
+| Purity is applied to spot | A feed quotes fine metal; 18k is 75% gold. Without this the material cost would be overstated by a third |
+
+### Client decisions recorded 2026-10-02
+
+- **Reading service:** their choice of supplier for Phase 1, to be entered in
+  Settings → AI & Automation. No code change: no supplier is named anywhere in
+  the codebase, and `NoVendorReferencesTest` still enforces that.
+- **Pilot cost visibility:** `ai_usage_log` records every call with its tokens
+  and cost, priced from rates in Settings, reported monthly and **per piece
+  catalogued** — the figure that actually answers whether the service earns its
+  keep. Historic rows keep the rate they were charged at.
+- **AI-maintained rate table:** the client is sending a separate specification.
+  The seam is in place — the tables are settings, and Layer 4 already applies
+  category, seasonal and inventory-age adjustments from them — but nothing is
+  built against a spec we have not seen.

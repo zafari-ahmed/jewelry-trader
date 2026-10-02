@@ -16,6 +16,11 @@ use RuntimeException;
  */
 class HttpVisionProvider extends HttpChatProvider implements AiVisionProvider
 {
+    protected function capability(): string
+    {
+        return 'vision';
+    }
+
     /** What the model is asked to return, by analysis type. */
     private const SHAPES = [
         'classification' => ['category', 'subcategory', 'title', 'object_type'],

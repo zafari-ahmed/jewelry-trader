@@ -3,77 +3,195 @@
 namespace App\Services\Pricing;
 
 use App\Models\Setting;
+use App\Services\Pricing\Contracts\MetalRateProvider;
 
 /**
- * The pricing factors and weight engine.
+ * The pricing stack.
  *
- * Builds a suggested price from what the piece is made of and what it is,
- * using rates the business maintains in Settings:
+ * The craftsman's four-step formula is the floor — it always runs, and every
+ * price the system produces starts there. The layers around it are
+ * refinements, each independently switchable so a strategy can be tested
+ * without the rest of the stack moving:
  *
- *   metal value + gemstone value  → intrinsic value
- *   × brand × period × condition  → adjusted value
- *   × retail multiplier           → suggested retail
+ *   Layer 1  base metal rates ........ always available, the fallback
+ *   Layer 2  live market feed ........ optional, feeds the material cost
+ *   ─────────  the formula runs  ─────────
+ *   Layer 3  maker / period / condition multipliers
+ *   Layer 4  category / seasonal / inventory-age adjustments
  *
- * This is arithmetic, not a guess. A language model is good at reading a
- * photograph and poor at knowing what platinum traded at this morning, so the
- * money comes from the rate table and only the *attributes* come from the
- * photographs. Where a market feed is connected later, it replaces the rate
- * table without touching anything that calls this.
+ * Layers 1 and 2 answer what the materials cost, so they belong *underneath*
+ * the formula, in Step 1. Layers 3 and 4 answer what this particular piece is
+ * worth beyond its materials and labour, so they apply after Step 4.
+ *
+ * None of these figures is invented. A model reads a photograph and tells us
+ * the piece is Art Deco; the rate table says what Art Deco is worth here. The
+ * money comes from tables the business maintains, which is what makes a price
+ * explainable to a customer and defensible in an appraisal.
  */
 class PricingEngine
 {
+    public function __construct(
+        private CraftsmanFormula $formula,
+        private MetalRateProvider $rates,
+    ) {}
+
     /**
-     * @param  array<string, mixed>  $attributes  metal_type, weight_grams, brand, style_period, condition_grade
+     * @param  array<string, mixed>  $attributes  metal_type, weight_grams, brand, style_period,
+     *                                            condition_grade, category, labor_cost_cents,
+     *                                            material_cost_cents, days_in_stock
      * @param  array<int, array<string, mixed>>  $gemstones
      */
     public function suggest(array $attributes, array $gemstones = []): PricingSuggestion
     {
         $factors = [];
         $missing = [];
+        $category = $attributes['category'] ?? null;
 
-        $metalCents = $this->metalValue($attributes, $factors, $missing);
-        $stoneCents = $this->gemstoneValue($gemstones, $factors, $missing);
+        // ---- Layers 1 and 2: what the materials cost ----------------------
+        $materialCents = $this->materialCost($attributes, $gemstones, $factors, $missing);
+        $labourCents = $this->labourCost($attributes, $factors);
 
-        $intrinsic = $metalCents + $stoneCents;
+        // ---- The formula --------------------------------------------------
+        $formula = $this->formula->compute($labourCents, $materialCents, $category);
 
-        $multipliers = [
-            'brand' => $this->lookupMultiplier('pricing.brand_premiums', $attributes['brand'] ?? null, 1.0),
-            'period' => $this->lookupMultiplier('pricing.period_premiums', $attributes['style_period'] ?? null, 1.0),
-            'condition' => $this->lookupMultiplier('pricing.condition_adjustments', $attributes['condition_grade'] ?? null, 1.0),
-        ];
+        $baseRetail = $formula['retail_cents'];
+        $lines = $formula['lines'];
+
+        // ---- Layers 3 and 4: what this piece is worth beyond its cost -----
+        $multipliers = [];
+        $price = $baseRetail;
+
+        $price = $this->applyLayer(
+            'pricing.layer.multipliers_enabled',
+            'Layer 3 · Maker, period and condition',
+            [
+                'brand' => $this->lookup('pricing.brand_premiums', $attributes['brand'] ?? null),
+                'period' => $this->lookup('pricing.period_premiums', $attributes['style_period'] ?? null),
+                'condition' => $this->lookup('pricing.condition_adjustments', $attributes['condition_grade'] ?? null),
+            ],
+            $price,
+            $multipliers,
+            $lines,
+        );
+
+        $price = $this->applyLayer(
+            'pricing.layer.market_enabled',
+            'Layer 4 · Market adjustments',
+            [
+                'category' => $this->lookup('pricing.category_demand', $category),
+                'season' => $this->lookup('pricing.seasonal_demand', now()->format('F')),
+                'inventory age' => $this->ageAdjustment($attributes),
+            ],
+            $price,
+            $multipliers,
+            $lines,
+        );
 
         if (blank($attributes['condition_grade'] ?? null)) {
             $missing[] = 'condition grade';
         }
 
-        $adjusted = $intrinsic;
+        // The rounding rule applies to whatever price a customer is finally
+        // shown, not only to the formula's own output.
+        $final = $this->formula->round($price);
 
-        foreach ($multipliers as $multiplier) {
-            $adjusted *= $multiplier;
+        if ($final !== $price) {
+            $lines[] = new PricingLine(
+                'Final rounding',
+                '$'.number_format($price / 100, 2).' rounded up for presentation',
+                $final,
+            );
         }
-
-        $retail = (int) round($adjusted * (float) Setting::get('pricing.retail_multiplier', 2.4));
 
         $bandPercent = (int) Setting::get('pricing.suggestion_band_percent', 15);
         $floorPercent = (int) Setting::get('pricing.negotiation_floor_percent', 85);
 
         return new PricingSuggestion(
-            intrinsicCents: (int) round($intrinsic),
-            retailCents: $retail,
-            bandLowCents: (int) round($retail * (1 - $bandPercent / 100)),
-            bandHighCents: (int) round($retail * (1 + $bandPercent / 100)),
-            insuranceCents: (int) round($retail * (float) Setting::get('pricing.insurance_multiplier', 1.15)),
-            negotiationFloorCents: (int) round($retail * $floorPercent / 100),
+            intrinsicCents: $materialCents,
+            labourCents: $labourCents,
+            determiningFactorsCents: $formula['determining_factors_cents'],
+            basicCents: $formula['basic_cents'],
+            wholesaleCents: $formula['wholesale_cents'],
+            baseRetailCents: $baseRetail,
+            retailCents: $final,
+            bandLowCents: (int) round($final * (1 - $bandPercent / 100)),
+            bandHighCents: (int) round($final * (1 + $bandPercent / 100)),
+            insuranceCents: (int) round($final * (float) Setting::get('pricing.insurance_multiplier', 1.15)),
+            negotiationFloorCents: (int) round($final * $floorPercent / 100),
             factors: $factors,
             multipliers: $multipliers,
+            percentages: $formula['percentages'],
+            lines: $lines,
             missing: $missing,
         );
+    }
+
+    /**
+     * Step 1's material half: metal plus stones.
+     *
+     * A figure entered by hand wins. Somebody who weighed the piece and
+     * costed it knows more than a rate table does, and the table is there to
+     * save them the arithmetic, not to overrule them.
+     */
+    private function materialCost(array $attributes, array $gemstones, array &$factors, array &$missing): int
+    {
+        $entered = (int) ($attributes['material_cost_cents'] ?? 0);
+
+        if ($entered > 0) {
+            $factors[] = [
+                'label' => 'Materials',
+                'detail' => 'Entered on the item record',
+                'value_cents' => $entered,
+            ];
+
+            return $entered;
+        }
+
+        return $this->metalValue($attributes, $factors, $missing)
+            + $this->gemstoneValue($gemstones, $factors, $missing);
+    }
+
+    /**
+     * Step 1's labour half: bench work, setting and finishing.
+     *
+     * Taken from the item record, or from a per-category default where the
+     * business has set one, since a watch service is not a ring sizing.
+     */
+    private function labourCost(array $attributes, array &$factors): int
+    {
+        $entered = (int) ($attributes['labor_cost_cents'] ?? 0);
+
+        if ($entered > 0) {
+            $factors[] = [
+                'label' => 'Labour',
+                'detail' => 'Entered on the item record',
+                'value_cents' => $entered,
+            ];
+
+            return $entered;
+        }
+
+        $default = $this->lookup('pricing.formula.default_labour_by_category', $attributes['category'] ?? null);
+
+        if ($default === null) {
+            return 0;
+        }
+
+        $cents = (int) round($default * 100);
+
+        $factors[] = [
+            'label' => 'Labour',
+            'detail' => 'Standard for '.($attributes['category'] ?: 'this category'),
+            'value_cents' => $cents,
+        ];
+
+        return $cents;
     }
 
     private function metalValue(array $attributes, array &$factors, array &$missing): int
     {
         $weight = (float) ($attributes['weight_grams'] ?? 0);
-        $metal = $attributes['metal_type'] ?? null;
+        $metal = (string) ($attributes['metal_type'] ?? '');
 
         if ($weight <= 0) {
             $missing[] = 'weight in grams';
@@ -81,7 +199,7 @@ class PricingEngine
             return 0;
         }
 
-        $rate = $this->lookupRate('pricing.metal_rates_per_gram', $metal);
+        $rate = $this->rates->ratePerGram($metal);
 
         if ($rate === null) {
             $missing[] = 'a rate for '.($metal ?: 'this metal');
@@ -93,7 +211,7 @@ class PricingEngine
 
         $factors[] = [
             'label' => 'Metal',
-            'detail' => trim(($metal ?: 'Metal').' · '.rtrim(rtrim(number_format($weight, 2), '0'), '.').' g at $'.number_format($rate, 2).'/g'),
+            'detail' => trim(($metal ?: 'Metal').' · '.$this->trimNumber($weight).' g at $'.number_format($rate, 2).'/g · '.$this->rates->sourceLabel()),
             'value_cents' => $value,
         ];
 
@@ -113,7 +231,7 @@ class PricingEngine
                 continue;
             }
 
-            $rate = $this->lookupRate('pricing.gemstone_rates_per_carat', $type);
+            $rate = $this->lookup('pricing.gemstone_rates_per_carat', $type);
 
             if ($rate === null) {
                 $missing[] = 'a rate for '.$type;
@@ -126,7 +244,7 @@ class PricingEngine
 
             $factors[] = [
                 'label' => 'Gemstone',
-                'detail' => ucfirst((string) $type).' · '.rtrim(rtrim(number_format($carats, 2), '0'), '.').' ct at $'.number_format($rate, 2).'/ct',
+                'detail' => ucfirst((string) $type).' · '.$this->trimNumber($carats).' ct at $'.number_format($rate, 2).'/ct',
                 'value_cents' => $value,
             ];
         }
@@ -134,32 +252,99 @@ class PricingEngine
         return $total;
     }
 
-    /** Rates are keyed loosely, so "18k gold" still finds the "18k" rate. */
-    private function lookupRate(string $settingKey, ?string $needle): ?float
+    /**
+     * Apply one of the multiplier layers, recording what it did.
+     *
+     * @param  array<string, float|null>  $candidates
+     */
+    private function applyLayer(string $toggle, string $label, array $candidates, int $price, array &$multipliers, array &$lines): int
+    {
+        if (! Setting::get($toggle, true)) {
+            $lines[] = PricingLine::skipped($label, 'Switched off');
+
+            return $price;
+        }
+
+        $applied = array_filter($candidates, fn ($value) => $value !== null && $value > 0);
+
+        if ($applied === []) {
+            $lines[] = PricingLine::skipped($label, 'Nothing on this piece matched the table');
+
+            return $price;
+        }
+
+        $detail = [];
+
+        foreach ($applied as $name => $multiplier) {
+            $multipliers[$name] = $multiplier;
+            $price = (int) round($price * $multiplier);
+            $detail[] = '×'.$this->trimNumber($multiplier).' '.$name;
+        }
+
+        $lines[] = new PricingLine($label, implode(' · ', $detail), $price);
+
+        return $price;
+    }
+
+    /**
+     * A piece that has not sold in a long time is telling you something.
+     *
+     * The bands are a setting, so whether that means a markdown at ninety
+     * days or at three hundred is the business's call, not the software's.
+     */
+    private function ageAdjustment(array $attributes): ?float
+    {
+        $days = (int) ($attributes['days_in_stock'] ?? 0);
+
+        if ($days <= 0) {
+            return null;
+        }
+
+        $bands = Setting::get('pricing.inventory_age_adjustments', []);
+
+        if (! is_array($bands)) {
+            return null;
+        }
+
+        $match = null;
+        $matchedAt = -1;
+
+        foreach ($bands as $threshold => $multiplier) {
+            if ($days >= (int) $threshold && (int) $threshold > $matchedAt) {
+                $match = (float) $multiplier;
+                $matchedAt = (int) $threshold;
+            }
+        }
+
+        return $match;
+    }
+
+    /** Tables are keyed loosely, so "18K Yellow Gold" still finds the "18k" row. */
+    private function lookup(string $settingKey, ?string $needle): ?float
     {
         if (blank($needle)) {
             return null;
         }
 
-        $rates = Setting::get($settingKey, []);
+        $table = Setting::get($settingKey, []);
 
-        if (! is_array($rates)) {
+        if (! is_array($table)) {
             return null;
         }
 
         $needle = strtolower(trim($needle));
 
-        foreach ($rates as $key => $rate) {
+        foreach ($table as $key => $value) {
             if (str_contains($needle, strtolower((string) $key))) {
-                return (float) $rate;
+                return (float) $value;
             }
         }
 
         return null;
     }
 
-    private function lookupMultiplier(string $settingKey, ?string $needle, float $default): float
+    private function trimNumber(float $value): string
     {
-        return $this->lookupRate($settingKey, $needle) ?? $default;
+        return rtrim(rtrim(number_format($value, 2), '0'), '.');
     }
 }

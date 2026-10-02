@@ -191,7 +191,7 @@
                 @endif
 
                 @if ($priceSuggestion)
-                    <x-ui.card title="Suggested price" meta="Built from your own rate table">
+                    <x-ui.card title="Suggested price" meta="The craftsman's formula, step by step">
                         <div class="flex flex-wrap items-baseline gap-14">
                             <div>
                                 <div class="font-serif text-display-xs font-semibold text-gold-ink">
@@ -199,31 +199,51 @@
                                 </div>
                                 <div class="mt-3 text-caption text-muted">
                                     Range ${{ number_format($priceSuggestion['band'][0] / 100) }} – ${{ number_format($priceSuggestion['band'][1] / 100) }}
+                                    · Insurance ${{ number_format($priceSuggestion['insurance_cents'] / 100) }}
+                                    · Floor ${{ number_format($priceSuggestion['negotiation_floor_cents'] / 100) }}
                                 </div>
                             </div>
                             <x-ui.button wire:click="applySuggestedPrice" variant="primary" size="sm" class="ml-auto">Use this price</x-ui.button>
                         </div>
 
+                        {{-- What the materials and the bench work cost: step 1's two halves. --}}
                         <div class="mt-15 border-t border-rule pt-12">
-                            <x-ui.eyebrow class="mb-8">How it was reached</x-ui.eyebrow>
+                            <x-ui.eyebrow class="mb-8">What went into it</x-ui.eyebrow>
                             @foreach ($priceSuggestion['factors'] as $factor)
                                 <div class="flex justify-between gap-12 py-3 text-caption-lg">
                                     <span class="text-muted">{{ $factor['label'] }} · {{ $factor['detail'] }}</span>
                                     <span class="font-semibold">${{ number_format($factor['value_cents'] / 100, 2) }}</span>
                                 </div>
                             @endforeach
+                        </div>
 
-                            <div class="mt-8 flex flex-wrap gap-10 border-t border-rule pt-8 text-caption text-muted">
-                                @foreach ($priceSuggestion['multipliers'] as $label => $multiplier)
-                                    <span>{{ str($label)->headline() }} ×{{ rtrim(rtrim(number_format($multiplier, 2), '0'), '.') }}</span>
-                                @endforeach
-                            </div>
+                        {{-- The full working. When a customer asks why a piece costs
+                             what it costs, this is the answer, on the screen. --}}
+                        <div class="mt-15 border-t border-rule pt-12">
+                            <x-ui.eyebrow class="mb-8">The working</x-ui.eyebrow>
+                            @foreach ($priceSuggestion['lines'] as $line)
+                                <div class="flex flex-wrap items-baseline justify-between gap-10 border-b border-rule py-7 last:border-0">
+                                    <div class="min-w-0">
+                                        <div class="text-caption-lg font-semibold {{ $line['skipped'] ? 'text-muted' : '' }}">{{ $line['label'] }}</div>
+                                        <div class="text-caption text-muted">{{ $line['detail'] }}</div>
+                                    </div>
+                                    @if ($line['result_cents'] !== null)
+                                        <span class="font-serif text-card-title font-semibold">${{ number_format($line['result_cents'] / 100, 2) }}</span>
+                                    @else
+                                        <span class="text-caption text-muted">not applied</span>
+                                    @endif
+                                </div>
+                            @endforeach
 
                             @if ($priceSuggestion['missing'])
                                 <div class="mt-10 text-caption text-status-required">
                                     Missing for a dependable figure: {{ implode(', ', $priceSuggestion['missing']) }}.
                                 </div>
                             @endif
+
+                            <div class="mt-10 text-caption text-muted">
+                                Every percentage above is a setting, editable in Settings → Pricing. The formula itself does not change.
+                            </div>
                         </div>
                     </x-ui.card>
                 @endif

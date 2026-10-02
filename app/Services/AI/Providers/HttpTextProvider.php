@@ -8,6 +8,11 @@ use RuntimeException;
 
 class HttpTextProvider extends HttpChatProvider implements AiTextProvider
 {
+    protected function capability(): string
+    {
+        return 'description';
+    }
+
     public function generate(string $prompt, array $context = []): string
     {
         $this->assertEnabled('ai.description');

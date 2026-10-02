@@ -54,6 +54,12 @@ class FieldColorRuleSeeder extends Seeder
             ['marketplace_description', 'gray', false, 'copy', 'Marketplace description', null, 150],
             ['social_description', 'gray', false, 'copy', 'Social description', null, 160],
 
+            // Step 1 of the craftsman's formula. Both may be left empty:
+            // labour then falls back to the standard for the category, and
+            // materials to the rate table.
+            ['labor_cost', 'yellow', false, 'pricing', 'Labour cost', 'Bench work, setting and finishing. Blank uses the standard for this category.', 162],
+            ['material_cost', 'yellow', false, 'pricing', 'Material cost', 'Blank prices the metal and stones from the rate table.', 164],
+
             ['acquisition_value', 'red', true, 'pricing', 'Acquisition cost', null, 170],
             ['retail_price', 'red', true, 'pricing', 'Retail price', null, 180],
             ['insurance_value', 'green', false, 'pricing', 'Insurance value', null, 190],

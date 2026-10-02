@@ -42,6 +42,12 @@ class AiCatalogueService
     {
         $paths = $product->images()->orderBy('sort_order')->pluck('file_path')->all();
 
+        // Tag the spend to the piece, so a pilot can be read as cost per item
+        // catalogued rather than as an undifferentiated monthly bill.
+        if (property_exists($this->vision, 'usageProductId')) {
+            $this->vision->usageProductId = $product->id;
+        }
+
         $result = $this->vision->analyze($paths, 'full');
 
         $result->persistFor($product->id, 'full');

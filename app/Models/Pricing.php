@@ -18,6 +18,7 @@ class Pricing extends Model
     protected $fillable = [
         'product_id', 'acquisition_value_cents', 'retail_price_cents',
         'insurance_value_cents', 'negotiation_min_cents', 'promo_price_cents', 'priced_by',
+        'working',
     ];
 
     protected $casts = [
@@ -26,6 +27,7 @@ class Pricing extends Model
         'insurance_value_cents' => 'integer',
         'negotiation_min_cents' => 'integer',
         'promo_price_cents' => 'integer',
+        'working' => 'array',
         'created_at' => 'datetime',
     ];
 

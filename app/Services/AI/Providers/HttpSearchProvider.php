@@ -17,6 +17,11 @@ use Illuminate\Support\Collection;
  */
 class HttpSearchProvider extends HttpChatProvider implements AiSearchProvider
 {
+    protected function capability(): string
+    {
+        return 'search';
+    }
+
     public function __construct(private KeywordProductSearch $keyword) {}
 
     public function search(string $naturalLanguageQuery): Collection

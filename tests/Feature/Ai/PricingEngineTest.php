@@ -50,11 +50,115 @@ class PricingEngineTest extends TestCase
 
         $this->assertStringContainsString('12.5 g', $suggestion->factors[0]['detail']);
         $this->assertStringContainsString('$61.50/g', $suggestion->factors[0]['detail']);
+        $this->assertStringContainsString('base rate table', $suggestion->factors[0]['detail']);
 
-        // Brand, period and condition each contribute a named multiplier.
-        $this->assertSame(2.6, $suggestion->multipliers['brand']);
-        $this->assertSame(1.45, $suggestion->multipliers['period']);
-        $this->assertSame(0.92, $suggestion->multipliers['condition']);
+        // Maker, period and condition each contribute a named multiplier.
+        $this->assertSame(1.35, $suggestion->multipliers['brand']);
+        $this->assertSame(1.25, $suggestion->multipliers['period']);
+        $this->assertSame(1.0, $suggestion->multipliers['condition']);
+    }
+
+    /**
+     * The formula is the floor: it runs underneath every suggestion.
+     *
+     * Switching off every layer above it must still produce a price, built by
+     * the four steps alone.
+     */
+    public function test_the_formula_runs_even_with_every_layer_switched_off(): void
+    {
+        Setting::set('pricing.layer.multipliers_enabled', false);
+        Setting::set('pricing.layer.market_enabled', false);
+
+        $suggestion = $this->engine->suggest([
+            'metal_type' => '950 Platinum', 'weight_grams' => 10,
+            'brand' => 'Cartier', 'style_period' => 'Art Deco',
+            'labor_cost_cents' => 18000,
+        ], []);
+
+        // 10g platinum at $28.50 = $285 material, plus $180 labour = $465.
+        $this->assertSame(28500, $suggestion->intrinsicCents);
+        $this->assertSame(18000, $suggestion->labourCents);
+        $this->assertSame(46500, $suggestion->determiningFactorsCents);
+
+        // The four steps, and nothing else: $465 ÷ .85 ÷ .90 ÷ .50
+        $this->assertSame(121600, $suggestion->retailCents);
+        $this->assertSame($suggestion->baseRetailCents, $suggestion->retailCents);
+        $this->assertSame([], $suggestion->multipliers);
+    }
+
+    /** Layers 3 and 4 apply after the formula, never inside it. */
+    public function test_layers_apply_on_top_of_the_formula_not_within_it(): void
+    {
+        $attributes = [
+            'metal_type' => '950 Platinum', 'weight_grams' => 10,
+            'brand' => 'Cartier', 'labor_cost_cents' => 18000,
+        ];
+
+        Setting::set('pricing.layer.multipliers_enabled', false);
+        $without = $this->engine->suggest($attributes, []);
+
+        Setting::set('pricing.layer.multipliers_enabled', true);
+        $with = $this->engine->suggest($attributes, []);
+
+        // The formula's own output is identical either way.
+        $this->assertSame($without->baseRetailCents, $with->baseRetailCents);
+        $this->assertSame($without->wholesaleCents, $with->wholesaleCents);
+
+        // Only the final price moves, by the maker multiplier.
+        $this->assertSame(1.35, $with->multipliers['brand']);
+        $this->assertGreaterThan($without->retailCents, $with->retailCents);
+    }
+
+    /** A cost entered by a person outranks the rate table. */
+    public function test_an_entered_material_cost_wins_over_the_rate_table(): void
+    {
+        $suggestion = $this->engine->suggest([
+            'metal_type' => '950 Platinum', 'weight_grams' => 10,
+            'material_cost_cents' => 99000,
+        ], []);
+
+        $this->assertSame(99000, $suggestion->intrinsicCents);
+        $this->assertSame('Entered on the item record', $suggestion->factors[0]['detail']);
+    }
+
+    /** Labour falls back to the standard for the category when none is entered. */
+    public function test_labour_falls_back_to_the_category_standard(): void
+    {
+        $suggestion = $this->engine->suggest([
+            'metal_type' => '18k', 'weight_grams' => 10, 'category' => 'Rings',
+        ], []);
+
+        $this->assertSame(12000, $suggestion->labourCents);
+    }
+
+    /** A piece that has sat unsold is priced differently — if that layer is on. */
+    public function test_the_market_layer_can_mark_down_aged_stock(): void
+    {
+        Setting::set('pricing.layer.market_enabled', true);
+        Setting::set('pricing.layer.multipliers_enabled', false);
+
+        $attributes = ['metal_type' => '18k', 'weight_grams' => 10, 'labor_cost_cents' => 10000];
+
+        $fresh = $this->engine->suggest($attributes + ['days_in_stock' => 3], []);
+        $aged = $this->engine->suggest($attributes + ['days_in_stock' => 400], []);
+
+        $this->assertArrayNotHasKey('inventory age', $fresh->multipliers);
+        $this->assertSame(0.9, $aged->multipliers['inventory age']);
+        $this->assertLessThan($fresh->retailCents, $aged->retailCents);
+    }
+
+    /** The whole working survives the round trip to the screen. */
+    public function test_the_working_reaches_the_view_intact(): void
+    {
+        $array = $this->engine->suggest([
+            'metal_type' => '950 Platinum', 'weight_grams' => 10, 'labor_cost_cents' => 18000,
+        ], [])->toArray();
+
+        $labels = array_column($array['lines'], 'label');
+
+        $this->assertContains('Step 1 · Determining factors', $labels);
+        $this->assertContains('Step 4 · Retail price', $labels);
+        $this->assertSame(10.0, $array['percentages']['overhead']);
     }
 
     public function test_rates_are_matched_loosely_so_18k_gold_finds_the_18k_rate(): void

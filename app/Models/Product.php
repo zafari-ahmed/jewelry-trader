@@ -17,7 +17,8 @@ class Product extends Model
 
     protected $fillable = [
         'sku', 'title', 'subtitle', 'category', 'subcategory', 'brand', 'style_period',
-        'metal_type', 'weight_grams', 'measurements', 'attributes', 'condition_notes',
+        'metal_type', 'weight_grams', 'labor_cost_cents', 'material_cost_cents',
+        'measurements', 'attributes', 'condition_notes',
         'internal_description', 'customer_description', 'seo_description',
         'marketplace_description', 'social_description', 'status',
         'manually_overridden_fields', 'ai_suggested_fields',

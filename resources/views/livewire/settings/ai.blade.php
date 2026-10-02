@@ -99,12 +99,59 @@
             </div>
         </x-ui.card>
 
-        <x-ui.card title="How suggestions will behave">
+        {{-- A pilot is a measurement. This is the measurement. --}}
+        <x-ui.card title="What it is costing" meta="Measured from real calls, not from a quoted price">
+            <div class="flex flex-wrap gap-24">
+                <div>
+                    <div class="font-serif text-display-xs font-semibold text-gold-ink">${{ number_format($thisMonth['total_cents'] / 100, 2) }}</div>
+                    <div class="mt-3 text-caption text-muted">{{ now()->format('F') }} so far · {{ $thisMonth['calls'] }} {{ str('call')->plural($thisMonth['calls']) }}</div>
+                </div>
+                <div>
+                    <div class="font-serif text-title-lg font-semibold">
+                        {{ $thisMonth['cost_per_piece_cents'] === null ? '—' : '$'.number_format($thisMonth['cost_per_piece_cents'] / 100, 2) }}
+                    </div>
+                    <div class="mt-3 text-caption text-muted">Per piece catalogued ({{ $thisMonth['pieces'] }})</div>
+                </div>
+                <div>
+                    <div class="font-serif text-title-lg font-semibold">${{ number_format($lastMonth['total_cents'] / 100, 2) }}</div>
+                    <div class="mt-3 text-caption text-muted">{{ now()->subMonthNoOverflow()->format('F') }} in full</div>
+                </div>
+            </div>
+
+            @if ($thisMonth['by_capability'])
+                <div class="mt-15 border-t border-rule pt-12">
+                    <x-ui.eyebrow class="mb-8">Where it went this month</x-ui.eyebrow>
+                    @foreach ($thisMonth['by_capability'] as $capability => $row)
+                        <div class="flex justify-between gap-12 py-3 text-caption-lg">
+                            <span class="text-muted">{{ str($capability)->headline() }} · {{ $row['calls'] }} {{ str('call')->plural($row['calls']) }}</span>
+                            <span class="font-semibold">${{ number_format($row['cost_cents'] / 100, 2) }}</span>
+                        </div>
+                    @endforeach
+                </div>
+            @endif
+
+            <div class="mt-15 grid gap-12 border-t border-rule pt-12 md:grid-cols-2">
+                <div>
+                    <label class="mb-5 block text-label font-semibold">Cost per million input tokens ($)</label>
+                    <x-ui.input wire:model="state.cost_per_million_input" />
+                </div>
+                <div>
+                    <label class="mb-5 block text-label font-semibold">Cost per million output tokens ($)</label>
+                    <x-ui.input wire:model="state.cost_per_million_output" />
+                </div>
+            </div>
+            <div class="mt-10 text-caption text-muted">
+                Taken from the supplier's price list. Calls already recorded keep the rate they were charged at,
+                so changing these does not rewrite history.
+            </div>
+        </x-ui.card>
+
+        <x-ui.card title="How suggestions behave">
             <div class="flex flex-col gap-12 text-body-sm leading-body">
                 <div>A suggested value lands <strong class="text-status-suggested-ink">yellow</strong> and is excluded from listings, POS and reports until reviewed.</div>
                 <div>Accepting a suggestion turns the field <strong class="text-status-valid">green</strong> and attributes it to the reviewer.</div>
                 <div>Editing a suggestion instead of accepting it turns the field <strong class="text-status-override">blue</strong> — a human override.</div>
-                <div class="border-t border-rule pt-12 text-caption text-muted">Already implemented in the inventory form, so no screen changes are needed when AI is switched on.</div>
+                <div class="border-t border-rule pt-12 text-caption text-muted">Every correction is written to the correction log, with the original suggestion, the value a person put instead, and who they were.</div>
             </div>
         </x-ui.card>
     </form>

@@ -108,6 +108,13 @@ class SettingsRegistry
             'ai.max_output_tokens' => ['type' => 'integer', 'default' => 1200, 'label' => 'Maximum response length'],
             'ai.min_confidence' => ['type' => 'integer', 'default' => 40, 'label' => 'Minimum confidence to suggest (%)', 'help' => 'Below this, a suggestion is discarded rather than shown.'],
 
+            // What the service costs, so a pilot can be judged on real spend
+            // rather than on a quoted price. Suppliers quote per million
+            // tokens; rows already written keep the rate they were charged at.
+            'ai.track_usage' => ['type' => 'boolean', 'default' => true, 'label' => 'Record what each call costs'],
+            'ai.cost_per_million_input' => ['type' => 'string', 'default' => '0', 'label' => 'Cost per million input tokens ($)'],
+            'ai.cost_per_million_output' => ['type' => 'string', 'default' => '0', 'label' => 'Cost per million output tokens ($)'],
+
             // Prompts live in settings so wording can be tuned by the business
             // without a deploy.
             'ai.vision_prompt' => ['type' => 'string', 'default' => 'You are cataloguing a piece of antique, estate or fine jewelry from photographs for a specialist dealer. Identify only what the images actually support, and say so when uncertain.', 'label' => 'Photo analysis instructions'],
@@ -165,7 +172,7 @@ class SettingsRegistry
                 '950 platinum' => 28.50, '900 platinum' => 27.00,
                 '24k' => 82.00, '22k' => 75.00, '18k' => 61.50, '14k' => 47.80, '9k' => 30.70,
                 'sterling silver' => 0.85,
-            ], 'label' => 'Metal value per gram', 'help' => 'Scrap or melt value used as the floor of a suggestion.'],
+            ], 'label' => 'Metal value per gram', 'help' => 'Layer 1. Always available, and what every other layer falls back to.'],
 
             'pricing.gemstone_rates_per_carat' => ['type' => 'json', 'default' => [
                 'diamond' => 2400.00, 'ruby' => 1800.00, 'sapphire' => 1100.00,
@@ -173,21 +180,79 @@ class SettingsRegistry
             ], 'label' => 'Gemstone value per carat'],
 
             'pricing.brand_premiums' => ['type' => 'json', 'default' => [
-                'cartier' => 2.60, 'van cleef & arpels' => 2.60, 'tiffany & co.' => 1.90,
-                'bulgari' => 1.80, 'boucheron' => 1.70,
-            ], 'label' => 'Brand multiplier'],
+                'cartier' => 1.35, 'van cleef & arpels' => 1.35, 'tiffany & co.' => 1.25,
+                'bulgari' => 1.22, 'boucheron' => 1.18,
+            ], 'label' => 'Maker multiplier', 'help' => 'Layer 3. Applied to the formula\'s retail price, not to the metal value.'],
 
             'pricing.period_premiums' => ['type' => 'json', 'default' => [
-                'georgian' => 1.60, 'victorian' => 1.30, 'edwardian' => 1.35,
-                'art deco' => 1.45, 'art nouveau' => 1.40, 'retro' => 1.15, 'mid-century' => 1.10,
-            ], 'label' => 'Period multiplier'],
+                'georgian' => 1.35, 'victorian' => 1.18, 'edwardian' => 1.20,
+                'art deco' => 1.25, 'art nouveau' => 1.22, 'retro' => 1.08, 'mid-century' => 1.05,
+            ], 'label' => 'Period multiplier', 'help' => 'Layer 3.'],
 
             'pricing.condition_adjustments' => ['type' => 'json', 'default' => [
-                'excellent' => 1.00, 'very good' => 0.92, 'good' => 0.82,
-                'fair' => 0.65, 'restored' => 0.75, 'damaged' => 0.45,
-            ], 'label' => 'Condition multiplier'],
+                'excellent' => 1.05, 'very good' => 1.00, 'good' => 0.92,
+                'fair' => 0.80, 'restored' => 0.88, 'damaged' => 0.65,
+            ], 'label' => 'Condition multiplier', 'help' => 'Layer 3.'],
 
-            'pricing.retail_multiplier' => ['type' => 'string', 'default' => '2.4', 'label' => 'Retail multiplier', 'help' => 'Applied to intrinsic value to reach a retail asking price.'],
+            // ---- The craftsman's formula (the foundation) -------------------
+            // The formula never changes. These percentages do.
+            'pricing.formula.overhead_percent' => ['type' => 'string', 'default' => '10', 'label' => 'Overhead cost (%)', 'help' => 'Step 2. Range 0–50.'],
+            'pricing.formula.design_percent' => ['type' => 'string', 'default' => '5', 'label' => 'Design cost (%)', 'help' => 'Step 2. Range 0–50.'],
+            'pricing.formula.wholesale_commission_percent' => ['type' => 'string', 'default' => '10', 'label' => 'Wholesale agent commission (%)', 'help' => 'Step 3. Range 0–30.'],
+            'pricing.formula.retail_commission_percent' => ['type' => 'string', 'default' => '50', 'label' => 'Retail agent commission (%)', 'help' => 'Step 4. Range 0–80.'],
+
+            'pricing.formula.rounding_enabled' => ['type' => 'boolean', 'default' => true, 'label' => 'Apply retail rounding'],
+            'pricing.formula.rounding_increment' => ['type' => 'string', 'default' => '0.50', 'label' => 'Round up to the nearest', 'help' => 'A retail price of $10.46 is not a selling price; $10.50 is.'],
+
+            // Each step switches off independently, so a pricing strategy can
+            // be tested without the rest of the formula moving.
+            'pricing.formula.step2_enabled' => ['type' => 'boolean', 'default' => true, 'label' => 'Step 2 · Basic price'],
+            'pricing.formula.step3_enabled' => ['type' => 'boolean', 'default' => true, 'label' => 'Step 3 · Wholesale price'],
+            'pricing.formula.step4_enabled' => ['type' => 'boolean', 'default' => true, 'label' => 'Step 4 · Retail price'],
+
+            'pricing.formula.category_overrides' => ['type' => 'json', 'default' => [
+                'rings' => ['overhead' => 10, 'design' => 5, 'wholesale' => 10, 'retail' => 50],
+                'necklaces' => ['overhead' => 12, 'design' => 5, 'wholesale' => 10, 'retail' => 45],
+                "men's accessories" => ['overhead' => 8, 'design' => 3, 'wholesale' => 12, 'retail' => 55],
+                'watches' => ['overhead' => 10, 'design' => 8, 'wholesale' => 10, 'retail' => 50],
+            ], 'label' => 'Percentages per category', 'help' => 'Different categories carry different economics.'],
+
+            'pricing.formula.default_labour_by_category' => ['type' => 'json', 'default' => [
+                'rings' => 120.00, 'necklaces' => 95.00, 'bracelets' => 95.00,
+                'earrings' => 80.00, 'brooches' => 85.00, 'watches' => 180.00,
+            ], 'label' => 'Standard labour per category ($)', 'help' => 'Used when the item record carries no labour cost of its own.'],
+
+            // ---- Layer switches ---------------------------------------------
+            // Layer 1 (the base rate table above) is always available: it is
+            // what every other layer falls back to.
+            'pricing.layer.live_rates_enabled' => ['type' => 'boolean', 'default' => false, 'label' => 'Layer 2 · Live metal rates', 'help' => 'Off uses the base rate table. On prices metal at the market feed below.'],
+            'pricing.layer.multipliers_enabled' => ['type' => 'boolean', 'default' => true, 'label' => 'Layer 3 · Maker, period and condition'],
+            'pricing.layer.market_enabled' => ['type' => 'boolean', 'default' => false, 'label' => 'Layer 4 · Market adjustments', 'help' => 'Category demand, season and how long the piece has been in stock.'],
+
+            // ---- Layer 2 connection (vendor-neutral, rule 3.3) --------------
+            'pricing.live_rates_endpoint' => ['type' => 'string', 'default' => null, 'label' => 'Metal rate feed URL'],
+            'pricing.live_rates_api_key' => ['type' => 'encrypted_string', 'default' => null, 'label' => 'Metal rate feed key'],
+            'pricing.live_rates_path' => ['type' => 'string', 'default' => 'rates', 'label' => 'Where the rates sit in the response', 'help' => 'Dotted path, e.g. data.rates. Leave blank if the response is the rates themselves.'],
+            'pricing.live_rates_quoted_per_ounce' => ['type' => 'boolean', 'default' => true, 'label' => 'Feed quotes per troy ounce'],
+            'pricing.live_rates_cache_seconds' => ['type' => 'integer', 'default' => 900, 'label' => 'Re-check the feed every (seconds)'],
+            'pricing.live_rates_timeout_seconds' => ['type' => 'integer', 'default' => 10, 'label' => 'Feed timeout (seconds)'],
+            'pricing.metal_purity_fractions' => ['type' => 'json', 'default' => [
+                '24k' => 1.0, '22k' => 0.9167, '18k' => 0.75, '14k' => 0.5833, '9k' => 0.375,
+                '950 platinum' => 0.95, '900 platinum' => 0.90, 'sterling silver' => 0.925,
+            ], 'label' => 'Purity of each alloy', 'help' => 'A feed quotes fine metal; a piece is rarely fine metal.'],
+
+            // ---- Layer 4 tables ---------------------------------------------
+            'pricing.category_demand' => ['type' => 'json', 'default' => [
+                'bridal' => 1.08, 'rings' => 1.00, 'necklaces' => 1.00,
+                'watches' => 1.05, 'brooches' => 0.95,
+            ], 'label' => 'Category demand'],
+            'pricing.seasonal_demand' => ['type' => 'json', 'default' => [
+                'November' => 1.05, 'December' => 1.08, 'January' => 0.95, 'February' => 1.04,
+            ], 'label' => 'Seasonal adjustment', 'help' => 'By month. Anything not listed is left alone.'],
+            'pricing.inventory_age_adjustments' => ['type' => 'json', 'default' => [
+                '180' => 0.95, '365' => 0.90, '730' => 0.85,
+            ], 'label' => 'Inventory age adjustment', 'help' => 'Days in stock → multiplier. A piece that has not sold is telling you something.'],
+
             'pricing.suggestion_band_percent' => ['type' => 'integer', 'default' => 15, 'label' => 'Suggestion band (±%)'],
             'pricing.insurance_multiplier' => ['type' => 'string', 'default' => '1.15', 'label' => 'Insurance value multiplier'],
             'pricing.negotiation_floor_percent' => ['type' => 'integer', 'default' => 85, 'label' => 'Negotiation floor (% of retail)'],

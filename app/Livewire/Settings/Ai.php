@@ -3,11 +3,15 @@
 namespace App\Livewire\Settings;
 
 use App\Models\AiProvider;
+use App\Models\AiUsage;
 
 /**
- * Visible but inert in Phase 1. Saving is allowed (so a provider can be
- * provisioned ahead of time) but every capability flag stays off by default and
- * the Null providers in Module 2 refuse calls regardless.
+ * The connection to the reading service, and what it is costing.
+ *
+ * No supplier is named here or anywhere in the codebase: the endpoint, the key
+ * and the model are entries on this form, so changing supplier is a saved form
+ * rather than a rebuild (rule 3.3). Every capability is off by default, and
+ * with none configured cataloguing works by hand exactly as before.
  */
 class Ai extends SettingsComponent
 {
@@ -30,10 +34,12 @@ class Ai extends SettingsComponent
     {
         return view('livewire.settings.ai', [
             'providers' => AiProvider::query()->orderBy('name')->get(),
+            'thisMonth' => AiUsage::summaryFor(now()),
+            'lastMonth' => AiUsage::summaryFor(now()->subMonthNoOverflow()),
         ])->layout('layouts.admin-livewire', [
             'title' => 'AI & Automation',
             'heading' => 'AI & Automation',
-            'subheading' => 'Prepared for Phase 2 — no capability active',
+            'subheading' => 'The reading service, and what it costs',
         ]);
     }
 }

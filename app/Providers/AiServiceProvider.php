@@ -12,6 +12,8 @@ use App\Services\AI\Providers\HttpVisionProvider;
 use App\Services\AI\Providers\NullAiSearchProvider;
 use App\Services\AI\Providers\NullAiTextProvider;
 use App\Services\AI\Providers\NullAiVisionProvider;
+use App\Services\Pricing\Contracts\MetalRateProvider;
+use App\Services\Pricing\Rates\LiveMetalRates;
 use Illuminate\Support\ServiceProvider;
 
 class AiServiceProvider extends ServiceProvider
@@ -39,5 +41,10 @@ class AiServiceProvider extends ServiceProvider
                 fn ($app) => $app->make(AiProviderResolver::class)->resolve($contract, $null, $flag, $default),
             );
         }
+
+        // Where a metal's price comes from. LiveMetalRates wraps the base rate
+        // table rather than replacing it, so the Layer 2 switch decides which
+        // answers — and the table is always underneath as the fallback.
+        $this->app->bind(MetalRateProvider::class, LiveMetalRates::class);
     }
 }
