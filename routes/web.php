@@ -97,6 +97,14 @@ Route::middleware('auth')->prefix('admin')->name('admin.')->group(function () {
     // module behind it arrives later (Module 11).
     Route::get('/phase-2/{feature}', \App\Livewire\Admin\Phase2Placeholder::class)->name('phase2');
 
+    // Rate proposals sit outside the settings group deliberately: the
+    // appraiser holds the veto on rate changes but has no business editing
+    // payment keys, so this is gated on its own permission rather than on
+    // blanket settings access.
+    Route::get('/pricing/proposals', Settings\RateProposals::class)
+        ->middleware('permission:review-rate-proposals')
+        ->name('pricing.proposals');
+
     Route::prefix('settings')->name('settings')->group(function () {
         Route::view('/', 'admin.settings.index')->middleware('permission:manage-settings|view-settings');
 

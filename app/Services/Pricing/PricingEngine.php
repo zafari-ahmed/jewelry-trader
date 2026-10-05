@@ -80,11 +80,21 @@ class PricingEngine
             [
                 'category' => $this->lookup('pricing.category_demand', $category),
                 'season' => $this->lookup('pricing.seasonal_demand', now()->format('F')),
+                'region' => $this->lookup('pricing.regional_demand', $attributes['region'] ?? null),
                 'inventory age' => $this->ageAdjustment($attributes),
             ],
             $price,
             $multipliers,
             $lines,
+            // Layer 4 reads the market; Layer 3 reads the piece. Adjusting for
+            // a soft market on a piece whose maker and condition have not been
+            // accounted for is adjusting a number that does not mean anything
+            // yet, so this layer only runs when Layer 3 does.
+            requires: 'pricing.layer.multipliers_enabled',
+            // Four multipliers compounding can run away: 1.15 × 1.10 × 1.08 ×
+            // 1.05 is already +43% before anyone has looked at the piece. The
+            // cap is what keeps a table edit from moving the whole catalogue.
+            capPercent: (float) Setting::get('pricing.market_adjustment_cap_percent', 30),
         );
 
         if (blank($attributes['condition_grade'] ?? null)) {
@@ -257,10 +267,24 @@ class PricingEngine
      *
      * @param  array<string, float|null>  $candidates
      */
-    private function applyLayer(string $toggle, string $label, array $candidates, int $price, array &$multipliers, array &$lines): int
-    {
+    private function applyLayer(
+        string $toggle,
+        string $label,
+        array $candidates,
+        int $price,
+        array &$multipliers,
+        array &$lines,
+        ?string $requires = null,
+        ?float $capPercent = null,
+    ): int {
         if (! Setting::get($toggle, true)) {
             $lines[] = PricingLine::skipped($label, 'Switched off');
+
+            return $price;
+        }
+
+        if ($requires !== null && ! Setting::get($requires, true)) {
+            $lines[] = PricingLine::skipped($label, 'Needs the layer below it switched on first');
 
             return $price;
         }
@@ -273,17 +297,34 @@ class PricingEngine
             return $price;
         }
 
+        $combined = 1.0;
         $detail = [];
 
         foreach ($applied as $name => $multiplier) {
             $multipliers[$name] = $multiplier;
-            $price = (int) round($price * $multiplier);
+            $combined *= $multiplier;
             $detail[] = '×'.$this->trimNumber($multiplier).' '.$name;
         }
 
-        $lines[] = new PricingLine($label, implode(' · ', $detail), $price);
+        $capped = $this->cap($combined, $capPercent);
+
+        if ($capped !== $combined) {
+            $detail[] = 'capped at '.$this->trimNumber($capPercent).'%';
+        }
+
+        $lines[] = new PricingLine($label, implode(' · ', $detail), $price = (int) round($price * $capped));
 
         return $price;
+    }
+
+    /** Hold a layer's combined effect inside ± the configured band. */
+    private function cap(float $combined, ?float $capPercent): float
+    {
+        if ($capPercent === null || $capPercent <= 0) {
+            return $combined;
+        }
+
+        return max(1 - $capPercent / 100, min(1 + $capPercent / 100, $combined));
     }
 
     /**

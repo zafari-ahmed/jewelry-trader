@@ -135,7 +135,6 @@ class PricingEngineTest extends TestCase
     public function test_the_market_layer_can_mark_down_aged_stock(): void
     {
         Setting::set('pricing.layer.market_enabled', true);
-        Setting::set('pricing.layer.multipliers_enabled', false);
 
         $attributes = ['metal_type' => '18k', 'weight_grams' => 10, 'labor_cost_cents' => 10000];
 
@@ -143,8 +142,76 @@ class PricingEngineTest extends TestCase
         $aged = $this->engine->suggest($attributes + ['days_in_stock' => 400], []);
 
         $this->assertArrayNotHasKey('inventory age', $fresh->multipliers);
-        $this->assertSame(0.9, $aged->multipliers['inventory age']);
+        $this->assertSame(0.8, $aged->multipliers['inventory age']);
         $this->assertLessThan($fresh->retailCents, $aged->retailCents);
+    }
+
+    /**
+     * Layer 4 reads the market; Layer 3 reads the piece.
+     *
+     * Adjusting for a soft market on a figure that has not yet accounted for
+     * the maker or the condition is adjusting a number that does not mean
+     * anything yet, so Layer 4 does not run without Layer 3.
+     */
+    public function test_the_market_layer_will_not_run_without_the_layer_beneath_it(): void
+    {
+        Setting::set('pricing.layer.market_enabled', true);
+        Setting::set('pricing.layer.multipliers_enabled', false);
+
+        $suggestion = $this->engine->suggest([
+            'metal_type' => '18k', 'weight_grams' => 10,
+            'category' => 'bridal', 'labor_cost_cents' => 10000, 'days_in_stock' => 400,
+        ], []);
+
+        $this->assertSame([], $suggestion->multipliers);
+        $this->assertSame($suggestion->baseRetailCents, $suggestion->retailCents);
+
+        $skipped = collect($suggestion->lines)->firstWhere('label', 'Layer 4 · Market adjustments');
+        $this->assertTrue($skipped->skipped);
+        $this->assertStringContainsString('layer below it', $skipped->detail);
+    }
+
+    /**
+     * Four multipliers compounding can run away.
+     *
+     * The cap is what stops one edit to a market table moving the whole
+     * catalogue by more than the business meant.
+     */
+    public function test_market_adjustments_are_capped(): void
+    {
+        Setting::set('pricing.layer.market_enabled', true);
+        Setting::set('pricing.market_adjustment_cap_percent', '10');
+        Setting::set('pricing.category_demand', ['bridal' => 1.30]);
+        Setting::set('pricing.regional_demand', ['new york' => 1.30]);
+
+        $attributes = [
+            'metal_type' => '18k', 'weight_grams' => 10,
+            'category' => 'bridal', 'region' => 'New York', 'labor_cost_cents' => 10000,
+        ];
+
+        $capped = $this->engine->suggest($attributes, []);
+
+        // 1.30 × 1.30 = 1.69 uncapped; the cap holds it to 1.10, and the
+        // presentation rounding then applies to what a customer is shown.
+        $expected = (int) (ceil(round($capped->baseRetailCents * 1.10) / 50) * 50);
+        $this->assertSame($expected, $capped->retailCents);
+
+        $line = collect($capped->lines)->firstWhere('label', 'Layer 4 · Market adjustments');
+        $this->assertStringContainsString('capped at 10%', $line->detail);
+    }
+
+    /** Regional demand is part of the market layer, per the specification. */
+    public function test_region_adjusts_the_price(): void
+    {
+        Setting::set('pricing.layer.market_enabled', true);
+
+        $attributes = ['metal_type' => '18k', 'weight_grams' => 10, 'labor_cost_cents' => 10000];
+
+        $online = $this->engine->suggest($attributes + ['region' => 'Online'], []);
+        $newYork = $this->engine->suggest($attributes + ['region' => 'New York'], []);
+
+        $this->assertSame(1.08, $newYork->multipliers['region']);
+        $this->assertGreaterThan($online->retailCents, $newYork->retailCents);
     }
 
     /** The whole working survives the round trip to the screen. */

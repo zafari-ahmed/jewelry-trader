@@ -54,6 +54,9 @@ class RolesAndPermissionsSeeder extends Seeder
                 'manage-inventory-transfers',
                 'view-all-locations',
                 'request-override', 'lock-inventory',
+                // The appraiser holds the veto on rate changes: it is their
+                // judgement the tables are meant to encode.
+                'review-rate-proposals', 'approve-rate-proposals',
             ],
             'accountant' => [
                 'view-settings',
@@ -85,6 +88,10 @@ class RolesAndPermissionsSeeder extends Seeder
             'manage-security-config',
             'manage-commission-config',
             'manage-feature-flags',
+
+            // Rate proposals: the AI proposes, a person approves.
+            'review-rate-proposals',
+            'approve-rate-proposals',
 
             // Module 4 — core platform
             'view-products',

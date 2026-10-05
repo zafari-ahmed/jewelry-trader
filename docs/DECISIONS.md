@@ -296,3 +296,72 @@ should not be treated as a test case.
   The seam is in place — the tables are settings, and Layer 4 already applies
   category, seasonal and inventory-age adjustments from them — but nothing is
   built against a spec we have not seen.
+
+## Rate table layers, and the batch approval model
+
+Client specification received 2026-10-05 (36 pages: formula confirmation, rate
+table toggle design, and a quality-control gauge). The formula is approved as
+built — *"Approved. Don't change the arithmetic."* Both of the inconsistencies
+raised on 2026-10-02 were confirmed in our favour:
+
+- **Live metals feed sits beneath the formula**, feeding material cost at
+  Step 1. Confirmed per their §7.0; their §4.2 example was wrong.
+- **The $6,945.00 figure was a demonstration error** and is withdrawn. Their
+  corrected chain is now pinned end to end in `CorrectedWorkedExampleTest`:
+  $1,395 → $1,641.18 → $1,823.53 → $3,647.50 → **$6,980.00**.
+
+Their corrected example implies a material cost of **$1,215**, not the $1,245
+a 3.75% move on the full $1,200 would give — consistent with the platinum
+being roughly $400 of the materials and the stones the rest. Every
+intermediate figure in their chain reconciles on that reading, so that is what
+the test states. Worth confirming with them, but it changes nothing
+structurally: material cost is an input.
+
+### Built this round
+
+| Change | Rationale |
+|---|---|
+| **Layer 4 requires Layer 3** | Their §6.3 dependency rule. Layer 4 reads the market; Layer 3 reads the piece. Adjusting for a soft market on a figure that has not yet accounted for maker or condition is adjusting a number that does not mean anything yet |
+| **Market adjustments capped at ±30%** | Their §6.3. Four multipliers compounding reach +43% before anyone has looked at the piece. The cap is what stops one table edit moving the whole catalogue |
+| **Regional adjustment added to Layer 4** | Their §6.2 |
+| **Inventory age bands rebased** to their 31/61/91/120-day schedule | Theirs is far more aggressive than our placeholder (−20% at 120 days vs −5% at 180) and reflects how they actually trade |
+| **Metal rates and purities extended** | 10K, 22K, fine silver, palladium and nickel, with their stated purities (24K now 0.999, 14K 0.585) |
+| **Batch approval for rate proposals** | Their §4.0, and the direct answer to the question raised on 2026-10-02 |
+
+### The batch approval model
+
+`RateChangeProposal` + `RateProposalService` + a review screen at
+`/admin/pricing/proposals`, gated on new permissions
+`review-rate-proposals` / `approve-rate-proposals`, held by the appraiser
+(inventory-specialist) and Super Admin — deliberately **not** tied to
+`manage-settings`, since the appraiser holds the veto on rates but has no
+business editing payment keys.
+
+Three decisions inside it worth recording:
+
+| Decision | Rationale |
+|---|---|
+| A proposal records the rate **as it stood when proposed** | So a human edit made in the meantime can be detected |
+| A rate edited since the proposal is marked `stale`, not overwritten | A person's later decision outranks a machine's earlier opinion. Without this, clearing a day-old batch would silently undo deliberate work |
+| A proposed value outside 0.1–10.0 never reaches the queue | A multiplier of 400 is a malfunction, not a suggestion. Nobody should have to spend attention rejecting it |
+
+Approval writes **one audited settings change per table**, so the log reads as
+the change the appraiser made rather than as eight separate edits.
+
+### Not built — awaiting the client
+
+Listed so the gap is explicit rather than discovered later:
+
+- **Confidence and source columns on the multiplier tables.** Their §5.2 shows
+  each multiplier carrying a confidence and a provenance ("auction data",
+  "historical sales"). Our tables hold a scalar. This is a settings-shape
+  change; it should be done once, alongside whatever writes those values.
+- **Layer 2 operational detail**: provider list as data rows, the
+  last-known-rate and hold-pricing failure modes (we have fall-back-to-base),
+  consecutive-failure alerting, test-connection, last-fetch display.
+- **Master control panel** (§7.0) — the per-layer status dashboard.
+- **REST API** (§9.1). Ten endpoints against a server-rendered platform is a
+  real scope item with its own authentication surface; it should be a
+  deliberate decision, not a side effect.
+- **The AI maintenance job itself.** The approval queue it feeds is built; what
+  writes proposals into it waits on their step-by-step process.

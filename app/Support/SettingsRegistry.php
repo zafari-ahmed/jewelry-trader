@@ -170,8 +170,10 @@ class SettingsRegistry
         return [
             'pricing.metal_rates_per_gram' => ['type' => 'json', 'default' => [
                 '950 platinum' => 28.50, '900 platinum' => 27.00,
-                '24k' => 82.00, '22k' => 75.00, '18k' => 61.50, '14k' => 47.80, '9k' => 30.70,
-                'sterling silver' => 0.85,
+                '24k' => 82.00, '22k' => 75.00, '18k' => 61.50, '14k' => 47.80,
+                '10k' => 34.20, '9k' => 30.70,
+                'sterling silver' => 0.85, 'fine silver' => 0.92,
+                'palladium' => 31.60, 'nickel' => 0.02,
             ], 'label' => 'Metal value per gram', 'help' => 'Layer 1. Always available, and what every other layer falls back to.'],
 
             'pricing.gemstone_rates_per_carat' => ['type' => 'json', 'default' => [
@@ -237,8 +239,10 @@ class SettingsRegistry
             'pricing.live_rates_cache_seconds' => ['type' => 'integer', 'default' => 900, 'label' => 'Re-check the feed every (seconds)'],
             'pricing.live_rates_timeout_seconds' => ['type' => 'integer', 'default' => 10, 'label' => 'Feed timeout (seconds)'],
             'pricing.metal_purity_fractions' => ['type' => 'json', 'default' => [
-                '24k' => 1.0, '22k' => 0.9167, '18k' => 0.75, '14k' => 0.5833, '9k' => 0.375,
-                '950 platinum' => 0.95, '900 platinum' => 0.90, 'sterling silver' => 0.925,
+                '24k' => 0.999, '22k' => 0.917, '18k' => 0.75, '14k' => 0.585,
+                '10k' => 0.417, '9k' => 0.375,
+                '950 platinum' => 0.95, '900 platinum' => 0.90,
+                'sterling silver' => 0.925, 'fine silver' => 0.999,
             ], 'label' => 'Purity of each alloy', 'help' => 'A feed quotes fine metal; a piece is rarely fine metal.'],
 
             // ---- Layer 4 tables ---------------------------------------------
@@ -249,9 +253,13 @@ class SettingsRegistry
             'pricing.seasonal_demand' => ['type' => 'json', 'default' => [
                 'November' => 1.05, 'December' => 1.08, 'January' => 0.95, 'February' => 1.04,
             ], 'label' => 'Seasonal adjustment', 'help' => 'By month. Anything not listed is left alone.'],
+            'pricing.regional_demand' => ['type' => 'json', 'default' => [
+                'los angeles' => 1.05, 'new york' => 1.08, 'san francisco' => 1.06, 'online' => 1.00,
+            ], 'label' => 'Regional adjustment'],
             'pricing.inventory_age_adjustments' => ['type' => 'json', 'default' => [
-                '180' => 0.95, '365' => 0.90, '730' => 0.85,
+                '31' => 0.97, '61' => 0.93, '91' => 0.88, '120' => 0.80,
             ], 'label' => 'Inventory age adjustment', 'help' => 'Days in stock → multiplier. A piece that has not sold is telling you something.'],
+            'pricing.market_adjustment_cap_percent' => ['type' => 'string', 'default' => '30', 'label' => 'Cap market adjustments at (±%)', 'help' => 'Four multipliers compounding can run away. This is what stops one table edit moving the whole catalogue.'],
 
             'pricing.suggestion_band_percent' => ['type' => 'integer', 'default' => 15, 'label' => 'Suggestion band (±%)'],
             'pricing.insurance_multiplier' => ['type' => 'string', 'default' => '1.15', 'label' => 'Insurance value multiplier'],
