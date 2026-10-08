@@ -12,6 +12,7 @@ class GemstoneDetail extends Model
 
     protected $fillable = [
         'product_id', 'stone_type', 'shape', 'cut', 'color',
+        'clarity', 'cut_grade', 'treatment', 'quality_tier',
         'estimated_weight_ct', 'setting_style', 'is_primary',
     ];
 

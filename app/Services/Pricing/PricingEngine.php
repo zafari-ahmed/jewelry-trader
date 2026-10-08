@@ -72,6 +72,11 @@ class PricingEngine
             $price,
             $multipliers,
             $lines,
+            // Off by default (0 = no cap), because the opening multipliers are
+            // the appraiser's signed judgement and capping them unasked would
+            // quietly overrule it. The control exists for when the business
+            // wants a ceiling on how far three multipliers can compound.
+            capPercent: (float) Setting::get('pricing.multiplier_cap_percent', 0),
         );
 
         $price = $this->applyLayer(
@@ -114,7 +119,14 @@ class PricingEngine
         }
 
         $bandPercent = (int) Setting::get('pricing.suggestion_band_percent', 15);
-        $floorPercent = (int) Setting::get('pricing.negotiation_floor_percent', 85);
+
+        // A brooch is negotiated harder than a ring and insured higher, so
+        // both come from the category table where the business has set one.
+        $floorPercent = $this->lookup('pricing.negotiation_floor_by_category', $category)
+            ?? (float) Setting::get('pricing.negotiation_floor_percent', 85);
+
+        $insuranceMultiplier = $this->lookup('pricing.insurance_by_category', $category)
+            ?? (float) Setting::get('pricing.insurance_multiplier', 1.15);
 
         return new PricingSuggestion(
             intrinsicCents: $materialCents,
@@ -126,7 +138,7 @@ class PricingEngine
             retailCents: $final,
             bandLowCents: (int) round($final * (1 - $bandPercent / 100)),
             bandHighCents: (int) round($final * (1 + $bandPercent / 100)),
-            insuranceCents: (int) round($final * (float) Setting::get('pricing.insurance_multiplier', 1.15)),
+            insuranceCents: (int) round($final * $insuranceMultiplier),
             negotiationFloorCents: (int) round($final * $floorPercent / 100),
             factors: $factors,
             multipliers: $multipliers,
@@ -228,7 +240,22 @@ class PricingEngine
         return $value;
     }
 
-    /** @param array<int, array<string, mixed>> $gemstones */
+    /**
+     * What the stones are worth.
+     *
+     * Diamond prices are not linear: a 0.05ct melee stone is worth $400 a
+     * carat and a four-carat stone $18,000 a carat. Pricing both off one
+     * average would overvalue the melee roughly sixfold and undervalue the
+     * large stone by as much, so the rate comes from a size band. An old
+     * European or rose cut carries its own rate instead, since in estate work
+     * the cut is often worth more than the size.
+     *
+     * Clarity, colour and cut then adjust the rate — but only where the
+     * grading was actually recorded. An ungraded stone is priced at the
+     * baseline and said to be ungraded, never assumed to be fine.
+     *
+     * @param array<int, array<string, mixed>> $gemstones
+     */
     private function gemstoneValue(array $gemstones, array &$factors, array &$missing): int
     {
         $total = 0;
@@ -241,7 +268,12 @@ class PricingEngine
                 continue;
             }
 
-            $rate = $this->lookup('pricing.gemstone_rates_per_carat', $type);
+            // A recorded quality tier is more specific than the stone type:
+            // "fine Burmese, unheated" and "commercial Australian" are both
+            // sapphire and an order of magnitude apart in value.
+            $rate = $this->stoneRate($stone['quality_tier'] ?? null)
+                ?? $this->cutRate($type, $stone['cut'] ?? null)
+                ?? $this->stoneRate($type, $carats);
 
             if ($rate === null) {
                 $missing[] = 'a rate for '.$type;
@@ -249,17 +281,114 @@ class PricingEngine
                 continue;
             }
 
+            $notes = [];
+            $rate = $this->applyStoneGrading($stone, $rate, $notes);
+
             $value = (int) round($carats * $rate * 100);
             $total += $value;
 
             $factors[] = [
                 'label' => 'Gemstone',
-                'detail' => ucfirst((string) $type).' · '.$this->trimNumber($carats).' ct at $'.number_format($rate, 2).'/ct',
+                'detail' => ucfirst((string) (($stone['quality_tier'] ?? null) ?: $type))
+                    .' · '.$this->trimNumber($carats).' ct at $'.number_format($rate, 2).'/ct'
+                    .($notes === [] ? '' : ' · '.implode(', ', $notes)),
                 'value_cents' => $value,
             ];
         }
 
         return $total;
+    }
+
+    /**
+     * The per-carat rate for a stone, from a flat figure or a size band.
+     *
+     * A table entry is either a number, or a list of bands as
+     * `max carats => rate`, with the last band open-ended.
+     */
+    private function stoneRate(?string $needle, ?float $carats = null): ?float
+    {
+        if (blank($needle)) {
+            return null;
+        }
+
+        $table = Setting::get('pricing.gemstone_rates_per_carat', []);
+
+        if (! is_array($table)) {
+            return null;
+        }
+
+        $needle = strtolower(trim($needle));
+
+        foreach ($table as $key => $value) {
+            if (! str_contains($needle, strtolower((string) $key))) {
+                continue;
+            }
+
+            if (! is_array($value)) {
+                return (float) $value;
+            }
+
+            if ($carats === null) {
+                return null;
+            }
+
+            // Bands are keyed by their upper bound; the open-ended top band
+            // is whatever is left once the bounded ones are exhausted.
+            $bands = $value;
+            ksort($bands, SORT_NUMERIC);
+
+            foreach ($bands as $maxCarats => $rate) {
+                if ((float) $maxCarats <= 0 || $carats <= (float) $maxCarats) {
+                    return (float) $rate;
+                }
+            }
+
+            return (float) end($bands);
+        }
+
+        return null;
+    }
+
+    /** An old European, old mine or rose cut is priced on the cut, not the size. */
+    private function cutRate(string $type, ?string $cut): ?float
+    {
+        if (blank($cut) || ! str_contains(strtolower($type), 'diamond')) {
+            return null;
+        }
+
+        return $this->lookup('pricing.diamond_cut_rates', $cut);
+    }
+
+    /**
+     * Clarity, colour, cut grade and treatment, where they were recorded.
+     *
+     * @param  string[]  $notes
+     */
+    private function applyStoneGrading(array $stone, float $rate, array &$notes): float
+    {
+        foreach ([
+            'clarity' => 'pricing.diamond_clarity_adjustments',
+            'color' => 'pricing.diamond_color_adjustments',
+            'cut_grade' => 'pricing.diamond_cut_quality_adjustments',
+            'treatment' => 'pricing.stone_treatment_adjustments',
+        ] as $field => $settingKey) {
+            $value = $stone[$field] ?? null;
+
+            if (blank($value)) {
+                continue;
+            }
+
+            $adjustment = $this->lookup($settingKey, (string) $value);
+
+            if ($adjustment === null || $adjustment <= 0) {
+                continue;
+            }
+
+            $rate *= $adjustment;
+            $notes[] = $value.' ×'.$this->trimNumber($adjustment);
+        }
+
+        return $rate;
     }
 
     /**

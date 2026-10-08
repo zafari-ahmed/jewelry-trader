@@ -365,3 +365,55 @@ Listed so the gap is explicit rather than discovered later:
   deliberate decision, not a side effect.
 - **The AI maintenance job itself.** The approval queue it feeds is built; what
   writes proposals into it waits on their step-by-step process.
+
+## The appraiser's opening rate table
+
+Received 2026-10-07 as a signed 13-page document with appraiser input, loaded
+by `OpeningRateTableSeeder`. Unlike `SettingsSeeder` it **overwrites**: it is
+the deliberate load of an agreed table, not a first-run default, and every
+write is audited so a reload shows in the log.
+
+Spot assumptions behind the metal figures — gold $2,650/oz, platinum
+$1,050/oz, silver $32.00/oz, palladium $1,150/oz, at 31.1035 g per troy ounce.
+Every metal rate in the document reconciles to spot ÷ 31.1035 × purity; all
+eleven were checked.
+
+### What the table forced us to change
+
+| Change | Why it could not simply be loaded |
+|---|---|
+| **Diamonds priced by size band** | Their table runs $400/ct at melee to $18,000/ct above four carats. Our model held one flat rate per stone type. Pricing a 0.05ct stone at the 1ct rate overvalues it roughly sixfold; pricing a 3ct stone there undervalues it fivefold. This is not an approximation, it is a wrong answer by multiples |
+| **Cut-specific diamond rates** | An old European or rose cut is priced on the cut, which in estate work frequently exceeds the size rate |
+| **Clarity, colour, cut grade and treatment** on `gemstone_details` | Their §2.3 adjusts the rate by up to +60% / −50%, and none of those could be recorded, so none could be priced. Treatment especially: a lab-grown stone at 8% of natural is the difference between a $4,500 ruby and a $360 one |
+| **Quality tiers for coloured stones** | "Fine Burmese sapphire, unheated" at $4,500/ct and "commercial Australian" at $400/ct are both sapphire. Tier keys are matched most-specific-first and fall through to the commercial rate |
+| **Negotiation floor per category** | Their §10: 85% on rings, 75% on men's accessories. We held one global figure |
+| **Insurance multiplier per category** | Their §11: 1.40 on rings, 1.50 on brooches. Same |
+
+Stones the trade prices per gram (jade, turquoise, coral, lapis, malachite)
+are entered per carat — a fifth of the per-gram figure — so the arithmetic
+stays one shape rather than branching on unit.
+
+### Flagged back, not silently resolved
+
+**Layer 3 now compounds much harder than before.** Georgian is ×2.50 (was
+×1.35) and condition can now add as well as subtract, so maker × period ×
+condition reaches ×4.65 at the top. A worked case: a signed Georgian piece in
+mint condition in New York prices at **15.4× materials and labour**.
+
+That may well be right for genuinely rare work — but nothing checks that the
+*combination* is possible. The system will happily price a "Georgian Van
+Cleef", though the house was founded in 1906. A cap setting
+(`pricing.multiplier_cap_percent`) now exists and is **off by default**:
+capping the appraiser's signed judgement unasked would quietly overrule it,
+so the control is there and the number is theirs to set.
+
+The better fix, offered to the client: their period table already carries date
+ranges, and maker founding dates are knowable, so the system could refuse — or
+flag — a historically impossible combination rather than pricing it.
+
+**Also flagged:** their assumptions page lists a 30–50% "retail markup on
+metal… reflects fabrication, labor, overhead". The craftsman's formula already
+applies overhead, design and both commissions on top of material cost. The
+rates loaded are raw metal (their own note confirms this), so there is no
+double count — but it is worth one line of confirmation, because loading
+marked-up rates into Step 1 would charge for the same overhead twice.
