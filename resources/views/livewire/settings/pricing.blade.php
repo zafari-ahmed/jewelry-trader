@@ -203,17 +203,7 @@
                         ['period_premiums', 'Period'],
                         ['condition_adjustments', 'Condition'],
                     ] as [$key, $label])
-                        <div>
-                            <x-ui.eyebrow class="mb-8">{{ $label }}</x-ui.eyebrow>
-                            <div class="grid gap-10 md:grid-cols-2">
-                                @foreach (($state[$key] ?? []) as $name => $value)
-                                    <div class="flex items-center gap-10" wire:key="{{ $key }}-{{ $loop->index }}">
-                                        <span class="min-w-0 flex-1 truncate text-body-sm">{{ str($name)->headline() }}</span>
-                                        <x-ui.input wire:model="state.{{ $key }}.{{ $name }}" class="w-120" />
-                                    </div>
-                                @endforeach
-                            </div>
-                        </div>
+                        <x-pricing.rate-rows :table="$key" :label="$label" :rows="$state[$key] ?? []" />
                     @endforeach
                 </div>
             </x-ui.card>
@@ -229,19 +219,10 @@
                     @foreach ([
                         ['category_demand', 'Category demand'],
                         ['seasonal_demand', 'By month'],
+                        ['regional_demand', 'By region'],
                         ['inventory_age_adjustments', 'Days in stock'],
                     ] as [$key, $label])
-                        <div>
-                            <x-ui.eyebrow class="mb-8">{{ $label }}</x-ui.eyebrow>
-                            <div class="grid gap-10 md:grid-cols-2">
-                                @foreach (($state[$key] ?? []) as $name => $value)
-                                    <div class="flex items-center gap-10" wire:key="{{ $key }}-{{ $loop->index }}">
-                                        <span class="min-w-0 flex-1 truncate text-body-sm">{{ str($name)->headline() }}</span>
-                                        <x-ui.input wire:model="state.{{ $key }}.{{ $name }}" class="w-120" />
-                                    </div>
-                                @endforeach
-                            </div>
-                        </div>
+                        <x-pricing.rate-rows :table="$key" :label="$label" :rows="$state[$key] ?? []" />
                     @endforeach
                 </div>
             </x-ui.card>

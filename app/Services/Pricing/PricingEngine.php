@@ -65,9 +65,9 @@ class PricingEngine
             'pricing.layer.multipliers_enabled',
             'Layer 3 · Maker, period and condition',
             [
-                'brand' => $this->lookup('pricing.brand_premiums', $attributes['brand'] ?? null),
-                'period' => $this->lookup('pricing.period_premiums', $attributes['style_period'] ?? null),
-                'condition' => $this->lookup('pricing.condition_adjustments', $attributes['condition_grade'] ?? null),
+                'brand' => $this->entry('pricing.brand_premiums', $attributes['brand'] ?? null),
+                'period' => $this->entry('pricing.period_premiums', $attributes['style_period'] ?? null),
+                'condition' => $this->entry('pricing.condition_adjustments', $attributes['condition_grade'] ?? null),
             ],
             $price,
             $multipliers,
@@ -83,9 +83,9 @@ class PricingEngine
             'pricing.layer.market_enabled',
             'Layer 4 · Market adjustments',
             [
-                'category' => $this->lookup('pricing.category_demand', $category),
-                'season' => $this->lookup('pricing.seasonal_demand', now()->format('F')),
-                'region' => $this->lookup('pricing.regional_demand', $attributes['region'] ?? null),
+                'category' => $this->entry('pricing.category_demand', $category),
+                'season' => $this->entry('pricing.seasonal_demand', now()->format('F')),
+                'region' => $this->entry('pricing.regional_demand', $attributes['region'] ?? null),
                 'inventory age' => $this->ageAdjustment($attributes),
             ],
             $price,
@@ -396,6 +396,9 @@ class PricingEngine
      *
      * @param  array<string, float|null>  $candidates
      */
+    /**
+     * @param  array<string, RateEntry|null>  $candidates
+     */
     private function applyLayer(
         string $toggle,
         string $label,
@@ -418,7 +421,7 @@ class PricingEngine
             return $price;
         }
 
-        $applied = array_filter($candidates, fn ($value) => $value !== null && $value > 0);
+        $applied = array_filter($candidates, fn (?RateEntry $entry) => $entry !== null && $entry->value > 0);
 
         if ($applied === []) {
             $lines[] = PricingLine::skipped($label, 'Nothing on this piece matched the table');
@@ -428,17 +431,35 @@ class PricingEngine
 
         $combined = 1.0;
         $detail = [];
+        $floor = (int) Setting::get('pricing.min_rate_confidence', 0);
 
-        foreach ($applied as $name => $multiplier) {
-            $multipliers[$name] = $multiplier;
-            $combined *= $multiplier;
-            $detail[] = '×'.$this->trimNumber($multiplier).' '.$name;
+        $sources = [];
+
+        foreach ($applied as $name => $entry) {
+            $multipliers[$name] = $entry->value;
+            $combined *= $entry->value;
+
+            if ($entry->source !== null) {
+                $sources[$entry->source] = true;
+            }
+
+            // Confidence sits inline because it qualifies that figure.
+            // The source is collected and named once at the end: three
+            // multipliers from the same table should say so once, not
+            // three times.
+            $detail[] = '×'.$this->trimNumber($entry->value).' '.$name
+                .($entry->confidence === null ? '' : ' ('.$entry->confidence.'%)')
+                .($entry->isLowConfidence($floor) ? ' — worth checking' : '');
         }
 
         $capped = $this->cap($combined, $capPercent);
 
         if ($capped !== $combined) {
             $detail[] = 'capped at '.$this->trimNumber($capPercent).'%';
+        }
+
+        if ($sources !== []) {
+            $detail[] = 'from '.implode('; ', array_keys($sources));
         }
 
         $lines[] = new PricingLine($label, implode(' · ', $detail), $price = (int) round($price * $capped));
@@ -462,7 +483,7 @@ class PricingEngine
      * The bands are a setting, so whether that means a markdown at ninety
      * days or at three hundred is the business's call, not the software's.
      */
-    private function ageAdjustment(array $attributes): ?float
+    private function ageAdjustment(array $attributes): ?RateEntry
     {
         $days = (int) ($attributes['days_in_stock'] ?? 0);
 
@@ -479,9 +500,9 @@ class PricingEngine
         $match = null;
         $matchedAt = -1;
 
-        foreach ($bands as $threshold => $multiplier) {
+        foreach (array_keys($bands) as $threshold) {
             if ($days >= (int) $threshold && (int) $threshold > $matchedAt) {
-                $match = (float) $multiplier;
+                $match = RateTable::exact($bands, (string) $threshold);
                 $matchedAt = (int) $threshold;
             }
         }
@@ -489,28 +510,18 @@ class PricingEngine
         return $match;
     }
 
-    /** Tables are keyed loosely, so "18K Yellow Gold" still finds the "18k" row. */
+    /** The rate alone, for the tables that carry no provenance. */
     private function lookup(string $settingKey, ?string $needle): ?float
     {
-        if (blank($needle)) {
-            return null;
-        }
+        return $this->entry($settingKey, $needle)?->value;
+    }
 
+    /** The rate with its confidence and source, where those were recorded. */
+    private function entry(string $settingKey, ?string $needle): ?RateEntry
+    {
         $table = Setting::get($settingKey, []);
 
-        if (! is_array($table)) {
-            return null;
-        }
-
-        $needle = strtolower(trim($needle));
-
-        foreach ($table as $key => $value) {
-            if (str_contains($needle, strtolower((string) $key))) {
-                return (float) $value;
-            }
-        }
-
-        return null;
+        return is_array($table) ? RateTable::entry($table, $needle) : null;
     }
 
     private function trimNumber(float $value): string

@@ -55,8 +55,8 @@ class RateProposalService
                 'batch_id' => $batchId,
                 'table_key' => $tableKey,
                 'entry_key' => $proposal['entry_key'],
-                'value_at_proposal' => is_array($current) && isset($current[$proposal['entry_key']])
-                    ? (float) $current[$proposal['entry_key']]
+                'value_at_proposal' => is_array($current)
+                    ? RateTable::exact($current, $proposal['entry_key'])?->value
                     : null,
                 'proposed_value' => $value,
                 'reason' => $proposal['reason'] ?? null,
@@ -107,7 +107,16 @@ class RateProposalService
                         continue;
                     }
 
-                    $table[$proposal->entry_key] = $proposal->proposed_value;
+                    // The approved figure carries its confidence and source
+                    // into the table, so the provenance of a rate survives
+                    // the decision rather than living only in the queue.
+                    $table = RateTable::write(
+                        $table,
+                        $proposal->entry_key,
+                        $proposal->proposed_value,
+                        $proposal->confidence,
+                        $proposal->source,
+                    );
                     $changed = true;
 
                     $proposal->update([

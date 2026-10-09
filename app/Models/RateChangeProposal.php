@@ -89,10 +89,10 @@ class RateChangeProposal extends Model
     {
         $table = Setting::get($this->table_key, []);
 
-        if (! is_array($table) || ! array_key_exists($this->entry_key, $table)) {
+        if (! is_array($table)) {
             return null;
         }
 
-        return (float) $table[$this->entry_key];
+        return \App\Services\Pricing\RateTable::exact($table, $this->entry_key)?->value;
     }
 }

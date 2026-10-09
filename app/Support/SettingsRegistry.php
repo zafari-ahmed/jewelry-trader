@@ -259,6 +259,7 @@ class SettingsRegistry
             'pricing.inventory_age_adjustments' => ['type' => 'json', 'default' => [
                 '31' => 0.97, '61' => 0.93, '91' => 0.88, '120' => 0.80,
             ], 'label' => 'Inventory age adjustment', 'help' => 'Days in stock → multiplier. A piece that has not sold is telling you something.'],
+            'pricing.min_rate_confidence' => ['type' => 'integer', 'default' => 0, 'label' => 'Flag rates below this confidence (%)', 'help' => 'Zero means never flag. A rate recorded as weak is marked "worth checking" in the working.'],
             'pricing.multiplier_cap_percent' => ['type' => 'string', 'default' => '0', 'label' => 'Cap maker/period/condition at (±%)', 'help' => 'Zero means no cap. Three multipliers compound: a Georgian signed piece in mint condition reaches ×3.7 before the market layer is even reached.'],
             'pricing.market_adjustment_cap_percent' => ['type' => 'string', 'default' => '30', 'label' => 'Cap market adjustments at (±%)', 'help' => 'Four multipliers compounding can run away. This is what stops one table edit moving the whole catalogue.'],
 

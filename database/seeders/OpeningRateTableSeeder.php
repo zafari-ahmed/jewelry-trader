@@ -26,13 +26,47 @@ use Illuminate\Database\Seeder;
  */
 class OpeningRateTableSeeder extends Seeder
 {
+    /** Where these figures came from, recorded against every rate. */
+    private const SOURCE = 'Appraiser opening table, October 2026';
+
+    /**
+     * Tables whose rows carry a provenance.
+     *
+     * Confidence is deliberately left empty: the signed document states
+     * values, not confidence percentages, and inventing them would put a
+     * number nobody stands behind in front of an appraiser.
+     */
+    private const WITH_PROVENANCE = [
+        'pricing.brand_premiums',
+        'pricing.period_premiums',
+        'pricing.condition_adjustments',
+        'pricing.category_demand',
+        'pricing.seasonal_demand',
+        'pricing.regional_demand',
+        'pricing.inventory_age_adjustments',
+    ];
+
     public function run(): void
     {
         foreach ($this->rates() as $key => $value) {
-            Setting::set($key, $value);
+            Setting::set($key, in_array($key, self::WITH_PROVENANCE, true)
+                ? $this->withProvenance($value)
+                : $value);
         }
 
         Setting::flushCache();
+    }
+
+    /** @param array<string, float> $rates */
+    private function withProvenance(array $rates): array
+    {
+        $out = [];
+
+        foreach ($rates as $key => $value) {
+            $out[$key] = ['multiplier' => $value, 'confidence' => null, 'source' => self::SOURCE];
+        }
+
+        return $out;
     }
 
     /** @return array<string, mixed> */

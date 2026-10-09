@@ -7,6 +7,7 @@ use App\Models\RateChangeProposal;
 use App\Models\Setting;
 use App\Models\User;
 use App\Services\Pricing\RateProposalService;
+use App\Services\Pricing\RateTable;
 use Database\Seeders\RolesAndPermissionsSeeder;
 use Database\Seeders\SettingsSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -40,6 +41,12 @@ class RateProposalTest extends TestCase
         $this->service = app(RateProposalService::class);
     }
 
+    /** Read one rate, whichever shape the row is in. */
+    private function rate(string $table, string $key): ?float
+    {
+        return RateTable::exact(Setting::get($table, []), $key)?->value;
+    }
+
     private function proposeBridal(float $value = 1.11): RateChangeProposal
     {
         Setting::set('pricing.category_demand', ['bridal' => 1.08]);
@@ -61,7 +68,7 @@ class RateProposalTest extends TestCase
 
         // The queue has it; the rate table does not.
         $this->assertSame('pending', RateChangeProposal::sole()->status);
-        $this->assertSame(1.08, (float) Setting::get('pricing.category_demand')['bridal']);
+        $this->assertSame(1.08, $this->rate('pricing.category_demand', 'bridal'));
     }
 
     public function test_approving_writes_the_rate(): void
@@ -71,7 +78,7 @@ class RateProposalTest extends TestCase
         $result = $this->service->approve([$proposal->id], $this->appraiser->id);
 
         $this->assertSame(1, $result['applied']);
-        $this->assertSame(1.11, (float) Setting::get('pricing.category_demand')['bridal']);
+        $this->assertSame(1.11, $this->rate('pricing.category_demand', 'bridal'));
         $this->assertSame('approved', $proposal->fresh()->status);
         $this->assertSame($this->appraiser->id, $proposal->fresh()->decided_by);
     }
@@ -82,7 +89,7 @@ class RateProposalTest extends TestCase
 
         $this->service->reject([$proposal->id], $this->appraiser->id, 'Not what we are seeing');
 
-        $this->assertSame(1.08, (float) Setting::get('pricing.category_demand')['bridal']);
+        $this->assertSame(1.08, $this->rate('pricing.category_demand', 'bridal'));
         $this->assertSame('rejected', $proposal->fresh()->status);
         $this->assertSame('Not what we are seeing', $proposal->fresh()->decision_note);
     }
@@ -104,7 +111,7 @@ class RateProposalTest extends TestCase
 
         $this->assertSame(0, $result['applied']);
         $this->assertSame(1, $result['stale']);
-        $this->assertSame(1.20, (float) Setting::get('pricing.category_demand')['bridal']);
+        $this->assertSame(1.20, $this->rate('pricing.category_demand', 'bridal'));
         $this->assertSame('stale', $proposal->fresh()->status);
     }
 
@@ -148,10 +155,9 @@ class RateProposalTest extends TestCase
 
         $this->assertSame(3, $result['applied']);
 
-        $table = Setting::get('pricing.category_demand');
-        $this->assertSame(1.11, (float) $table['bridal']);
-        $this->assertSame(0.95, (float) $table['estate']);
-        $this->assertSame(1.07, (float) $table['watches']);
+        $this->assertSame(1.11, $this->rate('pricing.category_demand', 'bridal'));
+        $this->assertSame(0.95, $this->rate('pricing.category_demand', 'estate'));
+        $this->assertSame(1.07, $this->rate('pricing.category_demand', 'watches'));
     }
 
     public function test_the_review_screen_shows_what_is_waiting(): void
@@ -176,7 +182,7 @@ class RateProposalTest extends TestCase
             ->call('approveSelected')
             ->assertSee('1 rate updated');
 
-        $this->assertSame(1.11, (float) Setting::get('pricing.category_demand')['bridal']);
+        $this->assertSame(1.11, $this->rate('pricing.category_demand', 'bridal'));
     }
 
     public function test_sales_staff_cannot_open_the_queue(): void
