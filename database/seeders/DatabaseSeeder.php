@@ -15,6 +15,7 @@ class DatabaseSeeder extends Seeder
             LocationSeeder::class,
             SettingsSeeder::class,
             PaymentGatewaySeeder::class,
+            MetalRateProviderSeeder::class,
             AiProviderSeeder::class,
             FieldColorRuleSeeder::class,
             StepUpChallengeSeeder::class,

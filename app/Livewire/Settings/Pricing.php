@@ -2,8 +2,14 @@
 
 namespace App\Livewire\Settings;
 
+use App\Models\MetalRateFetch;
+use App\Models\MetalRateProvider;
+use App\Models\Setting;
 use App\Services\Pricing\CraftsmanFormula;
+use App\Services\Pricing\Rates\LiveMetalRates;
 use Closure;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Gate;
 
 /**
  * The pricing stack, top to bottom.
@@ -119,10 +125,60 @@ class Pricing extends SettingsComponent
         return ['steps' => $steps, 'final' => $price];
     }
 
+    public ?string $feedResult = null;
+
+    public ?string $feedError = null;
+
+    /**
+     * Ask the feed for rates now, and say plainly what came back.
+     *
+     * Marked as a test so it stays out of the failure count and cannot set
+     * off the "feed is down" alert while somebody is deliberately poking it.
+     */
+    public function testConnection(): void
+    {
+        Gate::authorize('manage-settings');
+
+        $this->reset('feedResult', 'feedError');
+
+        $provider = MetalRateProvider::query()
+            ->where('slug', $this->state['live_rates_provider'] ?? '')
+            ->first();
+
+        $endpoint = trim((string) ($provider?->endpoint ?: ($this->state['live_rates_endpoint'] ?? '')));
+
+        if ($endpoint === '') {
+            $this->feedError = 'There is no feed address to test yet.';
+
+            return;
+        }
+
+        $rates = app(LiveMetalRates::class)->fetch($endpoint, $provider, isTest: true);
+
+        if ($rates === []) {
+            $this->feedError = MetalRateFetch::latest('id')->value('error')
+                ?? 'The feed did not return any rates that could be read.';
+
+            return;
+        }
+
+        // Cached rates are now stale relative to what we just proved works.
+        Cache::forget('pricing.live_rates');
+
+        $this->feedResult = 'Read '.count($rates).' '.str('rate')->plural(count($rates)).': '
+            .collect($rates)
+                ->map(fn ($perGram, $metal) => str($metal)->headline().' $'.number_format($perGram, 2).'/g')
+                ->implode(' · ');
+    }
+
     public function render()
     {
         return view('livewire.settings.pricing', [
             'houseRates' => app(CraftsmanFormula::class)->percentagesFor(null),
+            'providers' => MetalRateProvider::query()->where('is_active', true)->orderBy('name')->get(),
+            'lastFetch' => MetalRateFetch::lastSuccessful(),
+            'recentFetches' => MetalRateFetch::query()->latest('id')->limit(8)->get(),
+            'consecutiveFailures' => MetalRateFetch::consecutiveFailures(),
         ])->layout('layouts.admin-livewire', [
             'title' => 'Pricing',
             'heading' => 'Pricing',

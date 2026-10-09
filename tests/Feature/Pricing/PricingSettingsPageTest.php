@@ -124,6 +124,61 @@ class PricingSettingsPageTest extends TestCase
         $this->assertSame('rates-secret-value', Setting::get('pricing.live_rates_api_key'));
     }
 
+    /** The feed can be proved rather than promised. */
+    public function test_testing_the_connection_reports_what_came_back(): void
+    {
+        Setting::set('pricing.live_rates_endpoint', 'https://feed.test/rates');
+        Setting::set('pricing.live_rates_path', 'rates');
+
+        \Illuminate\Support\Facades\Http::fake([
+            'feed.test/*' => \Illuminate\Support\Facades\Http::response(['rates' => ['gold' => 3110.34768]]),
+        ]);
+
+        Livewire::actingAs($this->admin)
+            ->test(Pricing::class)
+            ->call('testConnection')
+            ->assertSet('feedError', null)
+            ->assertSee('Gold $100.00/g');
+    }
+
+    public function test_a_failing_feed_says_why_rather_than_claiming_success(): void
+    {
+        Setting::set('pricing.live_rates_endpoint', 'https://feed.test/rates');
+
+        \Illuminate\Support\Facades\Http::fake([
+            'feed.test/*' => \Illuminate\Support\Facades\Http::response('', 503),
+        ]);
+
+        Livewire::actingAs($this->admin)
+            ->test(Pricing::class)
+            ->call('testConnection')
+            ->assertSet('feedResult', null)
+            ->assertSee('503');
+    }
+
+    public function test_testing_with_no_address_configured_says_so(): void
+    {
+        Livewire::actingAs($this->admin)
+            ->test(Pricing::class)
+            ->call('testConnection')
+            ->assertSee('no feed address to test');
+    }
+
+    /** A test must not look like a production failure to the alerting. */
+    public function test_a_connection_test_does_not_count_towards_the_failure_alert(): void
+    {
+        Setting::set('pricing.live_rates_endpoint', 'https://feed.test/rates');
+
+        \Illuminate\Support\Facades\Http::fake([
+            'feed.test/*' => \Illuminate\Support\Facades\Http::response('', 503),
+        ]);
+
+        Livewire::actingAs($this->admin)->test(Pricing::class)->call('testConnection');
+
+        $this->assertTrue(\App\Models\MetalRateFetch::sole()->was_test);
+        $this->assertSame(0, \App\Models\MetalRateFetch::consecutiveFailures());
+    }
+
     public function test_someone_without_the_permission_cannot_open_it(): void
     {
         $staff = User::factory()->create();

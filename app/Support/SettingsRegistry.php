@@ -236,6 +236,11 @@ class SettingsRegistry
             'pricing.live_rates_api_key' => ['type' => 'encrypted_string', 'default' => null, 'label' => 'Metal rate feed key'],
             'pricing.live_rates_path' => ['type' => 'string', 'default' => 'rates', 'label' => 'Where the rates sit in the response', 'help' => 'Dotted path, e.g. data.rates. Leave blank if the response is the rates themselves.'],
             'pricing.live_rates_quoted_per_ounce' => ['type' => 'boolean', 'default' => true, 'label' => 'Feed quotes per troy ounce'],
+            'pricing.live_rates_provider' => ['type' => 'string', 'default' => null, 'label' => 'Feed provider', 'help' => 'Chosen from the providers table, so adding one is a record rather than a deploy.'],
+            'pricing.live_rates_metals' => ['type' => 'json', 'default' => ['gold', 'silver', 'platinum', 'palladium'], 'label' => 'Metals to take from the feed'],
+            'pricing.live_rates_failure_behaviour' => ['type' => 'string', 'default' => 'base', 'label' => 'If the feed is unavailable', 'help' => 'base = use your own table · last_known = use the last rate it returned · hold = refuse to price the metal.'],
+            'pricing.live_rates_alert_after_failures' => ['type' => 'integer', 'default' => 3, 'label' => 'Alert after this many consecutive failures', 'help' => 'Zero never alerts. One message per run of failures, not one per failure.'],
+            'pricing.live_rates_alert_recipients' => ['type' => 'string', 'default' => null, 'label' => 'Alert recipients', 'help' => 'Comma-separated email addresses.'],
             'pricing.live_rates_cache_seconds' => ['type' => 'integer', 'default' => 900, 'label' => 'Re-check the feed every (seconds)'],
             'pricing.live_rates_timeout_seconds' => ['type' => 'integer', 'default' => 10, 'label' => 'Feed timeout (seconds)'],
             'pricing.metal_purity_fractions' => ['type' => 'json', 'default' => [

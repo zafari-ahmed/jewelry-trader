@@ -155,6 +155,17 @@
 
                 <div class="mt-12 flex flex-col gap-12" @if (! ($state['layer_live_rates_enabled'] ?? false)) hidden @endif>
                     <div>
+                        <label class="mb-5 block text-label font-semibold">Provider</label>
+                        <x-ui.select wire:model.live="state.live_rates_provider">
+                            <option value="">Configured by hand below</option>
+                            @foreach ($providers as $provider)
+                                <option value="{{ $provider->slug }}">{{ $provider->name }}</option>
+                            @endforeach
+                        </x-ui.select>
+                        <div class="mt-4 text-caption text-muted">Providers are records, so adding one needs no deploy.</div>
+                    </div>
+
+                    <div>
                         <label class="mb-5 block text-label font-semibold">Feed URL</label>
                         <x-ui.input wire:model="state.live_rates_endpoint" placeholder="https://…" :status="$errors->has('state.live_rates_endpoint') ? 'red' : null" />
                         @error('state.live_rates_endpoint')<div class="mt-4 text-caption text-status-required">{{ $message }}</div>@enderror
@@ -173,19 +184,109 @@
                         <input type="checkbox" wire:model="state.live_rates_quoted_per_ounce" class="size-16 accent-navy">
                         The feed quotes per troy ounce
                     </label>
+
+                    <div>
+                        <x-ui.eyebrow class="mb-8">Metals to take from the feed</x-ui.eyebrow>
+                        <div class="flex flex-wrap gap-14">
+                            @foreach (['gold', 'silver', 'platinum', 'palladium'] as $metal)
+                                <label class="flex items-center gap-8 text-body-sm">
+                                    <input type="checkbox" wire:model="state.live_rates_metals" value="{{ $metal }}" class="size-16 accent-navy">
+                                    {{ ucfirst($metal) }}
+                                </label>
+                            @endforeach
+                        </div>
+                    </div>
+
+                    {{-- What happens when it goes wrong is the part that
+                         actually decides whether the shop keeps working. --}}
+                    <div class="border-t border-rule pt-12">
+                        <x-ui.eyebrow class="mb-8">If the feed is unavailable</x-ui.eyebrow>
+                        <div class="flex flex-col gap-8">
+                            @foreach ([
+                                ['base', 'Use your own base rate table', 'The shop is unaffected. Recommended.'],
+                                ['last_known', 'Use the last rate the feed returned', 'Closer to the market, but the working says how old it is.'],
+                                ['hold', 'Refuse to price the metal', 'Nothing is quoted from a stale rate — and nothing is quoted at all.'],
+                            ] as [$value, $label, $help])
+                                <label class="flex items-start gap-10 text-body-sm">
+                                    <input type="radio" wire:model.live="state.live_rates_failure_behaviour" value="{{ $value }}" class="mt-3 size-15 accent-navy">
+                                    <span>
+                                        {{ $label }}
+                                        <span class="block text-caption text-muted">{{ $help }}</span>
+                                    </span>
+                                </label>
+                            @endforeach
+                        </div>
+                    </div>
+
                     <div class="grid gap-10 md:grid-cols-2">
+                        <div>
+                            <label class="mb-5 block text-label font-semibold">Alert after this many failures</label>
+                            <x-ui.input wire:model="state.live_rates_alert_after_failures" />
+                        </div>
                         <div>
                             <label class="mb-5 block text-label font-semibold">Re-check every (seconds)</label>
                             <x-ui.input wire:model="state.live_rates_cache_seconds" :status="$errors->has('state.live_rates_cache_seconds') ? 'red' : null" />
                         </div>
-                        <div>
-                            <label class="mb-5 block text-label font-semibold">Timeout (seconds)</label>
-                            <x-ui.input wire:model="state.live_rates_timeout_seconds" :status="$errors->has('state.live_rates_timeout_seconds') ? 'red' : null" />
-                        </div>
                     </div>
+                    <div>
+                        <label class="mb-5 block text-label font-semibold">Alert recipients</label>
+                        <x-ui.input wire:model="state.live_rates_alert_recipients" placeholder="manager@example.com, owner@example.com" />
+                        <div class="mt-4 text-caption text-muted">One message per run of failures, not one per failure.</div>
+                    </div>
+                    <div class="max-w-200">
+                        <label class="mb-5 block text-label font-semibold">Timeout (seconds)</label>
+                        <x-ui.input wire:model="state.live_rates_timeout_seconds" :status="$errors->has('state.live_rates_timeout_seconds') ? 'red' : null" />
+                    </div>
+
+                    {{-- Proof it works, rather than a promise that it should. --}}
+                    <div class="border-t border-rule pt-12">
+                        <div class="flex flex-wrap items-center gap-9">
+                            <x-ui.button wire:click="testConnection" type="button">Test connection</x-ui.button>
+                            @if ($consecutiveFailures > 0)
+                                <span class="text-caption text-status-required">{{ $consecutiveFailures }} consecutive {{ str('failure')->plural($consecutiveFailures) }}</span>
+                            @endif
+                        </div>
+
+                        @if ($feedResult)
+                            <div class="mt-10 rounded-surface border border-status-valid bg-status-valid-ground px-14 py-10 text-caption text-status-valid">{{ $feedResult }}</div>
+                        @endif
+                        @if ($feedError)
+                            <div class="mt-10 rounded-surface border border-status-required bg-status-required-ground px-14 py-10 text-caption text-status-required">{{ $feedError }}</div>
+                        @endif
+
+                        @if ($lastFetch)
+                            <div class="mt-12">
+                                <x-ui.eyebrow class="mb-6">Last successful fetch</x-ui.eyebrow>
+                                <div class="text-caption text-muted">{{ $lastFetch->created_at->diffForHumans() }} · {{ $lastFetch->created_at->format('j M Y, H:i') }}</div>
+                                <div class="mt-6 flex flex-wrap gap-12 text-caption">
+                                    @foreach (($lastFetch->rates ?? []) as $metal => $perGram)
+                                        <span><strong>{{ str($metal)->headline() }}</strong> ${{ number_format($perGram, 2) }}/g</span>
+                                    @endforeach
+                                </div>
+                            </div>
+                        @else
+                            <div class="mt-12 text-caption text-muted">The feed has not yet returned anything.</div>
+                        @endif
+
+                        @if ($recentFetches->isNotEmpty())
+                            <div class="mt-12">
+                                <x-ui.eyebrow class="mb-6">Recent calls</x-ui.eyebrow>
+                                @foreach ($recentFetches as $fetch)
+                                    <div class="flex flex-wrap items-baseline justify-between gap-10 border-b border-rule py-5 last:border-0 text-caption">
+                                        <span class="{{ $fetch->succeeded ? 'text-status-valid' : 'text-status-required' }}">
+                                            {{ $fetch->succeeded ? 'OK' : 'Failed' }}{{ $fetch->was_test ? ' (test)' : '' }}
+                                            @if ($fetch->error) — {{ $fetch->error }} @endif
+                                        </span>
+                                        <span class="text-muted">{{ $fetch->created_at->diffForHumans() }}@if ($fetch->duration_ms) · {{ $fetch->duration_ms }}ms @endif</span>
+                                    </div>
+                                @endforeach
+                            </div>
+                        @endif
+                    </div>
+
                     <p class="text-caption text-muted">
-                        A feed that is unreachable or slow falls back to the base rates and says so in the working.
-                        Pricing a piece never depends on somebody else's uptime.
+                        A feed that is unreachable or slow never stops a piece being catalogued: the working
+                        always says which source answered.
                     </p>
                 </div>
             </x-ui.card>
