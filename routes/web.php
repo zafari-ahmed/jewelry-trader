@@ -101,6 +101,10 @@ Route::middleware('auth')->prefix('admin')->name('admin.')->group(function () {
     // appraiser holds the veto on rate changes but has no business editing
     // payment keys, so this is gated on its own permission rather than on
     // blanket settings access.
+    Route::get('/pricing', \App\Livewire\Pricing\ControlPanel::class)
+        ->middleware('permission:manage-settings')
+        ->name('pricing.control');
+
     Route::get('/pricing/proposals', Settings\RateProposals::class)
         ->middleware('permission:review-rate-proposals')
         ->name('pricing.proposals');
