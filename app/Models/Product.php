@@ -120,6 +120,12 @@ class Product extends Model
             ->first(fn (InventoryLock $lock) => $lock->blocks($action))?->reason;
     }
 
+    /** The sale lines this piece appears on, for the quality gate. */
+    public function orderItems(): HasMany
+    {
+        return $this->hasMany(OrderItem::class);
+    }
+
     public function transferRequests(): HasMany
     {
         return $this->hasMany(TransferRequest::class);

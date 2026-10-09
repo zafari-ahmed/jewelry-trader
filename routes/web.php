@@ -85,6 +85,7 @@ Route::middleware('auth')->prefix('admin')->name('admin.')->group(function () {
     Route::get('/inventory', Inventory\ProductList::class)->middleware('permission:view-products')->name('inventory');
     Route::get('/inventory/create', Inventory\ProductIntake::class)->middleware('permission:manage-products')->name('inventory.create');
     Route::get('/inventory/{product}/edit', Inventory\ProductIntake::class)->middleware('permission:view-products')->name('inventory.edit');
+    Route::get('/inventory/{product}/quality', \App\Livewire\Quality\GaugePage::class)->middleware('permission:view-products')->name('inventory.quality');
     Route::get('/customers', Customers\CustomerList::class)->middleware('permission:view-customers')->name('customers');
     Route::get('/orders', Orders\OrderList::class)->middleware('permission:view-orders')->name('orders');
     Route::get('/review', Inventory\ReviewQueue::class)->middleware('permission:view-products')->name('review');

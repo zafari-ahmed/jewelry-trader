@@ -40,6 +40,10 @@
                 <p class="mt-15 max-w-prose text-body-lg leading-prose text-ink-secondary">{{ $product->customer_description }}</p>
             @endif
 
+            {{-- Specific verified facts, each attributable. No score, no
+                 stars: see App\Livewire\Shop\VerifiedFacts. --}}
+            <livewire:shop.verified-facts :product="$product" :key="'facts-'.$product->id" />
+
             <div class="mt-20 flex flex-col">
                 @foreach ([
                     ['Metal', $product->metal_type],

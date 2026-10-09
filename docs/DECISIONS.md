@@ -417,3 +417,50 @@ applies overhead, design and both commissions on top of material cost. The
 rates loaded are raw metal (their own note confirms this), so there is no
 double count — but it is worth one line of confirmation, because loading
 marked-up rates into Step 1 would charge for the same overhead twice.
+
+## The quality gauge
+
+Built to the design agreed on 2026-10-08, after the client accepted four
+changes to his original specification.
+
+### The change that mattered
+
+His draft had **55 manual checks per item**. That sits directly against the
+five-minute cataloguing target that is his own competitive advantage, and —
+more importantly — a form of fifty-five boxes gets ticked without being read.
+The gauge would then look authoritative while meaning nothing, which is worse
+than no gauge.
+
+So the system derives everything the record can answer and asks a person only
+about what it cannot. The split lands at **~48 derived, 14 human** — hallmarks
+under magnification, physical inspection before showing, condition approval,
+and the appraiser's sign-off on price. Each of those now means something,
+because somebody actually had to look.
+
+A test pins the ratio, so a future check added as manual-by-default fails the
+build rather than quietly eroding the design.
+
+### Decisions
+
+| Decision | Rationale |
+|---|---|
+| **Score is unweighted** (passed ÷ applicable) | His §3.1 defined it unweighted but his table assigned 3/2/1 points, and his own worked example counted unweighted. Weighting the score *and* using criticality to block would let a piece score well while missing something critical — the exact failure the gauge exists to prevent. Criticality governs blocking; the score counts |
+| **No score and no stars for customers** | The number measures *record completeness*. A fair-condition piece with a complete record scores full marks, and a customer reads five stars as "excellent piece". In a trade where buyers rely on dealer representations that gap is a liability, not a theoretical concern. A test asserts no percentage and no star reaches the customer page |
+| **Role and date publicly; name in the record** | Publishing a named individual's professional judgement on a commercial page attached to a high-value sale is their decision. `users.show_name_publicly` defaults off, with a per-staff opt-in, and the name is produced on request — which is what "full record available on request" promises |
+| **"Not applicable" is a real answer** | A plain gold band must not sit amber forever waiting for gemstones it does not have, and nobody should be asked to inspect the arrival of a piece that has never been sent anywhere. Transfer, sale and post-sale checks are grey until they apply |
+| **A human answer survives re-evaluation** | Derived checks are re-read every time so the gauge cannot drift from the truth; anything a person answered or overrode is left alone, exactly as on the item record |
+| **Overruling a derived check is an override** | It renders blue and is audited, like every other override in this build |
+| **Check ranking is a setting** | Whether a missing hallmark blocks a sale is a business decision, not a decision for the registry file (rule 3.1). `qc.check_types` can re-rank or disable any check |
+| **QC is excluded from commission** | Agreed with the client. Paying on a partly self-reported metric creates an incentive to tick boxes, and sits badly beside the California commission rules already constraining this build |
+
+### Also built
+
+The verified-facts panel promises "full record available on request", so there
+is an inbox behind it: `appraisal_requests`, reachable from the product page.
+A promise with no inbox is worse than no promise.
+
+### Deferred by agreement
+
+The **appraisal record** — the client's original 55 checks, which were a good
+specification filed under the wrong heading. It is the document the "Request
+full appraisal" button should eventually produce.

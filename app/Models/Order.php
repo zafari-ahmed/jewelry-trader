@@ -41,6 +41,11 @@ class Order extends Model
         return $this->hasMany(Payment::class);
     }
 
+    public function commissions(): HasMany
+    {
+        return $this->hasMany(Commission::class);
+    }
+
     public function customer(): BelongsTo
     {
         return $this->belongsTo(Customer::class);

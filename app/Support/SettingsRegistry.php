@@ -24,6 +24,7 @@ class SettingsRegistry
             self::security(),
             self::commission(),
             self::pricing(),
+            self::qc(),
             self::features(),
         );
     }
@@ -282,6 +283,23 @@ class SettingsRegistry
             'pricing.suggestion_band_percent' => ['type' => 'integer', 'default' => 15, 'label' => 'Suggestion band (±%)'],
             'pricing.insurance_multiplier' => ['type' => 'string', 'default' => '1.15', 'label' => 'Insurance value multiplier'],
             'pricing.negotiation_floor_percent' => ['type' => 'integer', 'default' => 85, 'label' => 'Negotiation floor (% of retail)'],
+        ];
+    }
+
+    /**
+     * The quality gate.
+     *
+     * Which checks block a sale is a business decision, so the ranking of
+     * every check is editable here rather than fixed in code (rule 3.1).
+     */
+    public static function qc(): array
+    {
+        return [
+            'qc.enabled' => ['type' => 'boolean', 'default' => true, 'label' => 'Quality gauge'],
+            'qc.minimum_photos' => ['type' => 'integer', 'default' => 5, 'label' => 'Photographs required'],
+            'qc.show_customer_panel' => ['type' => 'boolean', 'default' => true, 'label' => 'Show verified facts to customers', 'help' => 'Specific attributable claims. Never a score or a star rating.'],
+            'qc.check_types' => ['type' => 'json', 'default' => [], 'label' => 'Check ranking overrides', 'help' => 'check key → critical, standard, optional or disabled.'],
+            'qc.block_listing_when_critical_fails' => ['type' => 'boolean', 'default' => true, 'label' => 'A failed critical check blocks listing'],
         ];
     }
 
