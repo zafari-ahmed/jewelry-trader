@@ -56,6 +56,23 @@ class QualityCheckRegistry
         return null;
     }
 
+    /**
+     * Every check as defined, ignoring overrides — including ones currently
+     * switched off, so the settings screen can offer them back.
+     *
+     * @return array<int, array{key:string, stage:string, label:string, type:string, derived:bool}>
+     */
+    public function definitionsForSettings(): array
+    {
+        return array_map(fn (QualityCheck $check) => [
+            'key' => $check->key,
+            'stage' => $check->stage,
+            'label' => $check->label,
+            'type' => $check->type,
+            'derived' => ! $check->needsAPerson(),
+        ], $this->definitions());
+    }
+
     private function applyOverride(QualityCheck $check, array $overrides): ?QualityCheck
     {
         $type = $overrides[$check->key] ?? $check->type;

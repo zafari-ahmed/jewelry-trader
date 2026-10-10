@@ -58,12 +58,13 @@
                         @php $price = $product->sellingPriceCents(); @endphp
                         {{ $price ? '$'.number_format($price / 100) : '—' }}
                     </div>
-                    <div>
+                    <div class="flex gap-10">
                         @can('update', $product)
                             <a href="{{ route('admin.inventory.edit', $product) }}" class="text-meta hover:text-gold">Edit</a>
                         @else
                             <a href="{{ route('admin.inventory.edit', $product) }}" class="text-meta text-muted hover:text-gold">View</a>
                         @endcan
+                        <a href="{{ route('admin.inventory.quality', $product) }}" class="text-meta text-muted hover:text-gold">Quality</a>
                     </div>
                 </x-ui.table-row>
             @endforeach

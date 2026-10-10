@@ -250,6 +250,10 @@
 
                 <x-ui.card padded="false" class="px-20 py-16">
                     <div class="flex flex-wrap items-center gap-9">
+                        @if ($product?->exists)
+                            <a href="{{ route('admin.inventory.quality', $product) }}"
+                                class="text-meta text-muted underline hover:text-gold">Quality control</a>
+                        @endif
                         <x-ui.button wire:click="saveDraft">Save as draft</x-ui.button>
                         <x-ui.button wire:click="submitForReview" variant="primary" :disabled="count($this->missing) > 0">Submit for review</x-ui.button>
                         @if (count($this->missing) > 0)

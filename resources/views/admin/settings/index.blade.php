@@ -18,6 +18,7 @@
             ['R', 'Field Rules', 'Which item fields are required, suggested or not applicable — per category.', null, route('admin.settings.field-rules')],
             ['#', 'Pricing Control', 'What the four layers are doing right now, and what each is worth on a real piece.', null, route('admin.pricing.control')],
             ['$', 'Pricing Rates', "The craftsman's formula, the rate tables, and the layers above them.", null, route('admin.settings.pricing')],
+            ['*', 'Quality Control', 'What the quality gate asks of every piece, and what it will not let past.', null, route('admin.settings.quality')],
             ['~', 'Rate Proposals', 'Proposed rate changes awaiting an appraiser. Nothing changes until approved.', null, route('admin.pricing.proposals')],
         ] as [$initial, $title, $description, $badge, $href])
             <a href="{{ $href ?? '#' }}" class="flex flex-col rounded-surface border border-border-card bg-surface px-20 py-18 transition-colors hover:border-gold">

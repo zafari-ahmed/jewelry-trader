@@ -102,6 +102,10 @@ Route::middleware('auth')->prefix('admin')->name('admin.')->group(function () {
     // appraiser holds the veto on rate changes but has no business editing
     // payment keys, so this is gated on its own permission rather than on
     // blanket settings access.
+    Route::get('/appraisal-requests', \App\Livewire\Shop\AppraisalRequests::class)
+        ->middleware('permission:handle-appraisal-requests')
+        ->name('appraisal-requests');
+
     Route::get('/pricing', \App\Livewire\Pricing\ControlPanel::class)
         ->middleware('permission:manage-settings')
         ->name('pricing.control');
@@ -123,6 +127,7 @@ Route::middleware('auth')->prefix('admin')->name('admin.')->group(function () {
             Route::get('/flags', Settings\FeatureFlags::class)->middleware('permission:manage-feature-flags')->name('.flags');
             Route::get('/field-rules', Settings\FieldRules::class)->middleware('permission:manage-field-rules')->name('.field-rules');
             Route::get('/pricing', Settings\Pricing::class)->name('.pricing');
+            Route::get('/quality', Settings\QualityControl::class)->name('.quality');
         });
     });
 });

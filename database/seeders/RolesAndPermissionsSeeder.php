@@ -33,6 +33,7 @@ class RolesAndPermissionsSeeder extends Seeder
                 'view-audit-log',
                 'request-override', 'approve-overrides', 'lock-inventory',
                 'view-own-commission', 'view-all-commissions',
+                'verify-quality-checks', 'handle-appraisal-requests',
             ],
             'sales-staff' => [
                 'view-products', 'manage-products',
@@ -57,6 +58,7 @@ class RolesAndPermissionsSeeder extends Seeder
                 // The appraiser holds the veto on rate changes: it is their
                 // judgement the tables are meant to encode.
                 'review-rate-proposals', 'approve-rate-proposals',
+                'verify-quality-checks', 'handle-appraisal-requests',
             ],
             'accountant' => [
                 'view-settings',
@@ -72,6 +74,8 @@ class RolesAndPermissionsSeeder extends Seeder
                 // Processes returns at the register; no discounting, no pricing.
                 'use-pos',
                 'request-override',
+                // Answers customers asking for the record behind a piece.
+                'handle-appraisal-requests',
             ],
         ];
     }
@@ -92,6 +96,10 @@ class RolesAndPermissionsSeeder extends Seeder
             // Rate proposals: the AI proposes, a person approves.
             'review-rate-proposals',
             'approve-rate-proposals',
+
+            // Quality gate and the requests the public panel generates.
+            'verify-quality-checks',
+            'handle-appraisal-requests',
 
             // Module 4 — core platform
             'view-products',
