@@ -4,6 +4,7 @@ namespace App\Services\Quality;
 
 use App\Models\Product;
 use App\Models\Setting;
+use App\Services\Pricing\HistoricalConsistency;
 
 /**
  * Every check, in the order a piece meets them.
@@ -188,6 +189,19 @@ class QualityCheckRegistry
                         : [QualityStatus::PASSED, null];
                 }),
 
+            // A confident price for a piece that could not exist is worse
+            // than no price at all. Critical, because the record is making a
+            // factual claim that cannot be true — a reviewer must accept it,
+            // correct it or reject it before the piece is listed.
+            $this->derived('3.9', 'review', 'Maker and period are historically consistent', 'critical',
+                function (Product $p) {
+                    $conflict = app(HistoricalConsistency::class)->check($p->brand, $p->style_period);
+
+                    return $conflict === null
+                        ? [QualityStatus::PASSED, null]
+                        : [QualityStatus::FAILED, $conflict['problem']];
+                }),
+
             $this->derived('3.8', 'review', 'Reviewer signed off', 'critical',
                 fn (Product $p) => $this->pass(
                     $p->approved_by !== null && in_array($p->status, ['approved', 'listed', 'sold'], true),
@@ -217,6 +231,24 @@ class QualityCheckRegistry
 
             $this->human('4.7', 'valuation', 'Price verified by an appraiser', 'critical',
                 publicClaim: 'Appraisal on file'),
+
+            // Standard rather than critical: the client asked for this to
+            // flag and pause, never to block. A genuinely rare piece may
+            // legitimately sit above the ceiling.
+            $this->derived('4.10', 'valuation', 'Multipliers within the agreed ceiling', 'standard',
+                function (Product $p) {
+                    $working = $p->currentPricing?->working;
+
+                    if (! is_array($working) || ($working['warnings'] ?? []) === []) {
+                        return [QualityStatus::PASSED, null];
+                    }
+
+                    $ceiling = collect($working['warnings'])->first(fn ($w) => str_contains($w, 'ceiling'));
+
+                    return $ceiling === null
+                        ? [QualityStatus::PASSED, null]
+                        : [QualityStatus::FAILED, $ceiling];
+                }),
 
             $this->derived('4.8', 'valuation', 'Negotiation floor set', 'standard',
                 fn (Product $p) => $this->pass($p->currentPricing?->negotiation_min_cents > 0)),

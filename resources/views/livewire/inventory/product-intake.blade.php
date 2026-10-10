@@ -241,6 +241,14 @@
                                 </div>
                             @endif
 
+                            {{-- The arithmetic is sound but something about the
+                                 piece does not add up. A person decides. --}}
+                            @foreach ($priceSuggestion['warnings'] ?? [] as $warning)
+                                <div class="mt-10 rounded-surface border border-status-override bg-surface px-13 py-10 text-caption text-status-override">
+                                    <strong>Hold for review.</strong> {{ $warning }}
+                                </div>
+                            @endforeach
+
                             <div class="mt-10 text-caption text-muted">
                                 Every percentage above is a setting, editable in Settings → Pricing. The formula itself does not change.
                             </div>

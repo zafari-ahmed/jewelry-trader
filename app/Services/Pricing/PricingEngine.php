@@ -33,6 +33,7 @@ class PricingEngine
     public function __construct(
         private CraftsmanFormula $formula,
         private MetalRateProvider $rates,
+        private HistoricalConsistency $history,
     ) {}
 
     /**
@@ -45,6 +46,7 @@ class PricingEngine
     {
         $factors = [];
         $missing = [];
+        $warnings = [];
         $category = $attributes['category'] ?? null;
 
         // ---- Layers 1 and 2: what the materials cost ----------------------
@@ -72,12 +74,20 @@ class PricingEngine
             $price,
             $multipliers,
             $lines,
-            // Off by default (0 = no cap), because the opening multipliers are
-            // the appraiser's signed judgement and capping them unasked would
-            // quietly overrule it. The control exists for when the business
-            // wants a ceiling on how far three multipliers can compound.
-            capPercent: (float) Setting::get('pricing.multiplier_cap_percent', 0),
         );
+
+        // A ceiling on how far three multipliers may compound. It flags
+        // rather than clamps: the appraiser's judgement stands, but a data
+        // error that compounds to ×12 is caught before it reaches a shelf.
+        $this->checkMultiplierCeiling($baseRetail, $price, $warnings, $lines);
+
+        // A maker premium times a period premium, with nothing asking whether
+        // the combination could have existed. A confident price for a piece
+        // that could not exist is worse than no price at all.
+        if ($conflict = $this->history->check($attributes['brand'] ?? null, $attributes['style_period'] ?? null)) {
+            $warnings[] = $conflict['problem'];
+            $lines[] = PricingLine::skipped('Historical check', $conflict['problem']);
+        }
 
         $price = $this->applyLayer(
             'pricing.layer.market_enabled',
@@ -145,6 +155,7 @@ class PricingEngine
             percentages: $formula['percentages'],
             lines: $lines,
             missing: $missing,
+            warnings: $warnings,
         );
     }
 
@@ -465,6 +476,40 @@ class PricingEngine
         $lines[] = new PricingLine($label, implode(' · ', $detail), $price = (int) round($price * $capped));
 
         return $price;
+    }
+
+    /**
+     * Flag a combined multiplier that has run away.
+     *
+     * Deliberately not a clamp. Clamping would quietly overrule the
+     * appraiser's judgement on a genuinely rare piece; flagging asks a person
+     * to look at it and leaves the decision where it belongs.
+     *
+     * @param  string[]  $warnings
+     * @param  PricingLine[]  $lines
+     */
+    private function checkMultiplierCeiling(int $baseRetail, int $price, array &$warnings, array &$lines): void
+    {
+        $ceiling = (float) Setting::get('pricing.multiplier_ceiling', 0);
+
+        if ($ceiling <= 0 || $baseRetail <= 0) {
+            return;
+        }
+
+        $combined = $price / $baseRetail;
+
+        if ($combined <= $ceiling) {
+            return;
+        }
+
+        $warnings[] = 'The maker, period and condition multipliers compound to ×'
+            .$this->trimNumber($combined).', above the ×'.$this->trimNumber($ceiling)
+            .' ceiling. A reviewer should confirm this before it is listed.';
+
+        $lines[] = PricingLine::skipped(
+            'Above the multiplier ceiling',
+            '×'.$this->trimNumber($combined).' combined · held for review, not reduced',
+        );
     }
 
     /** Hold a layer's combined effect inside ± the configured band. */

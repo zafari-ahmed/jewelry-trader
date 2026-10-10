@@ -34,6 +34,7 @@ readonly class PricingSuggestion
         public array $percentages = [],
         public array $lines = [],
         public array $missing = [],
+        public array $warnings = [],
     ) {}
 
     public function hasValue(): bool
@@ -45,6 +46,17 @@ readonly class PricingSuggestion
     public function isPartial(): bool
     {
         return $this->missing !== [];
+    }
+
+    /**
+     * True when the figure is complete but something about it looks wrong.
+     *
+     * Distinct from being partial: the price is there and defensible as
+     * arithmetic, but a person should look before it reaches a shelf.
+     */
+    public function needsReview(): bool
+    {
+        return $this->warnings !== [];
     }
 
     public function toArray(): array
@@ -65,6 +77,7 @@ readonly class PricingSuggestion
             'percentages' => $this->percentages,
             'lines' => array_map(fn (PricingLine $line) => $line->toArray(), $this->lines),
             'missing' => $this->missing,
+            'warnings' => $this->warnings,
         ];
     }
 }

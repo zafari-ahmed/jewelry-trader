@@ -266,7 +266,63 @@ class SettingsRegistry
                 '31' => 0.97, '61' => 0.93, '91' => 0.88, '120' => 0.80,
             ], 'label' => 'Inventory age adjustment', 'help' => 'Days in stock → multiplier. A piece that has not sold is telling you something.'],
             'pricing.min_rate_confidence' => ['type' => 'integer', 'default' => 0, 'label' => 'Flag rates below this confidence (%)', 'help' => 'Zero means never flag. A rate recorded as weak is marked "worth checking" in the working.'],
-            'pricing.multiplier_cap_percent' => ['type' => 'string', 'default' => '0', 'label' => 'Cap maker/period/condition at (±%)', 'help' => 'Zero means no cap. Three multipliers compound: a Georgian signed piece in mint condition reaches ×3.7 before the market layer is even reached.'],
+            // A ceiling on the combined maker × period × condition multiplier.
+            // It flags rather than clamps: above it the price still shows, but
+            // the piece is held for a reviewer. Catching a data error that
+            // compounds to ×12 before it reaches a shelf is the point.
+            'pricing.multiplier_ceiling' => ['type' => 'string', 'default' => '6.0', 'label' => 'Flag combined multiplier above', 'help' => 'Maker × period × condition. Zero never flags. Above this a reviewer decides; nothing is blocked automatically.'],
+
+            // Dates behind the historical consistency check. A maker or
+            // period absent from these tables is never flagged — silence
+            // beats a false accusation against a genuine piece.
+            'pricing.period_years' => ['type' => 'json', 'default' => [
+                'georgian' => ['from' => 1714, 'to' => 1837],
+                'early victorian' => ['from' => 1837, 'to' => 1860],
+                'mid victorian' => ['from' => 1860, 'to' => 1885],
+                'late victorian' => ['from' => 1885, 'to' => 1901],
+                'victorian' => ['from' => 1837, 'to' => 1901],
+                'art nouveau' => ['from' => 1890, 'to' => 1910],
+                'edwardian' => ['from' => 1901, 'to' => 1915],
+                'art deco' => ['from' => 1920, 'to' => 1935],
+                'retro' => ['from' => 1935, 'to' => 1950],
+                'mid-century' => ['from' => 1950, 'to' => 1965],
+                'modern' => ['from' => 1965, 'to' => 1990],
+                'contemporary' => ['from' => 1990, 'to' => null],
+            ], 'label' => 'Period date ranges'],
+
+            'pricing.maker_years' => ['type' => 'json', 'default' => [
+                'chaumet' => ['founded' => 1780, 'dissolved' => null],
+                'black starr' => ['founded' => 1810, 'dissolved' => null],
+                'kirk' => ['founded' => 1815, 'dissolved' => null],
+                'gorham' => ['founded' => 1831, 'dissolved' => null],
+                'bailey banks' => ['founded' => 1832, 'dissolved' => null],
+                'tiffany' => ['founded' => 1837, 'dissolved' => null],
+                'whiting' => ['founded' => 1840, 'dissolved' => null],
+                'cartier' => ['founded' => 1847, 'dissolved' => null],
+                'shreve' => ['founded' => 1852, 'dissolved' => null],
+                'boucheron' => ['founded' => 1858, 'dissolved' => null],
+                'chopard' => ['founded' => 1860, 'dissolved' => null],
+                'dominick' => ['founded' => 1872, 'dissolved' => null],
+                'piaget' => ['founded' => 1874, 'dissolved' => null],
+                'bulgari' => ['founded' => 1884, 'dissolved' => null],
+                'marcus & co' => ['founded' => 1892, 'dissolved' => null],
+                'mikimoto' => ['founded' => 1893, 'dissolved' => null],
+                'georg jensen' => ['founded' => 1904, 'dissolved' => null],
+                'seaman schepps' => ['founded' => 1904, 'dissolved' => null],
+                'van cleef' => ['founded' => 1906, 'dissolved' => null],
+                'oscar heyman' => ['founded' => 1912, 'dissolved' => null],
+                'buccellati' => ['founded' => 1919, 'dissolved' => null],
+                'raymond yard' => ['founded' => 1922, 'dissolved' => null],
+                'paul flato' => ['founded' => 1928, 'dissolved' => null],
+                'harry winston' => ['founded' => 1932, 'dissolved' => null],
+                'verdura' => ['founded' => 1939, 'dissolved' => null],
+                'david webb' => ['founded' => 1948, 'dissolved' => null],
+                'schlumberger' => ['founded' => 1956, 'dissolved' => null],
+                'graff' => ['founded' => 1960, 'dissolved' => null],
+                'elsa peretti' => ['founded' => 1974, 'dissolved' => null],
+                'paloma picasso' => ['founded' => 1980, 'dissolved' => null],
+            ], 'label' => 'Maker founding and closing years', 'help' => 'A starting table, not scholarship — have the appraiser confirm these. A maker absent from it is never flagged.'],
+
             'pricing.market_adjustment_cap_percent' => ['type' => 'string', 'default' => '30', 'label' => 'Cap market adjustments at (±%)', 'help' => 'Four multipliers compounding can run away. This is what stops one table edit moving the whole catalogue.'],
 
             // Stone grading, from the appraiser's rate table.

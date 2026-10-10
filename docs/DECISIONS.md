@@ -464,3 +464,59 @@ A promise with no inbox is worse than no promise.
 The **appraisal record** — the client's original 55 checks, which were a good
 specification filed under the wrong heading. It is the document the "Request
 full appraisal" button should eventually produce.
+
+## Historical consistency, and the multiplier ceiling
+
+Both approved by the client on 2026-10-11, after we raised that the stack
+would price a "Georgian Van Cleef" without objection — the house was founded
+in 1906 and the period ended in 1837.
+
+### The historical check
+
+`HistoricalConsistency` compares the maker's founding and closing years
+against the claimed period's date range. Two rules govern it:
+
+| Rule | Why |
+|---|---|
+| **It only speaks when certain.** A maker absent from the table, a period with no dates, or a null year produces silence — never a guess | A false accusation against a genuine piece costs the business more than a missed check. The tests spend more effort on the silence than on the flagging |
+| **It never decides.** It reports; the reviewer accepts, corrects or rejects | The maker dates are a starting table, not scholarship |
+
+"Unsigned", "attributed", "retailer mark" and "unmarked" never flag: none of
+them asserts that a particular workshop made the piece.
+
+It surfaces in two places — as a warning on the price working, and as **QC
+check 3.9, ranked critical**. Critical because the record is making a factual
+claim that cannot be true, so a reviewer must resolve it before listing. The
+existing override path handles acceptance: blue, reasoned and audited.
+
+**The maker dates need the appraiser's eye.** Thirty founding years are
+seeded from general knowledge. They are configuration, and a wrong one
+produces a false flag, so they should be confirmed during the rate session
+rather than trusted.
+
+### The ceiling
+
+Set to **×6.0** on the combined maker × period × condition multiplier, and
+switched on — the client's values: under ×4.65 reasonable, ×4.65–6.0 rare but
+conceivable, above ×6.0 a human decides.
+
+It **flags and does not clamp**, which was the client's explicit instruction
+("never block — just pause") and is also the right behaviour: clamping would
+quietly overrule the appraiser on a genuinely rare piece. A test asserts the
+price above the ceiling is byte-identical to the price with no ceiling at
+all — only now a person has to look.
+
+Ranked **standard** rather than critical as QC check 4.10, so it pauses
+without blocking. This is the one place the two new checks differ, and
+deliberately: an impossible maker/period pair is a factual error in the
+record, while a high multiplier is only implausible.
+
+The earlier `pricing.multiplier_cap_percent` — a ±% clamp, off by default —
+is retired in favour of `pricing.multiplier_ceiling`. The Layer 4 market cap
+(±30%) remains a genuine clamp, as agreed on 2026-10-05.
+
+### Also confirmed
+
+The metal rates are **raw** — spot × purity, no markup — so the craftsman's
+formula applying overhead, design and commissions on top is not a double
+count. Confirmed explicitly by the client.
