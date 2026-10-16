@@ -47,6 +47,64 @@
                 </div>
             </x-ui.card>
 
+            {{-- A revised rate table arrives as a file. Loading it should not
+                 need a developer — and should not happen silently either. --}}
+            <x-ui.card title="Load a rate table" meta="A revised table, exported from here or prepared elsewhere">
+                @if ($pendingImport)
+                    @if ($pendingImport['exported_at'])
+                        <div class="text-caption text-muted">Exported {{ \Illuminate\Support\Carbon::parse($pendingImport['exported_at'])->diffForHumans() }}</div>
+                    @endif
+
+                    @if ($pendingImport['changes'])
+                        <div class="mt-10 text-body-sm font-semibold">
+                            {{ count($pendingImport['changes']) }} {{ str('setting')->plural(count($pendingImport['changes'])) }} would change:
+                        </div>
+                        @foreach ($pendingImport['changes'] as $change)
+                            <div class="flex flex-wrap items-baseline justify-between gap-10 border-b border-rule py-6 last:border-0">
+                                <span class="text-caption-lg">{{ $change['label'] }}</span>
+                                <span class="text-caption text-muted">
+                                    @if ($change['rows'] !== null)
+                                        {{ $change['rows'] }} {{ str('row')->plural($change['rows']) }}
+                                    @else
+                                        {{ $change['from'] }} → <strong class="text-ink">{{ $change['to'] }}</strong>
+                                    @endif
+                                </span>
+                            </div>
+                        @endforeach
+                    @else
+                        <p class="mt-10 text-body-sm text-muted">That file matches what is already here. Nothing would change.</p>
+                    @endif
+
+                    @if ($pendingImport['ignored'])
+                        <div class="mt-12 text-caption text-status-override">
+                            Ignored: {{ implode('; ', $pendingImport['ignored']) }}
+                        </div>
+                    @endif
+
+                    <div class="mt-14 flex flex-wrap gap-9">
+                        @if ($pendingImport['changes'])
+                            <x-ui.button type="button" size="sm" variant="primary" wire:click="confirmImport">Apply these changes</x-ui.button>
+                        @endif
+                        <x-ui.button type="button" size="sm" wire:click="cancelImport">Cancel</x-ui.button>
+                    </div>
+                    <p class="mt-8 text-caption text-muted">Nothing has changed yet. Every change applied here is written to the audit log.</p>
+                @else
+                    <input type="file" wire:model="configFile" accept=".json"
+                        class="block w-full text-body-sm file:mr-10 file:cursor-pointer file:rounded-surface file:border file:border-border-field file:bg-surface file:px-13 file:py-8 file:text-meta" />
+                    @error('configFile')<div class="mt-6 text-caption text-status-required">{{ $message }}</div>@enderror
+                    <div wire:loading wire:target="configFile" class="mt-6 text-caption text-gold-ink">Reading…</div>
+
+                    <x-ui.button type="button" size="sm" class="mt-12" wire:click="previewImport">See what would change</x-ui.button>
+                    <p class="mt-8 text-caption text-muted">
+                        You will be shown every difference before anything is written. Keys are never imported.
+                    </p>
+                @endif
+
+                @if ($importError)
+                    <div class="mt-10 rounded-surface border border-status-required bg-status-required-ground px-14 py-10 text-caption text-status-required">{{ $importError }}</div>
+                @endif
+            </x-ui.card>
+
             @if ($this->pendingProposals > 0)
                 <x-ui.card title="Waiting on an appraiser">
                     <p class="text-body-sm">

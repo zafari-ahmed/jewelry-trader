@@ -5,10 +5,12 @@ namespace App\Livewire\Pricing;
 use App\Models\MetalRateFetch;
 use App\Models\RateChangeProposal;
 use App\Models\Setting;
+use App\Services\Pricing\ConfigurationImport;
 use App\Services\Pricing\PricingEngine;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
 use Livewire\Component;
+use Livewire\WithFileUploads;
 
 /**
  * One screen that says what the pricing stack is currently doing.
@@ -20,7 +22,16 @@ use Livewire\Component;
  */
 class ControlPanel extends Component
 {
+    use WithFileUploads;
+
     public ?string $flash = null;
+
+    public ?string $importError = null;
+
+    public $configFile;
+
+    /** What the uploaded file would change. Nothing is written until confirmed. */
+    public ?array $pendingImport = null;
 
     public function mount(): void
     {
@@ -195,6 +206,53 @@ class ControlPanel extends Component
             $filename,
             ['Content-Type' => 'application/json'],
         );
+    }
+
+    /**
+     * Read an uploaded configuration and show what it would change.
+     *
+     * A rate table is the business's money. Replacing one from a file should
+     * feel deliberate, so this writes nothing — it reports.
+     */
+    public function previewImport(): void
+    {
+        Gate::authorize('manage-settings');
+
+        $this->reset('importError', 'pendingImport', 'flash');
+
+        $this->validate([
+            'configFile' => ['required', 'file', 'mimes:json,txt', 'max:2048'],
+        ], attributes: ['configFile' => 'configuration file']);
+
+        try {
+            $this->pendingImport = app(ConfigurationImport::class)
+                ->preview(file_get_contents($this->configFile->getRealPath()));
+        } catch (\RuntimeException $e) {
+            $this->importError = $e->getMessage();
+        }
+    }
+
+    public function confirmImport(): void
+    {
+        Gate::authorize('manage-settings');
+
+        if (! $this->pendingImport || $this->pendingImport['changes'] === []) {
+            $this->importError = 'There is nothing to apply.';
+
+            return;
+        }
+
+        $applied = app(ConfigurationImport::class)
+            ->apply($this->pendingImport['changes'], Auth::id());
+
+        $this->reset('pendingImport', 'configFile', 'importError');
+
+        $this->flash = $applied.' '.str('setting')->plural($applied).' updated from the file. Every change is in the audit log.';
+    }
+
+    public function cancelImport(): void
+    {
+        $this->reset('pendingImport', 'configFile', 'importError');
     }
 
     private function updatedAt(string $path): ?\Illuminate\Support\Carbon
