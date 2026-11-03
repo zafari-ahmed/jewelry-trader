@@ -209,6 +209,72 @@ case, with a number). The password is prompted rather than passed as an
 argument so it does not land in your shell history. Two-factor enrolment
 happens on first sign-in, so have an authenticator app open.
 
+---
+
+## 7a. What is in the database, and what is not
+
+After `db:seed` the system is configured but has no business data. This is
+deliberate: reference data that makes the application work is seeded, and
+anything that is a record of the client's actual trading is left for them to
+enter. Nothing below needs a developer.
+
+**Filled by the seeder — ready to use, editable in the admin panel**
+
+| Table | Rows | What it holds |
+|---|---|---|
+| `roles` / `permissions` | 6 / 38 | The six roles and the permission set behind them |
+| `settings` | 122 | Every configurable value, at its default |
+| `locations` | 4 | Madison Ave, Workshop, Greenwich, Web — rename or replace in Settings → Locations |
+| `categories` | 6 | Rings, Necklaces, Bracelets, Brooches, Earrings, Watches |
+| `field_color_rules` | 31 | Which intake fields are required, optional or not applicable |
+| `payment_gateways` | 1 | The Stripe row the factory resolves against |
+| `metal_rate_providers` | 5 | Live-rate sources, all inactive until a key is entered |
+| `ai_providers` | 3 | Phase 2 seams. No provider is active and none is called |
+| `step_up_challenges` | 3 | Placeholder symbol challenges — **replace these before go-live** |
+
+The rate table loads separately, as above, and lands in `settings` under the
+`pricing` group. Everything on that list is editable from the admin panel, so
+the seeded values are a starting point rather than a commitment.
+
+**Empty on a fresh server — the client enters these**
+
+| Table | How it gets filled |
+|---|---|
+| `users` | `jt:create-admin` makes the first one; the rest are added in Roles & Permissions |
+| `products` | Inventory → Add / Edit Item |
+| `product_images` | Photo upload on step 1 of intake |
+| `gemstone_details` | The Stones section on intake |
+| `pricing` | Written automatically when a price is entered or accepted |
+| `inventory_stock` | Written automatically when a location is chosen |
+| `customers` | Customers, or captured at the point of sale |
+| `orders` / `order_items` | A completed sale, in the POS or on the storefront |
+| `payments` / `payment_splits` | Written by the payment gateway on checkout |
+| `commission_plans` | Settings → Commission |
+| `staff_commission_assignments` | Assigned per salesperson, with their written agreement |
+| `transfer_requests` | Inventory transfers between locations |
+| `overrides` / `inventory_locks` | Override & Lock, when a situation calls for one |
+
+**Fills itself — nothing to enter**
+
+`audit_logs` records every change from the first sign-in onwards.
+`quality_control_checks` is written as items pass through intake and review.
+`commissions` is calculated by the queue after each paid order.
+`metal_rate_fetches` logs every live-rate call, successful or not.
+`rate_change_proposals` and `appraisal_requests` are written by the people
+using those screens.
+
+**Stays empty in Phase 1 — by design**
+
+`ai_analysis_results`, `ai_correction_log`, `ai_usage_log`,
+`rental_agreements`, `rental_claims`, `salesperson_storefronts`,
+`storefront_inventory_requests`, `audit_reports` and `audit_exceptions`.
+
+These are the Phase 2 seams. The tables exist so activating a feature is a
+flag change rather than a migration, and they stay empty until that happens.
+An empty table here is the system working as intended, not a failed install.
+
+---
+
 Finally, cache for production:
 
 ```bash
@@ -293,6 +359,9 @@ the AI reading service are both off until a provider and key are entered.
 - [ ] Commission appears against that sale within a minute — proves the queue
       cron is running
 - [ ] *Settings → Pricing Control* prices its worked example
+- [ ] The step-up challenge answers have been replaced — the seeded ones are
+      published in this repository, so until they are changed the challenge
+      protects nothing
 
 ---
 
@@ -304,6 +373,7 @@ php artisan down
 
 # upload the new release, or: git pull && composer install --no-dev --optimize-autoloader
 # upload the locally built public/build
+# and public/reference, if the reference material has changed
 
 php artisan migrate --force
 php artisan optimize:clear

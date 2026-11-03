@@ -33,6 +33,12 @@ class ProductIntakeService
         'material_cost' => 'material_cost_cents',
     ];
 
+    /** The columns a stone row carries. */
+    public const STONE_FIELDS = [
+        'stone_type', 'origin', 'shape', 'cut', 'estimated_weight_ct',
+        'color', 'clarity', 'cut_grade', 'treatment', 'setting_style',
+    ];
+
     /** Money fields, stored as cents on the pricing history. */
     public const PRICING = [
         'acquisition_value' => 'acquisition_value_cents',
@@ -42,7 +48,10 @@ class ProductIntakeService
         'promo_price' => 'promo_price_cents',
     ];
 
-    public function __construct(private FieldColorResolver $colors) {}
+    public function __construct(
+        private FieldColorResolver $colors,
+        private StoneDisclosureService $disclosure,
+    ) {}
 
     /** @param array<string, mixed> $values */
     public function save(?Product $product, array $values, ?int $userId = null, ?array $working = null): Product
@@ -101,6 +110,11 @@ class ProductIntakeService
             throw new RuntimeException('Complete every required field first: '.implode(', ', $missing).'.');
         }
 
+        // Caught here too, so a reviewer is not the first to discover it.
+        if ($blockers = $this->disclosure->blockers($product)) {
+            throw new RuntimeException('Stone disclosure is incomplete: '.implode('; ', $blockers).'.');
+        }
+
         $product->update([
             'status' => 'pending_review',
             'submitted_for_review_at' => now(),
@@ -127,6 +141,13 @@ class ProductIntakeService
             throw new RuntimeException('An item must be approved before it can be listed.');
         }
 
+        // Publication is the point the obligation attaches, so it is the
+        // point the check belongs — not the description field, which a later
+        // edit can empty.
+        if ($blockers = $this->disclosure->blockers($product)) {
+            throw new RuntimeException('This item cannot be listed until its stones are disclosed: '.implode('; ', $blockers).'.');
+        }
+
         $product->update(['status' => 'listed']);
 
         return $product->fresh();
@@ -137,6 +158,52 @@ class ProductIntakeService
         $product->update(['status' => 'draft', 'submitted_for_review_at' => null]);
 
         return $product->fresh();
+    }
+
+    /**
+     * Replace the stones on a piece with the rows from the form.
+     *
+     * A stone with no type is a row somebody opened and did not fill, so it
+     * is dropped rather than saved as an empty stone that would later read as
+     * a gap in the record.
+     *
+     * @param  array<int, array<string, mixed>>  $stones
+     */
+    public function saveStones(Product $product, array $stones): void
+    {
+        DB::transaction(function () use ($product, $stones) {
+            $keep = [];
+
+            foreach (array_values($stones) as $position => $row) {
+                if (blank($row['stone_type'] ?? null)) {
+                    continue;
+                }
+
+                $attributes = [];
+
+                foreach (self::STONE_FIELDS as $field) {
+                    $value = $row[$field] ?? null;
+                    $attributes[$field] = ($value === '' || $value === null) ? null : $value;
+                }
+
+                $attributes['estimated_weight_ct'] = $attributes['estimated_weight_ct'] === null
+                    ? null
+                    : (float) $attributes['estimated_weight_ct'];
+
+                // The first stone entered is the one the piece is described
+                // by. There is no control for nominating a different one yet,
+                // so entering the principal stone first is what decides it.
+                $attributes['is_primary'] = $position === 0;
+
+                $keep[] = $product->gemstones()->create($attributes)->id;
+            }
+
+            // Rewritten rather than reconciled: the rows carry no identity of
+            // their own on the form, so matching them back up would be a
+            // guess. Replacing them after the new set is written means a
+            // failure part-way leaves the old set intact.
+            $product->gemstones()->whereNotIn('id', $keep ?: [0])->delete();
+        });
     }
 
     /** Values keyed by field name, for the form and the resolver. */

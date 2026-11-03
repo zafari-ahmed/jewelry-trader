@@ -3,13 +3,14 @@
 namespace App\Livewire\Inventory;
 
 use App\Models\Category;
-use App\Models\FieldColorRule;
 use App\Models\Location;
 use App\Models\Product;
 use App\Models\ProductImage;
+use App\Models\Setting;
 use App\Services\AI\AiCatalogueService;
 use App\Services\Inventory\FieldColorResolver;
 use App\Services\Inventory\ProductIntakeService;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Gate;
 use Livewire\Attributes\Computed;
 use Livewire\Component;
@@ -27,6 +28,12 @@ class ProductIntake extends Component
 {
     use WithFileUploads;
 
+    /** The columns a stone row carries, in the order they are entered. */
+    public const STONE_FIELDS = [
+        'stone_type', 'origin', 'shape', 'cut', 'estimated_weight_ct',
+        'color', 'clarity', 'cut_grade', 'treatment', 'setting_style',
+    ];
+
     public ?Product $product = null;
 
     public int $step = 1;
@@ -37,6 +44,17 @@ class ProductIntake extends Component
     public array $photos = [];
 
     public array $photoTypes = [];
+
+    /**
+     * The stones, as rows on the form.
+     *
+     * Held here rather than on the product because a stone is only worth
+     * saving once the piece it is set in exists, and intake routinely starts
+     * before anything has been persisted.
+     *
+     * @var array<int, array<string, mixed>>
+     */
+    public array $stones = [];
 
     public ?string $flash = null;
 
@@ -58,6 +76,10 @@ class ProductIntake extends Component
 
             $this->product = $product->load('images', 'currentPricing', 'stock');
             $this->values = app(ProductIntakeService::class)->valuesFor($product);
+            $this->stones = $product->gemstones()->get()->map(fn ($stone) => array_map(
+                fn ($v) => $v === null ? '' : (string) $v,
+                $stone->only(self::STONE_FIELDS),
+            ))->all();
             $this->step = 2;
 
             return;
@@ -69,7 +91,7 @@ class ProductIntake extends Component
     }
 
     #[Computed]
-    public function sections(): \Illuminate\Support\Collection
+    public function sections(): Collection
     {
         return app(FieldColorResolver::class)->sectionsFor($this->values['category'] ?? null);
     }
@@ -242,7 +264,11 @@ class ProductIntake extends Component
     {
         $this->reset('error', 'flash');
 
-        $gemstones = $this->product?->gemstones()->get()->map->toArray()->all() ?? [];
+        // From the rows on the form, so an unsaved stone still prices.
+        $gemstones = array_values(array_filter(
+            $this->stones,
+            fn (array $stone) => filled($stone['stone_type'] ?? null),
+        ));
 
         $suggestion = app(AiCatalogueService::class)->suggestPrice($this->pricingAttributes(), $gemstones);
 
@@ -311,6 +337,75 @@ class ProductIntake extends Component
         $this->values[$field] = '';
         unset($this->suggestedValues[$field]);
         $this->product = $this->product->fresh();
+    }
+
+    /**
+     * The dropdown vocabulary, from settings rather than an enum.
+     *
+     * @return array<string, array<int, string>>
+     */
+    #[Computed]
+    public function stoneOptions(): array
+    {
+        return [
+            'stone_type' => $this->optionsFor('reference.stone_types'),
+            'origin' => $this->optionsFor('reference.stone_origins'),
+            'shape' => $this->optionsFor('reference.stone_shapes'),
+            'cut' => $this->optionsFor('reference.diamond_cuts'),
+            'color' => $this->optionsFor('reference.color_grades'),
+            'clarity' => $this->optionsFor('reference.clarity_grades'),
+            'cut_grade' => $this->optionsFor('reference.cut_grades'),
+            'treatment' => $this->optionsFor('reference.stone_treatments'),
+        ];
+    }
+
+    /** What still has to be disclosed before this item could be listed. */
+    #[Computed]
+    public function disclosureBlockers(): array
+    {
+        $needs = array_map(
+            'strtolower',
+            (array) Setting::get('reference.treatment_disclosure_required', ['ruby', 'sapphire', 'emerald']),
+        );
+
+        $blockers = [];
+
+        foreach ($this->stones as $stone) {
+            $type = strtolower(trim((string) ($stone['stone_type'] ?? '')));
+
+            if ($type === '' || trim((string) ($stone['treatment'] ?? '')) !== '') {
+                continue;
+            }
+
+            foreach ($needs as $needle) {
+                if ($needle !== '' && str_contains($type, $needle)) {
+                    $blockers[$type] = $stone['stone_type'];
+
+                    break;
+                }
+            }
+        }
+
+        return array_values($blockers);
+    }
+
+    public function addStone(): void
+    {
+        $this->stones[] = array_fill_keys(self::STONE_FIELDS, '');
+    }
+
+    public function removeStone(int $index): void
+    {
+        unset($this->stones[$index]);
+
+        $this->stones = array_values($this->stones);
+    }
+
+    private function optionsFor(string $key): array
+    {
+        $options = Setting::get($key, []);
+
+        return is_array($options) ? array_values(array_filter(array_map('strval', $options))) : [];
     }
 
     public function goToStep(int $step): void
@@ -432,6 +527,7 @@ class ProductIntake extends Component
             'values.material_cost' => ['nullable', 'numeric', 'min:0'],
             'values.retail_price' => ['nullable', 'numeric', 'min:0'],
             'values.acquisition_value' => ['nullable', 'numeric', 'min:0'],
+            'stones.*.estimated_weight_ct' => ['nullable', 'numeric', 'min:0'],
         ], attributes: ['values.sku' => 'SKU', 'values.title' => 'item title']);
 
         // The working travels with the price it produced, so the figure can
@@ -443,10 +539,13 @@ class ProductIntake extends Component
             $this->priceSuggestion,
         );
 
+        app(ProductIntakeService::class)->saveStones($this->product, $this->stones);
+
         if ($this->suggestedValues !== []) {
             $this->captureCorrections($this->product);
-            $this->product = $this->product->fresh();
         }
+
+        $this->product = $this->product->fresh(['currentPricing', 'stock', 'images', 'gemstones']);
 
         return $this->product;
     }

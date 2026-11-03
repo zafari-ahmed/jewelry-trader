@@ -15,6 +15,7 @@
         <x-ui.nav-item :href="route('admin.orders')" :active="$current === 'admin.orders'">Orders</x-ui.nav-item>
         <x-ui.nav-item :href="route('admin.customers')" :active="$current === 'admin.customers'">Customers</x-ui.nav-item>
         <x-ui.nav-item :href="route('admin.review')" :active="$current === 'admin.review'" badge="7">Review Queue</x-ui.nav-item>
+        <x-ui.nav-item :href="route('admin.resources')" :active="$current === 'admin.resources'">Reference Library</x-ui.nav-item>
 
         <x-ui.eyebrow tone="navy" class="mt-14 mb-4 pl-12">Administration</x-ui.eyebrow>
         <x-ui.nav-item :href="route('admin.settings')" :active="$current === 'admin.settings'">Settings Hub</x-ui.nav-item>

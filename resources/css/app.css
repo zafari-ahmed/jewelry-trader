@@ -222,6 +222,7 @@
     --container-cart: 360px;
     --container-filters: 240px;
     --container-thermal: 80mm;      /* 80mm thermal receipt stock */
+    --container-chart: 1290px;      /* the reference chart at its native width */
 
     /* --- Aspect ratios present in the design ----------------------------- */
     --aspect-photo: 4 / 3;

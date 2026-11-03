@@ -40,6 +40,18 @@
                 <p class="mt-15 max-w-prose text-body-lg leading-prose text-ink-secondary">{{ $product->customer_description }}</p>
             @endif
 
+            {{-- Built from the stones on the record, not from copy anybody
+                 typed. There is no field here to clear and no description to
+                 forget, which is what "no exceptions" has to mean. --}}
+            @php($disclosures = app(\App\Services\Inventory\StoneDisclosureService::class)->statements($product))
+            @if ($disclosures)
+                <div class="mt-15 max-w-prose rounded-surface border border-border-card bg-ivory px-15 py-12">
+                    @foreach ($disclosures as $disclosure)
+                        <p class="text-body-sm leading-body text-ink @if (! $loop->first) mt-7 @endif">{{ $disclosure }}</p>
+                    @endforeach
+                </div>
+            @endif
+
             {{-- Specific verified facts, each attributable. No score, no
                  stars: see App\Livewire\Shop\VerifiedFacts. --}}
             <livewire:shop.verified-facts :product="$product" :key="'facts-'.$product->id" />

@@ -175,6 +175,72 @@
                     </x-ui.card>
                 @endforeach
 
+                {{-- Stones. Their own card because a piece may hold none or six,
+                     and the colour-coded field rules describe one value apiece. --}}
+                <x-ui.card>
+                    <x-slot:header>
+                        <h2 class="font-serif text-display-xs font-semibold">Stones</h2>
+                        <span class="text-label text-muted">What is set in the piece, and what must be said about it</span>
+                        <span class="ml-auto flex flex-wrap items-center gap-9">
+                            <x-ui.tooltip text="Carat is weight, not size. Cut is the quality of the faceting and how it returns light. Colour runs D (colourless) to Z. Clarity counts inclusions — fewer means higher value.">
+                                <span class="text-meta text-muted">The 4Cs</span>
+                            </x-ui.tooltip>
+                            <x-ui.reference-chart />
+                        </span>
+                    </x-slot:header>
+
+                    @forelse ($stones as $index => $stone)
+                        <div wire:key="stone-{{ $index }}" class="mb-15 rounded-surface border border-rule px-15 py-14 last:mb-0">
+                            <div class="mb-12 flex flex-wrap items-baseline gap-9">
+                                <span class="text-label font-semibold text-ink">Stone {{ $index + 1 }}</span>
+                                @if ($index === 0)<x-ui.badge variant="draft">Primary</x-ui.badge>@endif
+                                <button type="button" wire:click="removeStone({{ $index }})"
+                                    class="ml-auto cursor-pointer text-caption text-muted hover:text-status-required">Remove</button>
+                            </div>
+
+                            <div class="grid gap-13 md:grid-cols-3">
+                                @foreach (['stone_type' => 'Stone type', 'origin' => 'Origin', 'shape' => 'Shape', 'cut' => 'Cut', 'color' => 'Colour', 'clarity' => 'Clarity', 'cut_grade' => 'Cut grade', 'treatment' => 'Treatment'] as $field => $label)
+                                    <x-ui.field-status
+                                        :color="$field === 'stone_type' ? 'red' : ($field === 'treatment' && in_array($stone['stone_type'] ?? '', $this->disclosureBlockers, true) ? 'red' : 'neutral')"
+                                        :label="$label"
+                                        :required="$field === 'stone_type'"
+                                        :helper="$field === 'origin' ? 'Where the stone came from. Lab-grown and simulant are disclosed to customers automatically.' : ($field === 'treatment' && in_array($stone['stone_type'] ?? '', $this->disclosureBlockers, true) ? 'Required for this stone — blank is not the same as untreated.' : null)"
+                                    >
+                                        <x-ui.select wire:model.live="stones.{{ $index }}.{{ $field }}">
+                                            <option value="">—</option>
+                                            @foreach ($this->stoneOptions[$field] as $option)
+                                                <option value="{{ $option }}">{{ $option }}</option>
+                                            @endforeach
+                                        </x-ui.select>
+                                    </x-ui.field-status>
+                                @endforeach
+
+                                <x-ui.field-status color="neutral" label="Weight (ct)">
+                                    <x-ui.input type="number" step="0.01" min="0" wire:model.blur="stones.{{ $index }}.estimated_weight_ct" />
+                                    @error('stones.'.$index.'.estimated_weight_ct')<div class="mt-4 text-caption text-status-required">{{ $message }}</div>@enderror
+                                </x-ui.field-status>
+
+                                <x-ui.field-status color="neutral" label="Setting style">
+                                    <x-ui.input wire:model.blur="stones.{{ $index }}.setting_style" placeholder="Prong, bezel, pavé…" />
+                                </x-ui.field-status>
+                            </div>
+                        </div>
+                    @empty
+                        <p class="text-body-sm leading-body text-muted">
+                            No stones recorded. A piece with none priced is priced on its metal and labour alone.
+                        </p>
+                    @endforelse
+
+                    <div class="mt-15 flex flex-wrap items-center gap-9 border-t border-rule pt-14">
+                        <x-ui.button wire:click="addStone" size="sm">Add a stone</x-ui.button>
+                        @if ($this->disclosureBlockers)
+                            <span class="text-caption text-status-required">
+                                Treatment must be recorded for {{ implode(', ', $this->disclosureBlockers) }} before this item can be listed.
+                            </span>
+                        @endif
+                    </div>
+                </x-ui.card>
+
                 @if ($this->aiAvailable)
                     <x-ui.card title="Assistance" meta="Suggestions only — you decide">
                         <div class="flex flex-wrap gap-9">

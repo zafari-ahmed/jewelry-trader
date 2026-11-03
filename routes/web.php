@@ -94,6 +94,12 @@ Route::middleware('auth')->prefix('admin')->name('admin.')->group(function () {
     Route::get('/audit', \App\Livewire\Admin\AuditLogViewer::class)->middleware('permission:view-audit-log')->name('audit');
     Route::get('/roles', \App\Livewire\Admin\RolesPermissions::class)->middleware('permission:manage-roles')->name('roles');
 
+    // Internal reference material. Deliberately not under settings: an
+    // appraiser who may not touch configuration still needs the cheat sheet.
+    Route::view('/resources', 'admin.resources')
+        ->middleware('permission:view-products')
+        ->name('resources');
+
     // Phase 2 placeholders: the nav item exists and explains itself; the
     // module behind it arrives later (Module 11).
     Route::get('/phase-2/{feature}', \App\Livewire\Admin\Phase2Placeholder::class)->name('phase2');

@@ -25,6 +25,7 @@ class SettingsRegistry
             self::commission(),
             self::pricing(),
             self::qc(),
+            self::reference(),
             self::features(),
         );
     }
@@ -356,6 +357,83 @@ class SettingsRegistry
             'qc.show_customer_panel' => ['type' => 'boolean', 'default' => true, 'label' => 'Show verified facts to customers', 'help' => 'Specific attributable claims. Never a score or a star rating.'],
             'qc.check_types' => ['type' => 'json', 'default' => [], 'label' => 'Check ranking overrides', 'help' => 'check key → critical, standard, optional or disabled.'],
             'qc.block_listing_when_critical_fails' => ['type' => 'boolean', 'default' => true, 'label' => 'A failed critical check blocks listing'],
+        ];
+    }
+
+    /**
+     * The stone vocabulary, and what must be disclosed about a stone.
+     *
+     * These lists populate the dropdowns on intake. They are settings rather
+     * than enums because the trade's vocabulary is not ours to fix: an
+     * appraiser who starts buying Portuguese-cut stones adds a row, not a
+     * ticket (rule 3.1).
+     *
+     * The defaults come from the client's reference chart, with the estate
+     * cuts the chart omits added back — an Old European or rose cut carries a
+     * higher rate than any modern cut in the rate table, and a list that
+     * cannot name them would push antique stones into cheaper modern
+     * equivalents.
+     */
+    public static function reference(): array
+    {
+        return [
+            'reference.stone_types' => ['type' => 'json', 'default' => [
+                'Natural Diamond', 'Lab-Grown Diamond', 'Sapphire', 'Ruby', 'Emerald',
+                'Moissanite', 'Aquamarine', 'Amethyst', 'Tanzanite', 'Tourmaline',
+                'Peridot', 'Garnet', 'Citrine', 'Topaz', 'Opal', 'Onyx',
+                'Jade', 'Imperial Jade', 'Turquoise', 'Coral', 'Lapis', 'Malachite',
+                'Pearl', 'Other',
+            ], 'label' => 'Stone types'],
+
+            'reference.stone_shapes' => ['type' => 'json', 'default' => [
+                'Round', 'Princess', 'Cushion', 'Oval', 'Radiant', 'Emerald', 'Asscher',
+                'Marquise', 'Pear', 'Heart', 'Trillion', 'Baguette', 'Drop', 'Hexagon',
+                'Cabochon', 'Rough', 'Other',
+            ], 'label' => 'Stone shapes'],
+
+            // Priced on the cut rather than the size band, so the spelling
+            // here has to match pricing.diamond_cut_rates to be worth money.
+            'reference.diamond_cuts' => ['type' => 'json', 'default' => [
+                'Round Brilliant', 'Old Mine', 'Old European', 'Rose Cut',
+                'Princess', 'Cushion', 'Oval', 'Pear', 'Emerald Cut', 'Radiant',
+                'Marquise', 'Asscher', 'Baguette', 'Trilliant', 'Heart',
+                'Single Cut', 'Other',
+            ], 'label' => 'Diamond cuts', 'help' => 'Spelling must match the rate-by-cut table, or the stone falls back to the size band.'],
+
+            // Origin is not a treatment. A lab-grown ruby can also be heated,
+            // and one field cannot hold both without losing one of them.
+            'reference.stone_origins' => ['type' => 'json', 'default' => [
+                'Natural', 'Lab-Grown', 'Simulated', 'Unknown',
+            ], 'label' => 'Stone origins'],
+
+            'reference.stone_treatments' => ['type' => 'json', 'default' => [
+                'None', 'Untreated', 'Unheated', 'Heated', 'Minor Oil', 'Moderate Oil',
+                'Oiled', 'Fracture Filled', 'Irradiated', 'Stabilized', 'Dyed', 'Unknown',
+            ], 'label' => 'Stone treatments'],
+
+            'reference.clarity_grades' => ['type' => 'json', 'default' => [
+                'FL', 'IF', 'VVS1', 'VVS2', 'VS1', 'VS2', 'SI1', 'SI2', 'I1', 'I2', 'I3',
+            ], 'label' => 'Clarity grades'],
+
+            'reference.color_grades' => ['type' => 'json', 'default' => [
+                'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'Fancy',
+            ], 'label' => 'Colour grades'],
+
+            'reference.cut_grades' => ['type' => 'json', 'default' => [
+                'Excellent', 'Very Good', 'Good', 'Fair', 'Poor',
+            ], 'label' => 'Cut grades', 'help' => "GIA's scale, which applies to round brilliants."],
+
+            // Corundum and beryl are treated as a matter of course, so silence
+            // about treatment is not the same as "untreated".
+            'reference.treatment_disclosure_required' => ['type' => 'json', 'default' => [
+                'ruby', 'sapphire', 'emerald',
+            ], 'label' => 'Stones that must carry a treatment disclosure', 'help' => 'Matched against the stone type. An item cannot be listed until each of these has its treatment recorded.'],
+
+            'reference.origins_requiring_disclosure' => ['type' => 'json', 'default' => [
+                'lab-grown', 'simulated',
+            ], 'label' => 'Origins that must be disclosed to customers', 'help' => 'Rendered on the public page from the record itself, so no description can omit it.'],
+
+            'reference.chart_enabled' => ['type' => 'boolean', 'default' => true, 'label' => 'Show the reference chart', 'help' => 'The cheat sheet available from intake and the admin resources page. Internal only.'],
         ];
     }
 
