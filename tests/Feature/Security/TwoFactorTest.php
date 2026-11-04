@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Security;
 
+use App\Http\Middleware\RequireTwoFactor;
 use App\Livewire\Auth\TwoFactorChallenge;
 use App\Livewire\Auth\TwoFactorSetup;
 use App\Models\Setting;
@@ -10,6 +11,8 @@ use App\Services\Security\TwoFactorService;
 use Database\Seeders\RolesAndPermissionsSeeder;
 use Database\Seeders\SettingsSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\Request;
+use Illuminate\Routing\Route;
 use Livewire\Livewire;
 use PragmaRX\Google2FA\Google2FA;
 use Tests\TestCase;
@@ -63,6 +66,60 @@ class TwoFactorTest extends TestCase
         Setting::set('security.mfa_required_roles', ['sales-staff']);
 
         $this->actingAs($user)->get(route('pos.sale'))->assertRedirect(route('two-factor.setup'));
+    }
+
+    /**
+     * Livewire posts to its own endpoint, so these go through the middleware
+     * directly. Livewire::test() calls the component without any HTTP
+     * middleware at all, which is why the suite was blind to this.
+     *
+     * @param  array<int, string>  $componentNames
+     */
+    private function livewireUpdateThrough(User $user, array $componentNames): mixed
+    {
+        $request = Request::create('/livewire/update', 'POST', [
+            'components' => array_map(
+                fn (string $name) => ['snapshot' => json_encode(['memo' => ['name' => $name]])],
+                $componentNames,
+            ),
+        ]);
+
+        $request->setUserResolver(fn () => $user);
+        $request->setRouteResolver(fn () => (new Route('POST', 'livewire/update', []))->name('default.livewire.update'));
+
+        return app(RequireTwoFactor::class)->handle($request, fn () => response('reached'));
+    }
+
+    private function assertRedirectedToSetup(mixed $response): void
+    {
+        $this->assertSame(302, $response->getStatusCode());
+        $this->assertSame(route('two-factor.setup'), $response->headers->get('Location'));
+    }
+
+    public function test_the_enrolment_forms_own_livewire_request_is_not_redirected(): void
+    {
+        $user = $this->userWithRole(RolesAndPermissionsSeeder::SUPER_ADMIN);
+
+        // The page was reachable but every submission from it bounced back to
+        // the page, so enrolment could never be completed in a browser.
+        $this->assertSame('reached', $this->livewireUpdateThrough($user, ['auth.two-factor-setup'])->getContent());
+        $this->assertSame('reached', $this->livewireUpdateThrough($user, ['auth.two-factor-challenge'])->getContent());
+    }
+
+    public function test_any_other_component_is_still_held_at_the_requirement(): void
+    {
+        $user = $this->userWithRole(RolesAndPermissionsSeeder::SUPER_ADMIN);
+
+        $this->assertRedirectedToSetup($this->livewireUpdateThrough($user, ['pos.register']));
+    }
+
+    public function test_a_batched_request_cannot_smuggle_a_component_past_the_requirement(): void
+    {
+        $user = $this->userWithRole(RolesAndPermissionsSeeder::SUPER_ADMIN);
+
+        $this->assertRedirectedToSetup(
+            $this->livewireUpdateThrough($user, ['auth.two-factor-setup', 'pos.register']),
+        );
     }
 
     public function test_reloading_the_enrolment_page_keeps_the_secret_already_scanned(): void
