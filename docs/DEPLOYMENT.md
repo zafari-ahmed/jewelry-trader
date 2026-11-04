@@ -9,7 +9,7 @@ real domain.
 
 ---
 
-## 1. Before you start — check these three things
+## 1. Before you start — check these four things
 
 **PHP 8.3 or newer.** cPanel → *MultiPHP Manager*. The application will not
 run on 8.2 or below. Then cPanel → *Select PHP Version* → *Extensions*, and
@@ -20,13 +20,25 @@ bcmath  ctype  curl  dom  fileinfo  gd  intl  mbstring
 openssl  pdo_mysql  tokenizer  xml  zip
 ```
 
-`gd` is needed for image handling and `intl` for currency formatting; the rest
-are Laravel's own requirements.
+`gd` is needed for image handling; the rest are Laravel's own requirements.
+`intl` is not used by the application — money is formatted with
+`number_format()` — but some `artisan` diagnostics call it, so tick it while
+you are there.
+
+**The extension list is per PHP version.** Changing the account's PHP in
+*Select PHP Version* resets these, so re-tick them after any version change.
 
 **Terminal access.** cPanel → *Terminal*. If it is present, everything below
 is straightforward. If the host has disabled it, read section 9 first — you
 can still deploy, but migrations and seeding need a different route and it is
 worth knowing that before you upload anything.
+
+**A database of its own.** Count the tables in the database you are about to
+point at: `php artisan db:show` reports it. This application creates 47. A much
+larger number means the schema is shared with another application, which makes
+`migrate:fresh` and `migrate:refresh` destructive — both drop *every* table in
+the schema, not only ours. Give the application its own database if you can;
+if you cannot, treat those two commands as forbidden on this install.
 
 **Whether you can set a document root.** Laravel serves from `public/`, not
 from the application root. The clean way is to point the domain at
