@@ -148,6 +148,17 @@ it so the application lives at `/home/USER/jewelry-trader`.
   New Domain*, and set the document root to `/home/USER/jewelry-trader/public`
   rather than accepting the default.
 
+**Never leave the application inside `public_html`.** Extracting it to
+`public_html/jewelry-trader` appears to work — the app answers on
+`example.com/jewelry-trader/public/` — but everything else is served too. Check
+with `curl -sI`: `composer.json` and, far worse,
+`storage/logs/laravel.log` come back `200`. The log carries stack traces, file
+paths and SQL bindings. `.env` itself is usually blocked by mod_security with a
+`406`, which is a WAF rule rather than protection and should not be relied on.
+
+If it has been exposed, move it out, then rotate the database password and
+`APP_KEY` (see section 4a) before treating the install as clean.
+
 **If the host will not let you change the document root**, put the application
 outside `public_html` and move only the public files into it:
 
@@ -167,6 +178,33 @@ $app = require_once __DIR__.'/../jewelry-trader/bootstrap/app.php';
 
 This works, but it is the weaker arrangement: every future deployment has to
 repeat the move. Prefer the document root if you can get it.
+
+**After repointing the document root**, check that `.php` files still execute.
+cPanel writes its PHP handler into the document root's `.htaccess`, and that
+file does not follow the root when you move it — the symptom is `.php` files
+downloading as plain text. MultiPHP Manager → re-apply PHP 8.3 to the domain
+writes the handler into the new root. Laravel's own `public/.htaccess` does the
+URL rewriting and does not conflict with it.
+
+---
+
+## 4a. Rotate APP_KEY before the first sign-in, not after
+
+`APP_KEY` encrypts `two_factor_secret` and `two_factor_recovery_codes` on
+`users`, along with every secret in `settings`. Rotating it after anyone has
+enrolled in MFA makes their TOTP secret and recovery codes undecryptable and
+locks them out — and the only accounts with MFA enforced are the ones that can
+reach Settings to turn it off.
+
+On a fresh install nothing encrypted holds a value yet, so a rotation is free:
+
+```bash
+php artisan key:generate --force
+```
+
+Do it before the first sign-in. Afterwards, rotating `APP_KEY` means clearing
+`two_factor_secret` and `two_factor_recovery_codes` for every user and
+re-enrolling them, plus re-entering every secret in Settings.
 
 ---
 
