@@ -353,7 +353,7 @@ the seeded values are a starting point rather than a commitment.
 
 | Table | How it gets filled |
 |---|---|
-| `users` | `jt:create-admin` makes the first one; the rest are added in Roles & Permissions |
+| `users` | `jt:create-admin` only, and it creates Super Admins only. There is no user-management screen in Phase 1, so staff accounts for the other five roles cannot be added from the panel |
 | `products` | Inventory → Add / Edit Item |
 | `product_images` | Photo upload on step 1 of intake |
 | `gemstone_details` | The Stones section on intake |
