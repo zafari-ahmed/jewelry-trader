@@ -72,13 +72,24 @@ Root composer.json requires php ^8.3 but your php version (8.0.30) does not
 satisfy that requirement.
 ```
 
-Name the binary explicitly rather than trusting `composer` to find it:
+Run Composer through the PHP your shell already has, instead of letting the
+wrapper choose one:
 
 ```bash
-ls -d /opt/cpanel/ea-php*          # which versions this box actually has
-/opt/cpanel/ea-php83/root/usr/bin/php -v | head -1
-/opt/cpanel/ea-php83/root/usr/bin/php "$(command -v composer)" install --no-dev --optimize-autoloader
+php -v | head -1                   # confirm this says 8.3 or newer
+php "$(command -v composer)" install --no-dev --optimize-autoloader
 ```
+
+That works whatever the host's directory layout is. If the second line fails
+with PHP complaining about the file's syntax, the `composer` on your PATH is a
+wrapper script rather than the phar; `head -2 "$(command -v composer)"` shows
+which, and `php -r 'echo PHP_BINARY;'` gives the real path of the interpreter
+to call it with.
+
+Resist going hunting under `/opt/cpanel/ea-php83/` for the binary. Those
+directories are listable on a CageFS-jailed account whose shell cannot see
+inside them, so `ls -d /opt/cpanel/ea-php*` will cheerfully show you a version
+you have no path to.
 
 **Do not run `composer update` to clear the error.** It will succeed, and it
 will do it by resolving a different set of packages than the ones this release
