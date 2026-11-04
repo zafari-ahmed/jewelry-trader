@@ -72,24 +72,43 @@ Root composer.json requires php ^8.3 but your php version (8.0.30) does not
 satisfy that requirement.
 ```
 
-Run Composer through the PHP your shell already has, instead of letting the
-wrapper choose one:
+First find out whether `php` is telling you the truth, because on a CloudLinux
+host it often isn't. Run both of these:
 
 ```bash
-php -v | head -1                   # confirm this says 8.3 or newer
-php "$(command -v composer)" install --no-dev --optimize-autoloader
+printf '<?php echo PHP_VERSION, "\\n";' > ~/v.php && php ~/v.php
+php -r 'echo PHP_VERSION, "\n";'
 ```
 
-That works whatever the host's directory layout is. If the second line fails
-with PHP complaining about the file's syntax, the `composer` on your PATH is a
-wrapper script rather than the phar; `head -2 "$(command -v composer)"` shows
-which, and `php -r 'echo PHP_BINARY;'` gives the real path of the interpreter
-to call it with.
+**If those print different versions**, `php` on your PATH is a dispatcher: it
+runs inline code itself but hands *script files* to the version selected in
+cPanel → *Select PHP Version*. Composer is a script file, and so is `artisan`,
+so both get the old version no matter which binary you invoke. This is the
+single most confusing failure on these hosts — Composer will insist your PHP is
+8.0.30 while `php -v` says 8.3, and neither is lying.
 
-Resist going hunting under `/opt/cpanel/ea-php83/` for the binary. Those
-directories are listable on a CageFS-jailed account whose shell cannot see
-inside them, so `ls -d /opt/cpanel/ea-php*` will cheerfully show you a version
-you have no path to.
+Two things to do, and you need both:
+
+1. cPanel → *Select PHP Version* → set the account to 8.3, then re-tick the
+   extensions from section 1. They are stored per version, so whatever was
+   ticked under the old one does not follow you.
+2. For anything you run from the shell before that takes effect, call the real
+   binary by its path. `php -r 'echo PHP_BINARY;'` prints it — typically
+   `/opt/alt/php83/usr/bin/php` on CloudLinux. Then:
+
+```bash
+/opt/alt/php83/usr/bin/php "$(command -v composer)" install --no-dev --optimize-autoloader
+/opt/alt/php83/usr/bin/php artisan migrate --force
+```
+
+Note that step 1 is not optional even if step 2 works. Your shell's PHP has
+nothing to do with the PHP the web server uses to serve a page, and the
+compiled autoloader asserts 8.3, so a domain left on 8.0 returns a platform
+error instead of the application.
+
+Do not go hunting under `/opt/cpanel/ea-php83/` for a binary. Those directories
+are listable on a CageFS-jailed account whose shell cannot see inside them, so
+`ls -d /opt/cpanel/ea-php*` will show you versions you have no path to.
 
 **Do not run `composer update` to clear the error.** It will succeed, and it
 will do it by resolving a different set of packages than the ones this release
@@ -334,7 +353,9 @@ Re-run those three after any future change to `.env` or to the code.
 ## 8. Cron — two entries
 
 cPanel → *Cron Jobs*. Both run every minute (`* * * * *`). Use the
-`ea-php83` binary explicitly; the default `php` on a cPanel box is often an
+8.3 binary explicitly — on CloudLinux that is `/opt/alt/php83/usr/bin/php`
+rather than the `ea-php83` path below, and `php -r 'echo PHP_BINARY;'` settles
+which your host uses. The default `php` in a cron environment is often an
 older version.
 
 **The scheduler**, which runs the audit-log retention purge:
