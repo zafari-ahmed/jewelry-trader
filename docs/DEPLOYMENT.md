@@ -56,6 +56,39 @@ Two notes. `--no-dev` matters: without it you ship development tooling onto a
 public server. And run `composer install` on PHP 8.3 locally, so the
 autoloader and any platform-specific packages match the server.
 
+### If Composer is running on the server instead
+
+Composer's PHP is not the `php` your shell finds, and on cPanel the two are
+configured separately. *MultiPHP Manager* and *Select PHP Version* decide what
+the web server and your shell use; the `composer` wrapper calls whatever PHP it
+was installed against, which is usually the untouched system default. So this
+pair of outputs is not a contradiction:
+
+```
+$ php -v
+PHP 8.3.36 (cli)
+$ composer install --no-dev --optimize-autoloader
+Root composer.json requires php ^8.3 but your php version (8.0.30) does not
+satisfy that requirement.
+```
+
+Name the binary explicitly rather than trusting `composer` to find it:
+
+```bash
+ls -d /opt/cpanel/ea-php*          # which versions this box actually has
+/opt/cpanel/ea-php83/root/usr/bin/php -v | head -1
+/opt/cpanel/ea-php83/root/usr/bin/php "$(command -v composer)" install --no-dev --optimize-autoloader
+```
+
+**Do not run `composer update` to clear the error.** It will succeed, and it
+will do it by resolving a different set of packages than the ones this release
+was tested against — including a Laravel that still supports 8.0. The error is
+telling you the truth: the application does not run on 8.0.
+
+That still leaves `npm run build`, which has to happen somewhere and which
+cPanel rarely has Node for. If Composer has already fought you, building
+locally and uploading the result is the shorter road.
+
 Then zip the folder — `jewelry-trader.zip` — including hidden files.
 
 ---
