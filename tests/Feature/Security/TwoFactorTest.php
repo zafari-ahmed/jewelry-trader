@@ -65,6 +65,42 @@ class TwoFactorTest extends TestCase
         $this->actingAs($user)->get(route('pos.sale'))->assertRedirect(route('two-factor.setup'));
     }
 
+    public function test_reloading_the_enrolment_page_keeps_the_secret_already_scanned(): void
+    {
+        $user = $this->userWithRole(RolesAndPermissionsSeeder::SUPER_ADMIN);
+
+        $first = Livewire::actingAs($user)->test(TwoFactorSetup::class)->get('secret');
+        $second = Livewire::actingAs($user)->test(TwoFactorSetup::class)->get('secret');
+
+        // A fresh secret here would strand the QR code already in somebody's
+        // authenticator, and no code they entered could ever match.
+        $this->assertSame($first, $second);
+    }
+
+    public function test_a_code_from_the_first_visit_still_works_after_a_reload(): void
+    {
+        $user = $this->userWithRole(RolesAndPermissionsSeeder::SUPER_ADMIN);
+
+        $scanned = Livewire::actingAs($user)->test(TwoFactorSetup::class)->get('secret');
+
+        Livewire::actingAs($user)->test(TwoFactorSetup::class)
+            ->set('code', $this->validCodeFor($scanned))
+            ->call('confirm')
+            ->assertSet('error', null);
+
+        $this->assertSame($scanned, $user->fresh()->two_factor_secret);
+    }
+
+    public function test_the_pending_secret_is_discarded_once_enrolment_completes(): void
+    {
+        $user = $this->userWithRole(RolesAndPermissionsSeeder::SUPER_ADMIN);
+
+        $component = Livewire::actingAs($user)->test(TwoFactorSetup::class);
+        $component->set('code', $this->validCodeFor($component->get('secret')))->call('confirm');
+
+        $this->assertNull(session('two_factor_pending_secret'));
+    }
+
     public function test_enrolment_stores_an_encrypted_secret_and_returns_recovery_codes(): void
     {
         $user = $this->userWithRole(RolesAndPermissionsSeeder::SUPER_ADMIN);

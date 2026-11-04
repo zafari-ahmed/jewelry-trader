@@ -8,6 +8,9 @@ use Livewire\Component;
 
 class TwoFactorSetup extends Component
 {
+    /** Where an unconfirmed secret waits between requests. */
+    private const PENDING_SECRET = 'two_factor_pending_secret';
+
     public string $secret = '';
 
     public string $code = '';
@@ -26,9 +29,14 @@ class TwoFactorSetup extends Component
             return;
         }
 
-        // Held in the component, not the database: an unconfirmed secret is
-        // not an enrolment.
-        $this->secret = $twoFactor->generateSecret();
+        // Kept in the session rather than the database, because an unconfirmed
+        // secret is not an enrolment — but kept across requests all the same,
+        // so refreshing the page does not silently issue a new secret and
+        // strand the one already scanned into somebody's authenticator.
+        $this->secret = session(self::PENDING_SECRET) ?? tap(
+            $twoFactor->generateSecret(),
+            fn (string $secret) => session([self::PENDING_SECRET => $secret]),
+        );
     }
 
     public function confirm(): void
@@ -45,6 +53,8 @@ class TwoFactorSetup extends Component
         }
 
         $this->recoveryCodes = $twoFactor->enrol(auth()->user(), $this->secret);
+
+        session()->forget(self::PENDING_SECRET);
 
         session(['two_factor_passed_at' => now()->toIso8601String()]);
 
