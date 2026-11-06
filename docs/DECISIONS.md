@@ -520,3 +520,39 @@ is retired in favour of `pricing.multiplier_ceiling`. The Layer 4 market cap
 The metal rates are **raw** — spot × purity, no markup — so the craftsman's
 formula applying overhead, design and commissions on top is not a double
 count. Confirmed explicitly by the client.
+
+---
+
+## 2026-11-06 — The appraisal-record discrepancies, settled
+
+Three differences between the system's arithmetic and the client's own
+appraisal documents were put to him on 2026-11-04. His answer: **the system is
+right and the documents will be corrected.** Explicitly — "Do not change yours
+to match my document; the document will match the system."
+
+- **Rounding** stays at **up to the nearest $0.50**. The $5 / $25 increments in
+  his written records are not to be adopted.
+- **Insurance multiplier** stays at **×1.30 for men's accessories**, per his
+  signed rate table, not the ×1.35 appearing in his records.
+- **Record #2's ×6.0 note** is a documentation error on his side. Its
+  multipliers compound to ×1.518. Noted, no code change.
+
+So `pricing.round_up_to_cents` and the men's-accessory insurance multiplier are
+**not** open questions any more. If a future rate table arrives showing ×1.35,
+that is a change to the table, not a correction of a defect.
+
+### Lab-grown origin as its own field — approved
+
+The separate `gemstone_details.origin` column, split out from `treatment`
+(2026-11-03), was put to the client as a deviation from his instruction. He
+approved it: "If you decide that changing lab-grown stones to their own
+separate field is the most logical way to build it, that is fine with me."
+
+### Standing instruction on scope
+
+The client has asked, in writing, for push-back rather than compliance where an
+idea conflicts with the architecture: "if my idea doesn't fit the logic of the
+code, you have my permission to say no or to adjust it to what actually works."
+
+Apply it. Where an instruction is adjusted rather than followed, say so and say
+why — in the reply, not silently in the code.
