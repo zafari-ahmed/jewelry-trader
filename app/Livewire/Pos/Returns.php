@@ -8,6 +8,7 @@ use App\Models\Setting;
 use App\Services\Payments\Tender;
 use App\Services\Pos\Cart;
 use App\Services\Pos\PosSaleService;
+use App\Services\Pos\RestockFeeCalculator;
 use Illuminate\Support\Facades\Gate;
 use Livewire\Attributes\Computed;
 use Livewire\Component;
@@ -26,6 +27,9 @@ class Returns extends Component
     public array $selectedItems = [];
 
     public string $mode = 'refund';        // refund | exchange
+
+    /** Blank means the fee stands. A reason waives it, and is recorded. */
+    public string $waiverReason = '';
 
     public string $exchangeSearch = '';
 
@@ -104,6 +108,13 @@ class Returns extends Component
     #[Computed]
     public function creditCents(): int
     {
+        return max(0, $this->grossCredit - $this->restockFeeCents);
+    }
+
+    /** Before the fee: the goods plus all of their tax. */
+    #[Computed]
+    public function grossCredit(): int
+    {
         $order = $this->order;
 
         if (! $order) {
@@ -114,6 +125,54 @@ class Returns extends Component
         $subtotal = $lines->sum(fn ($i) => $i->lineTotalCents());
 
         return $subtotal + (int) round($subtotal * (float) $order->tax_rate);
+    }
+
+    /** The goods price the fee is calculated on, before tax. */
+    #[Computed]
+    public function goodsCents(): int
+    {
+        $order = $this->order;
+
+        if (! $order) {
+            return 0;
+        }
+
+        return (int) $order->items->whereIn('id', $this->selectedItems)
+            ->sum(fn ($i) => $i->lineTotalCents());
+    }
+
+    /**
+     * Shown before the refund is issued, because a fee the customer learns
+     * about afterwards is the one that gets disputed.
+     */
+    #[Computed]
+    public function restockFeeCents(): int
+    {
+        if (! $this->order) {
+            return 0;
+        }
+
+        return app(RestockFeeCalculator::class)->feeFor(
+            $this->goodsCents,
+            isExchange: $this->mode === 'exchange',
+            waiverReason: $this->waiver(),
+            method: $this->order->payments()->where('status', '!=', 'failed')->latest('id')->value('method'),
+        );
+    }
+
+    #[Computed]
+    public function restockFeePercent(): int
+    {
+        return app(RestockFeeCalculator::class)->percent();
+    }
+
+    /** @return array<int, string> */
+    #[Computed]
+    public function waiverOptions(): array
+    {
+        return auth()->user()?->can('waive-restock-fee')
+            ? app(RestockFeeCalculator::class)->waiverReasons()
+            : [];
     }
 
     #[Computed]
@@ -143,6 +202,20 @@ class Returns extends Component
         unset($this->exchangeCart);
     }
 
+    /**
+     * A waiver only counts if this user is allowed to grant one. Without this
+     * check the field could be set from the browser by anyone who can reach
+     * the returns screen, and the permission would be decoration.
+     */
+    private function waiver(): ?string
+    {
+        if ($this->waiverReason === '' || ! auth()->user()?->can('waive-restock-fee')) {
+            return null;
+        }
+
+        return $this->waiverReason;
+    }
+
     public function refundSelected(): void
     {
         $this->reset('error', 'flash');
@@ -162,7 +235,12 @@ class Returns extends Component
         }
 
         try {
-            app(PosSaleService::class)->refund($this->order, $this->selectedItems);
+            app(PosSaleService::class)->refund(
+                $this->order,
+                $this->selectedItems,
+                waiverReason: $this->waiver(),
+                userId: auth()->id(),
+            );
         } catch (\Throwable $e) {
             $this->error = $e->getMessage();
 
@@ -193,6 +271,7 @@ class Returns extends Component
                 newCart: $this->exchangeCart,
                 tenders: $difference > 0 ? [$this->differenceTender($difference)] : [],
                 userId: auth()->id(),
+                waiverReason: $this->waiver(),
             );
         } catch (\Throwable $e) {
             $this->error = $e->getMessage();

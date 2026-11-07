@@ -95,8 +95,38 @@
 
                     <div class="flex justify-between text-body-sm text-navy-text">
                         <span>Credit for returned items</span>
-                        <span>${{ number_format($this->creditCents / 100, 2) }}</span>
+                        <span>${{ number_format($this->grossCredit / 100, 2) }}</span>
                     </div>
+
+                    @if ($this->restockFeePercent === 0)
+                        {{-- Said out loud, so an unset policy is a visible choice rather than a silent one. --}}
+                        <div class="mt-10 text-caption text-navy-eyebrow">No restocking fee is configured — this refunds in full.</div>
+                    @elseif ($this->restockFeeCents > 0)
+                        <div class="mt-10 flex justify-between text-body-sm text-navy-text">
+                            <span>Restocking fee ({{ $this->restockFeePercent }}%)</span>
+                            <span>−${{ number_format($this->restockFeeCents / 100, 2) }}</span>
+                        </div>
+                    @elseif ($waiverReason !== '' && $this->waiverOptions !== [])
+                        <div class="mt-10 flex justify-between text-body-sm text-status-valid">
+                            <span>Restocking fee waived</span>
+                            <span>{{ $waiverReason }}</span>
+                        </div>
+                    @endif
+
+                    @if ($this->waiverOptions !== [])
+                        <div class="mt-14 border-t border-hairline-dark pt-14">
+                            <label class="mb-5 block text-caption text-navy-eyebrow">Waive the restocking fee</label>
+                            <x-ui.select wire:model.live="waiverReason" tone="dark">
+                                <option value="">Charge the fee</option>
+                                @foreach ($this->waiverOptions as $reason)
+                                    <option value="{{ $reason }}">{{ $reason }}</option>
+                                @endforeach
+                            </x-ui.select>
+                            <div class="mt-5 text-caption text-navy-eyebrow">
+                                A faulty or misdescribed piece is refunded in full. The reason is recorded against the return.
+                            </div>
+                        </div>
+                    @endif
 
                     @if ($mode === 'exchange')
                         <div class="mt-10 flex justify-between text-body-sm text-navy-text">
@@ -126,6 +156,7 @@
                             <span class="font-serif text-total font-bold text-gold-tint">${{ number_format($this->creditCents / 100, 2) }}</span>
                         </div>
                         <div class="mt-10 text-caption text-navy-eyebrow">Card refunds return to the original card and take 3–5 business days. Cash is unrestricted.</div>
+                        <div class="mt-8 text-caption text-navy-eyebrow">{{ \App\Models\Setting::get('pos.return_policy_text') }}</div>
 
                         <x-ui.button wire:click="refundSelected" variant="pos-primary" size="lg" class="mt-15 w-full">Issue refund</x-ui.button>
                     @endif

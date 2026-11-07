@@ -66,6 +66,43 @@ class SettingsRegistry
                 'type' => 'integer', 'default' => 10, 'label' => 'Max staff discount (%)',
                 'help' => 'Above this, a role with apply-discount-above-threshold must approve.',
             ],
+
+            // The restocking fee. Zero by default on purpose: the percentage is
+            // the owner's commercial policy and has a disclosure obligation
+            // attached, so it is not ours to invent. Until it is set, returns
+            // refund in full and both the settings page and the register say so.
+            'pos.restock_fee_percent' => [
+                'type' => 'integer', 'default' => 0, 'label' => 'Restocking fee (%)',
+                'help' => 'Withheld from a refund, calculated on the goods price before tax. Zero disables the fee entirely.',
+            ],
+            'pos.restock_fee_cap_cents' => [
+                'type' => 'integer', 'default' => 25000, 'label' => 'Restocking fee cap (cents)',
+                'help' => 'The most that can be withheld from one return. Zero means no cap — on high-value pieces a percentage alone gets large quickly.',
+            ],
+            'pos.restock_fee_applies_to_exchanges' => [
+                'type' => 'boolean', 'default' => false, 'label' => 'Charge the fee on exchanges too',
+                'help' => 'Off by default: on an exchange the money stays in the business and the piece is replaced by another sale. Charging here pushes customers toward a refund instead.',
+            ],
+            'pos.restock_fee_applies_to_cash' => [
+                'type' => 'boolean', 'default' => true, 'label' => 'Charge the fee on cash returns',
+                'help' => 'A card refund also costs the gateway fee, which is not returned. Turn this off to charge only on card returns.',
+            ],
+            'pos.restock_fee_waiver_reasons' => [
+                'type' => 'json', 'default' => [
+                    'Item defective',
+                    'Not as described',
+                    'Our error',
+                    'Manager discretion',
+                ],
+                'label' => 'Reasons the fee may be waived',
+                'help' => 'A waiver always needs one of these. The first two are not discretionary — a fee on faulty or misdescribed goods is not enforceable.',
+            ],
+            'pos.return_policy_text' => [
+                'type' => 'string',
+                'default' => 'Returns accepted within 30 days with receipt. Faulty or misdescribed items are refunded in full.',
+                'label' => 'Return policy, shown to customers',
+                'help' => 'Shown at checkout and printed on the receipt. A restocking fee that was not disclosed before the sale is not enforceable (Civil Code s1723).',
+            ],
         ];
     }
 

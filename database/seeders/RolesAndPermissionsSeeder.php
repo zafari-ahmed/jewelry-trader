@@ -29,7 +29,7 @@ class RolesAndPermissionsSeeder extends Seeder
                 'view-orders', 'manage-orders', 'process-refunds',
                 'manage-inventory-transfers', 'approve-inventory-transfers',
                 'view-all-locations',
-                'use-pos', 'apply-discount-above-threshold',
+                'use-pos', 'apply-discount-above-threshold', 'waive-restock-fee',
                 'view-audit-log',
                 'request-override', 'approve-overrides', 'lock-inventory',
                 'view-own-commission', 'view-all-commissions',
@@ -122,6 +122,9 @@ class RolesAndPermissionsSeeder extends Seeder
             // Module 6 — point of sale
             'use-pos',
             'apply-discount-above-threshold',
+            // Waiving the restocking fee always needs a reason as well as this
+            // permission, so a salesperson cannot quietly drop it for a friend.
+            'waive-restock-fee',
 
             // Module 8 — security
             'view-audit-log',

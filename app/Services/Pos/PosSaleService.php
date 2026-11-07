@@ -5,6 +5,7 @@ namespace App\Services\Pos;
 use App\Models\Customer;
 use App\Models\Order;
 use App\Models\Payment;
+use App\Models\RestockFee;
 use App\Services\Orders\OrderService;
 use App\Services\Payments\PaymentService;
 use App\Services\Payments\Tender;
@@ -24,6 +25,7 @@ class PosSaleService
     public function __construct(
         private OrderService $orders,
         private PaymentService $payments,
+        private RestockFeeCalculator $restockFees,
     ) {}
 
     /**
@@ -72,9 +74,21 @@ class PosSaleService
     /**
      * Refund part or all of an order. Card refunds follow the gateway's rules;
      * cash is unrestricted. Items come back to the shelf only on a full return.
+     *
+     * A restocking fee is withheld unless waived, and a waiver needs one of
+     * the configured reasons — an arbitrary string will not do it.
+     *
+     * @param  string|null  $waiverReason  waives the fee, and is recorded
+     * @param  bool  $isExchange  called from exchange(), where the fee is off by default
      */
-    public function refund(Order $order, array $orderItemIds = [], bool $restock = true): Order
-    {
+    public function refund(
+        Order $order,
+        array $orderItemIds = [],
+        bool $restock = true,
+        ?string $waiverReason = null,
+        bool $isExchange = false,
+        ?int $userId = null,
+    ): Order {
         if ($order->status === 'pending') {
             throw new RuntimeException('This order has not been paid.');
         }
@@ -93,10 +107,19 @@ class PosSaleService
             throw new RuntimeException('Select at least one item to return.');
         }
 
-        $amount = $this->refundableAmountFor($order, $items);
+        $this->assertWaiverReasonIsConfigured($waiverReason);
 
-        return DB::transaction(function () use ($order, $payment, $items, $amount, $restock) {
+        $fee = $this->restockFeeFor($order, $items, $isExchange, $waiverReason);
+
+        // The fee comes off the total refund, never off the tax: the sale is
+        // being reversed, so the whole of the tax the customer paid is owed
+        // back to them whatever is withheld from the goods price.
+        $amount = max(0, $this->refundableAmountFor($order, $items) - $fee);
+
+        return DB::transaction(function () use ($order, $payment, $items, $amount, $restock, $fee, $waiverReason, $userId) {
             $this->payments->refund($payment->fresh('splits'), $amount);
+
+            $this->recordRestockFee($order, $items, $fee, $waiverReason, $userId);
 
             if ($restock) {
                 foreach ($items as $item) {
@@ -119,22 +142,41 @@ class PosSaleService
      *
      * @param  Tender[]  $tenders  covering a positive difference
      */
-    public function exchange(Order $order, array $returnedItemIds, Cart $newCart, array $tenders = [], ?int $userId = null): array
-    {
+    public function exchange(
+        Order $order,
+        array $returnedItemIds,
+        Cart $newCart,
+        array $tenders = [],
+        ?int $userId = null,
+        ?string $waiverReason = null,
+    ): array {
         $returned = $order->items()->whereIn('id', $returnedItemIds)->get();
 
         if ($returned->isEmpty()) {
             throw new RuntimeException('Select at least one item to exchange.');
         }
 
-        $credit = $this->refundableAmountFor($order, $returned);
+        $this->assertWaiverReasonIsConfigured($waiverReason);
+
+        // Off by default on an exchange, so this is usually zero — but the
+        // credit has to agree with what the refund actually releases.
+        $fee = $this->restockFeeFor($order, $returned, true, $waiverReason);
+
+        $credit = max(0, $this->refundableAmountFor($order, $returned) - $fee);
         $owed = $newCart->totalCents();
         $difference = $owed - $credit;
 
-        return DB::transaction(function () use ($order, $returnedItemIds, $newCart, $tenders, $userId, $credit, $difference) {
+        return DB::transaction(function () use ($order, $returnedItemIds, $newCart, $tenders, $userId, $credit, $difference, $waiverReason) {
             // The returned items go back on the shelf and the credit is
             // released before the replacement sale is written.
-            $this->refund($order, $returnedItemIds, restock: true);
+            $this->refund(
+                $order,
+                $returnedItemIds,
+                restock: true,
+                waiverReason: $waiverReason,
+                isExchange: true,
+                userId: $userId,
+            );
 
             $newOrder = $this->orders->create(
                 lines: $newCart->toOrderLines(),
@@ -184,6 +226,74 @@ class PosSaleService
             'name' => $name ?: 'Walk-in customer',
             'phone' => $phone,
         ]));
+    }
+
+    /** The goods price of these lines, before tax — the fee's basis. */
+    private function goodsCentsFor($items): int
+    {
+        $total = 0;
+
+        foreach ($items as $item) {
+            $total += $item->lineTotalCents();
+        }
+
+        return $total;
+    }
+
+    /**
+     * The fee for these lines. Resolved here rather than in the calculator so
+     * refund() and exchange() cannot disagree about it: exchange() needs the
+     * figure to work out the credit, and refund() needs it to work out the
+     * amount, and a customer told one number and refunded another is the
+     * worst outcome available.
+     */
+    private function restockFeeFor(Order $order, $items, bool $isExchange, ?string $waiverReason): int
+    {
+        $method = $order->payments()->where('status', '!=', 'failed')->latest('id')->value('method');
+
+        return $this->restockFees->feeFor(
+            $this->goodsCentsFor($items),
+            isExchange: $isExchange,
+            waiverReason: $waiverReason,
+            method: $method,
+        );
+    }
+
+    /**
+     * A waiver is only a waiver for a configured reason. Without this an
+     * arbitrary string reaching the service would clear the fee, and the
+     * record would carry a reason nobody chose.
+     */
+    private function assertWaiverReasonIsConfigured(?string $waiverReason): void
+    {
+        if ($waiverReason === null) {
+            return;
+        }
+
+        if (! in_array($waiverReason, $this->restockFees->waiverReasons(), true)) {
+            throw new RuntimeException("\"{$waiverReason}\" is not a configured reason for waiving the restocking fee.");
+        }
+    }
+
+    /**
+     * A waiver is recorded as a fee of nothing with its reason, because the
+     * reason is what anybody looking at this later needs to see.
+     */
+    private function recordRestockFee(Order $order, $items, int $fee, ?string $waiverReason, ?int $userId): void
+    {
+        if ($fee === 0 && $waiverReason === null) {
+            return;
+        }
+
+        RestockFee::create([
+            'order_id' => $order->id,
+            'goods_cents' => $this->goodsCentsFor($items),
+            'amount_cents' => $fee,
+            'percent_applied' => $fee > 0 ? $this->restockFees->percent() : null,
+            'cap_cents' => $this->restockFees->capCents() ?: null,
+            'waiver_reason' => $waiverReason,
+            'created_by' => $userId,
+        ]);
     }
 
     /** A line's share of the order, including its discount and its tax. */

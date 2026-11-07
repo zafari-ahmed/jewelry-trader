@@ -134,6 +134,7 @@ Route::middleware('auth')->prefix('admin')->name('admin.')->group(function () {
             Route::get('/field-rules', Settings\FieldRules::class)->middleware('permission:manage-field-rules')->name('.field-rules');
             Route::get('/pricing', Settings\Pricing::class)->name('.pricing');
             Route::get('/quality', Settings\QualityControl::class)->name('.quality');
+            Route::get('/pos', Settings\Pos::class)->name('.pos');
         });
     });
 });

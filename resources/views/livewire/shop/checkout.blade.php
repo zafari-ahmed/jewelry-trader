@@ -97,6 +97,10 @@
                 <div class="text-caption text-muted">
                     {{ \App\Models\Setting::get('pos.return_window_days', 30) }}-day insured return · appraisal enclosed
                 </div>
+
+                <div class="mt-10 border-t border-rule pt-10 text-caption text-muted">
+                    {{ \App\Models\Setting::get('pos.return_policy_text') }}
+                </div>
             </x-ui.card>
         </div>
     @endif

@@ -60,9 +60,21 @@
         </div>
     @endif
 
+    @foreach ($order->restockFees as $fee)
+        <div class="my-10 border-t border-dashed border-border-field"></div>
+        <div class="flex justify-between text-tiny">
+            <span>{{ $fee->wasWaived() ? 'RESTOCKING FEE WAIVED' : 'RESTOCKING FEE WITHHELD' }}</span>
+            <span>{{ number_format($fee->amount_cents / 100, 2) }}</span>
+        </div>
+        @if ($fee->waiver_reason)
+            <div class="text-tiny leading-compact">{{ strtoupper($fee->waiver_reason) }}</div>
+        @endif
+    @endforeach
+
     <div class="my-10 border-t border-dashed border-border-field"></div>
 
     <div class="text-center text-tiny leading-compact">
+        {!! nl2br(e(\App\Models\Setting::get('pos.return_policy_text'))) !!}<br /><br />
         {!! nl2br(e($footer ?: "ALL ANTIQUE & ESTATE SALES FINAL AFTER {$window} DAYS.")) !!}<br /><br />
         THANK YOU
     </div>

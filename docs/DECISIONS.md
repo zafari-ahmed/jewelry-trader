@@ -556,3 +556,94 @@ code, you have my permission to say no or to adjust it to what actually works."
 
 Apply it. Where an instruction is adjusted rather than followed, say so and say
 why — in the reply, not silently in the code.
+
+---
+
+## 2026-11-07 — The restocking fee, and three adjustments to the instruction
+
+The client's instruction (2026-11-06): "Exchanges must have a restock charge
+fee for all returns. Please ensure this is applied systematically to all return
+transactions."
+
+Built, with three departures. He has standing permission to be pushed back on,
+and asked for it in the same email.
+
+### 1. Waivable, because "all returns" cannot include faulty goods
+
+A restocking fee on an item that is defective or not as described is not
+enforceable, and in estate jewellery "not as described" is a live risk — a
+stone that turns out lab-grown, a hallmark misattributed. So the fee is charged
+by default and waived against one of `pos.restock_fee_waiver_reasons`, seeded
+with *Item defective*, *Not as described*, *Our error*, *Manager discretion*.
+
+A waiver needs the `waive-restock-fee` permission **and** a reason. The service
+rejects a reason that is not in the configured list, so an arbitrary string
+arriving from the browser cannot clear the fee. `customer-service` processes
+returns but does not get the permission — a waiver is a discount, and that role
+has no discounting.
+
+Deliberately **not** routed through Module 9's request-and-approve override
+flow, though that was the first plan. A defective-goods return happens at the
+counter with the customer waiting; a two-step approval would either hold them
+there or push staff to mislabel the return to avoid the queue. Permission plus
+mandatory reason plus audit log is both faster and harder to misuse.
+
+### 2. Off on exchanges by default
+
+His sentence conflates exchanges and refunds. The distinction is commercial: on
+a refund the money leaves and the piece needs re-listing, which is what the fee
+pays for; on an exchange the money stays and he has made a second sale.
+Charging there pushes customers toward the refund — the outcome that costs him.
+
+`pos.restock_fee_applies_to_exchanges`, default **false**. He can disagree
+without a deploy. Note the consequence when it is on: an even swap becomes the
+fee owed, and the register demands a tender for it.
+
+### 3. The tax is refunded in full regardless
+
+Not a preference — a liability. A return reverses the sale, so the whole of the
+sales tax the customer paid is owed back to them. The fee is a service charge
+against the goods price, computed **before tax**:
+
+    refund = (goods − fee) + tax_on_full_goods
+
+Pro-rating the tax down would mean keeping tax money that still has to be
+remitted. Two tests pin this. Whether the fee is itself taxable varies by
+jurisdiction and is for his accountant.
+
+### Disclosure is part of the feature
+
+Civil Code §1723 requires the refund policy to be posted, and a fee the
+customer was not told about before buying is not enforceable. So
+`pos.return_policy_text` renders at storefront checkout, on the thermal
+receipt, and on the register's returns screen. Without those three surfaces the
+fee is uncollectable, which makes them part of the build rather than polish.
+
+### Zero by default
+
+`pos.restock_fee_percent` ships at **0**, not at a guess. The percentage is the
+owner's commercial policy with a legal obligation attached, so it is not ours
+to invent — and a default would have silently reduced every refund in the
+existing tests. Until it is set, returns refund in full and both the settings
+page and the register say so in words, so an unset policy reads as a choice
+rather than a defect. The cap ships at $25,000c ($250) and only applies once a
+percentage is set: 10% of a $12,000 ring is $1,200, which is a negotiation
+rather than a policy.
+
+### Also closed: the POS settings page
+
+The `pos` registry group had existed since Module 6 with **no page behind it**,
+so `pos.return_window_days`, `pos.max_staff_discount_percent` and
+`pos.receipt_footer` were only ever changeable in code — a standing breach of
+rule 3.1 that the fee settings would have inherited. `/admin/settings/pos` now
+edits all of them.
+
+`reference` is still in the same position: registered, seeded, no page. Next.
+
+### Recorded, not totalled
+
+`restock_fees` is a row per return rather than a column on the order: a partial
+return can happen more than once against one order, and a waiver has to persist
+as a waiver because the reason is the point of it. `goods_cents` and
+`percent_applied` are stored alongside the result so a fee charged under last
+year's settings can still be explained.

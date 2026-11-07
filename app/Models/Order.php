@@ -36,6 +36,11 @@ class Order extends Model
         return $this->hasMany(OrderItem::class);
     }
 
+    public function restockFees(): HasMany
+    {
+        return $this->hasMany(RestockFee::class);
+    }
+
     public function payments(): HasMany
     {
         return $this->hasMany(Payment::class);
