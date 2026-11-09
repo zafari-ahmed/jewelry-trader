@@ -647,3 +647,55 @@ return can happen more than once against one order, and a waiver has to persist
 as a waiver because the reason is the point of it. `goods_cents` and
 `percent_applied` are stored alongside the result so a fee charged under last
 year's settings can still be explained.
+
+---
+
+## 2026-11-09 — The dashboard was never wired up
+
+Found by the client: the dashboard reported takings, queues and an activity
+feed on a database holding no orders and no products.
+
+The route was `Route::view('/', 'admin.dashboard')` — a static Blade file, no
+controller, no queries. Every figure was literal text: $18,420 of sales, 7
+pending review, 14 incomplete records, 1,284 items across 3 locations, a
+subheading hard-coded to "Wednesday, September 10", and an activity feed of
+four invented entries naming staff who do not exist (A. Whitfield, J. Ortega,
+M. Renner) against SKUs that do not exist, including a fabricated price
+override.
+
+Module 0 asked for exactly this — static screens with obvious placeholder data,
+so visual fidelity could be reviewed before there was a backend. The failure is
+that **no later module owned replacing it.** Module 4 built the CRUD, Module 8
+built the audit trail, and the screen that should have consumed both was not on
+either list. It went on quoting demo figures for every module after it.
+
+Now a Livewire component reading the database, through the models' existing
+`visibleTo` scopes so one branch's takings are not visible at another
+(rule 3.7).
+
+### Two departures from the design
+
+**"Incomplete Records — missing required fields" is now "Drafts".** A true
+count means running the field rules over every draft on every page load. A
+draft is by definition not yet submitted, which is the thing a manager is
+looking for. A real incomplete-fields figure belongs in a stored column, not a
+page-load calculation.
+
+**Refunds are reported beside the day's takings, not netted off.** Twenty sales
+and nineteen returns is not the same day as one quiet sale, and a single net
+figure conceals exactly the thing worth noticing.
+
+### Eleven orphaned static views deleted
+
+`admin/inventory`, `admin/settings/payments`, `pos/sale`, `pos/receipt`,
+`pos/payment`, `pos/return`, `pos/partials/thermal-receipt`,
+`partials/pos-cart`, `partials/pos-header`, `layouts/pos` and the dashboard
+itself. All superseded by Livewire components, none routed, and all still
+carrying the same invented names and figures — a standing trap for this same
+confusion.
+
+### The lesson worth keeping
+
+`php artisan view:cache` succeeding proves Blade compiles, not that a screen
+renders or that its numbers come from anywhere. The dashboard compiled cleanly
+for months. Only rendering it against an empty database shows what it says.

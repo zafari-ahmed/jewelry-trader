@@ -81,7 +81,7 @@ Route::middleware('auth')->prefix('two-factor')->name('two-factor.')->group(func
 | only one.
 */
 Route::middleware('auth')->prefix('admin')->name('admin.')->group(function () {
-    Route::view('/', 'admin.dashboard')->name('dashboard');
+    Route::get('/', \App\Livewire\Admin\Dashboard::class)->name('dashboard');
     Route::get('/inventory', Inventory\ProductList::class)->middleware('permission:view-products')->name('inventory');
     Route::get('/inventory/create', Inventory\ProductIntake::class)->middleware('permission:manage-products')->name('inventory.create');
     Route::get('/inventory/{product}/edit', Inventory\ProductIntake::class)->middleware('permission:view-products')->name('inventory.edit');
