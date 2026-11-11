@@ -9,6 +9,7 @@ use App\Services\Payments\Stripe\StripeApi;
 use App\Services\Payments\Tender;
 use App\Models\Location;
 use App\Models\Order;
+use App\Models\PaymentGateway;
 use Database\Seeders\PaymentGatewaySeeder;
 use Database\Seeders\SettingsSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -69,6 +70,41 @@ class PaymentFlowTest extends TestCase
         $this->assertSame('cash', $payment->method);
         $this->assertSame(0, $this->stripe->callCount('createPaymentIntent'));
         $this->assertSame(5500, $payment->splits->first()->raw_response['change']);
+    }
+
+    public function test_cash_still_works_when_no_gateway_is_configured(): void
+    {
+        // A shop whose keys are not entered yet, or whose provider is down,
+        // can still take cash — that is the whole point of cash.
+        PaymentGateway::query()->update(['is_active' => false]);
+
+        $payment = $this->service()->pay($this->orderId(), [Tender::cash(50000, cashTenderedCents: 50000)], 'EST-0001');
+
+        $this->assertSame('succeeded', $payment->status);
+        $this->assertSame('cash', $payment->method);
+        $this->assertSame('cash', $payment->gateway);
+        $this->assertSame(0, $this->stripe->callCount('createPaymentIntent'));
+    }
+
+    public function test_a_cash_payment_can_be_refunded_with_no_gateway_configured(): void
+    {
+        $payment = $this->service()->pay($this->orderId(), [Tender::cash(50000, cashTenderedCents: 50000)], 'EST-0002');
+
+        PaymentGateway::query()->update(['is_active' => false]);
+
+        $refunded = $this->service()->refund($payment->fresh('splits'), 50000);
+
+        $this->assertSame('refunded', $refunded->status);
+        $this->assertSame(50000, $refunded->amount_refunded);
+    }
+
+    public function test_a_card_sale_still_demands_a_gateway(): void
+    {
+        PaymentGateway::query()->update(['is_active' => false]);
+
+        $this->expectException(\RuntimeException::class);
+
+        $this->service()->pay($this->orderId(), [Tender::card(50000, 'pm_card_visa')], 'EST-0003');
     }
 
     public function test_a_split_card_and_cash_sale_produces_splits_that_sum_to_the_total(): void

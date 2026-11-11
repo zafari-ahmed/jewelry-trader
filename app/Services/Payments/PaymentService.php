@@ -35,7 +35,18 @@ class PaymentService
 
         $total = array_sum(array_map(fn (Tender $t) => $t->amountCents, $tenders));
         $method = count($tenders) > 1 ? 'split' : $tenders[0]->method;
-        $gateway = PaymentGatewayFactory::make();
+
+        // A gateway is required only when something is actually going to one.
+        // Cash is recorded, never charged (Module 3), so a counter must still
+        // be able to take it when no gateway is configured yet or the provider
+        // is down — which is precisely when a shop falls back to cash.
+        //
+        // Still resolved for a cash-only sale when it can be, so the payment
+        // keeps recording the gateway the shop was running at the time rather
+        // than changing what it writes once one is configured.
+        $gateway = $this->needsGateway($tenders)
+            ? PaymentGatewayFactory::make()
+            : rescue(fn () => PaymentGatewayFactory::make(), null, report: false);
 
         // Charge outside the transaction: a gateway call is not rollback-able,
         // so money must move first and be recorded second. A failure here
@@ -55,13 +66,13 @@ class PaymentService
 
             $first = array_values($failures)[0][1];
 
-            return $this->recordFailure($orderId, $total, $currency, $method, $gateway->slug(), $first);
+            return $this->recordFailure($orderId, $total, $currency, $method, $gateway?->slug() ?? 'cash', $first);
         }
 
         return DB::transaction(function () use ($orderId, $total, $currency, $method, $gateway, $outcomes) {
             $payment = Payment::create([
                 'order_id' => $orderId,
-                'gateway' => $gateway->slug(),
+                'gateway' => $gateway?->slug() ?? 'cash',
                 'gateway_transaction_id' => $method === 'split' ? null : $outcomes[0][1]->gatewayTransactionId,
                 'amount' => $total,
                 'currency' => $currency,
@@ -152,7 +163,13 @@ class PaymentService
             throw new RuntimeException('Refund exceeds the remaining refundable amount on this payment.');
         }
 
-        $gateway = PaymentGatewayFactory::make($payment->gateway);
+        // Same reason as pay(): only a card split goes back through a gateway,
+        // so a cash payment is refundable without one. A payment recorded
+        // while no gateway was configured carries the slug 'cash'.
+        $gateway = $payment->splits()->where('method', 'card')->exists()
+            ? PaymentGatewayFactory::make($payment->gateway)
+            : null;
+
         $remaining = $amountCents;
         $applied = [];
 
@@ -198,6 +215,7 @@ class PaymentService
         });
     }
 
+    /** @param  mixed  $gateway  null when every tender is cash */
     private function runTender($gateway, Tender $tender, string $description, array $metadata, string $currency): PaymentResult
     {
         // Cash is recorded, never sent to a gateway.
@@ -211,6 +229,18 @@ class PaymentService
         }
 
         return $gateway->charge($tender->amountCents, $currency, $tender->paymentMethodToken, $description, $metadata);
+    }
+
+    /** @param  Tender[]  $tenders */
+    private function needsGateway(array $tenders): bool
+    {
+        foreach ($tenders as $tender) {
+            if ($tender->method !== 'cash') {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /** @param array<array{0: Tender, 1: PaymentResult}> $outcomes */

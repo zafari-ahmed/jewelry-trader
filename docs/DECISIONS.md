@@ -699,3 +699,62 @@ confusion.
 `php artisan view:cache` succeeding proves Blade compiles, not that a screen
 renders or that its numbers come from anywhere. The dashboard compiled cleanly
 for months. Only rendering it against an empty database shows what it says.
+
+---
+
+## 2026-11-11 — Demo data, and cash without a gateway
+
+The client asked for dummy items, customers and sample data so he can walk the
+whole workflow without first typing a day's inventory.
+
+### It has to be unmistakable, and reversible
+
+Built as `jt:demo-data`, not a seeder folded into `db:seed`. Two days earlier
+this project had a dashboard quoting $18,420 of invented sales, and the lesson
+holds: demo data that cannot be told apart from real data is worse than none.
+
+So every record is marked. Products are `DEMO-####`. People are on
+`@demo.invalid`, a reserved domain that cannot receive mail. `--purge` removes
+exactly what the command wrote, identified by those markers, and a test asserts
+a real product and a real customer survive it.
+
+The audit trail is **not** purged. Entries about demo records are a true
+account of what happened to the database, and a log that can be cleared is not
+a log.
+
+### Sales go through the real code
+
+Orders are created by `PosSaleService` with cash tenders rather than written as
+rows, so the payments, the stock flipping to sold, the refund path and the
+order numbering are all produced by the code the client is testing. Cash means
+no gateway is touched and no money moves.
+
+Staff logins are opt-in (`--staff`) and the password is **prompted for, never
+in the source**. They are real logins that outlive the demo unless somebody
+purges them. Without the flag the demo records are attributed to whoever is
+already on the system, by role where possible — otherwise the overrides, locks
+and commissions would be the parts that came up empty, and those are the parts
+most worth seeing.
+
+Two records are deliberately awkward: a draft missing its required fields, and
+a lab-grown ruby with no treatment recorded, left `approved` because the
+listing gate refuses it. The client meets the compliance stop rather than
+reading about it.
+
+### A defect found on the way: cash needed a gateway
+
+`PaymentService::pay()` called `PaymentGatewayFactory::make()` before looking
+at a single tender, so an all-cash sale failed when no gateway was configured.
+`refund()` did the same. Module 3 specifies cash as "recorded, no gateway
+call", and a shop falls back to cash **precisely** when the provider is down or
+the keys are not in yet — so this broke the one path that should always work.
+
+Now the gateway is required only when a tender actually needs one. For a
+cash-only sale it is still resolved when it can be, so a payment keeps
+recording the gateway the shop was running at the time rather than changing
+what it writes once one is configured; where none resolves, the slug is `cash`.
+A card sale with no active gateway still fails, and there is a test for that
+too.
+
+Found only because the demo command runs the real register on a database with
+no Stripe keys. No existing test covered it: they all seed the gateway first.
