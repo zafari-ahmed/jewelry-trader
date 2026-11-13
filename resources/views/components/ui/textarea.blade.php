@@ -21,4 +21,4 @@
     };
 @endphp
 <textarea rows="{{ $rows }}" @disabled($disabled) {{ $attributes->class([$hasWidth ? '' : 'w-full',
-        'px-11 py-9 rounded-surface text-body leading-body outline-none transition-colors', $palette ?? $statusTone]) }}>{{ $slot }}</textarea>
+        'border px-11 py-9 rounded-surface text-body leading-body outline-none transition-colors', $palette ?? $statusTone]) }}>{{ $slot }}</textarea>

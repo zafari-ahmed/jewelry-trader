@@ -18,11 +18,22 @@
         </button>
 
         <template x-if="chart">
+            {{--
+                Dismissed by clicking the backdrop itself (@click.self), not by
+                detecting a click outside the panel.
+
+                @click.outside listens at the document, and the very click that
+                opens this modal is still travelling up to the document when
+                the panel appears — so the handler saw its own opening click as
+                an outside one and shut the modal in the same tick. It read as
+                a button that did nothing at all.
+            --}}
             <div
                 x-on:keydown.escape.window="chart = false"
+                @click.self="chart = false"
                 class="fixed inset-0 z-30 flex items-center justify-center bg-scrim-ink px-20 py-20"
             >
-                <div @click.outside="chart = false" class="flex max-h-full w-full max-w-chart flex-col rounded-surface border border-border-card bg-surface">
+                <div class="flex max-h-full w-full max-w-chart flex-col rounded-surface border border-border-card bg-surface">
                     <div class="flex flex-wrap items-baseline gap-14 border-b border-hairline px-20 py-13">
                         <span class="text-card-title font-bold text-ink">Jeweller's reference chart</span>
                         <span class="text-label text-muted">Cuts, shapes, weights and disclosure — internal reference</span>

@@ -31,6 +31,43 @@ class FieldComponentTest extends TestCase
         $this->assertStringContainsString('border-border-field', $html);
     }
 
+    /** The class tokens on the rendered element. */
+    private function classesOf(string $html): array
+    {
+        preg_match('/class="([^"]*)"/', $html, $matches);
+
+        return preg_split('/\s+/', trim($matches[1] ?? ''), -1, PREG_SPLIT_NO_EMPTY);
+    }
+
+    /**
+     * Every variant has to draw an edge, not merely name a colour for one.
+     *
+     * These components set `border-border-field` and friends, which is a
+     * colour. Tailwind's reset leaves border-width at 0, so for months every
+     * field in the application rendered as plain text on the page — white on
+     * ivory, with nothing round it. Only the tinted statuses looked like
+     * fields at all, and only because of their background.
+     *
+     * The old assertion here passed throughout, because it checked for the
+     * colour.
+     */
+    #[\PHPUnit\Framework\Attributes\DataProvider('fieldComponents')]
+    public function test_every_variant_draws_a_border_and_not_only_a_colour(string $component): void
+    {
+        foreach ([null, 'red', 'yellow', 'green', 'neutral', 'gray', 'blue'] as $status) {
+            foreach (['light', 'dark'] as $tone) {
+                $attributes = $status ? " status=\"{$status}\"" : '';
+                $classes = $this->classesOf(Blade::render("<x-{$component} tone=\"{$tone}\"{$attributes} />"));
+
+                $this->assertContains(
+                    'border',
+                    $classes,
+                    "<x-{$component}> [status: ".($status ?? 'default').", tone: {$tone}] sets a border colour with no width.",
+                );
+            }
+        }
+    }
+
     #[\PHPUnit\Framework\Attributes\DataProvider('fieldComponents')]
     public function test_the_dark_tone_renders_readable_text_on_navy(string $component): void
     {

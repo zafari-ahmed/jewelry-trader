@@ -20,6 +20,6 @@
     };
 @endphp
 <select @disabled($disabled) {{ $attributes->class([$hasWidth ? '' : 'w-full',
-        'px-11 py-9 rounded-surface text-body outline-none transition-colors', $palette ?? $statusTone]) }}>
+        'border px-11 py-9 rounded-surface text-body outline-none transition-colors', $palette ?? $statusTone]) }}>
     {{ $slot }}
 </select>

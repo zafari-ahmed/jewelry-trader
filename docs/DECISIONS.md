@@ -758,3 +758,50 @@ too.
 
 Found only because the demo command runs the real register on a database with
 no Stripe keys. No existing test covered it: they all seed the gateway first.
+
+---
+
+## 2026-11-13 — Two faults found by looking at the screen
+
+Both reported by the client. Both had passing tests over them the whole time.
+
+### Every form field in the application was borderless
+
+`x-ui.input`, `x-ui.select` and `x-ui.textarea` set a border **colour**
+(`border-border-field`, `border-status-required`…) and never a border
+**width**. Tailwind's reset puts `border-width: 0` on everything, so the
+colours named an edge that was never drawn. On white-on-ivory the field read
+as plain text; only the tinted statuses — yellow suggested, grey not-applicable
+— looked like fields at all, and only because of their background.
+
+`FieldComponentTest` asserted `border-border-field` was present and passed
+throughout, which is the whole lesson: it checked for the colour.
+
+Fixed by adding `border` to the shared class list of all three. The new test
+walks every status and both tones and asserts the token `border` is on the
+element; removing the fix makes it fail, which was checked rather than assumed.
+
+An audit of every other component and view found no second instance.
+
+### The reference chart closed itself the moment it opened
+
+`@click.outside` on the modal panel listens at the document. The click that
+opens the modal is still travelling up to the document when the panel appears,
+so the handler treated its own opening click as an outside one and shut the
+modal in the same tick. The button looked completely dead.
+
+Now the backdrop dismisses itself with `@click.self`, which cannot see the
+opening click because the click never lands on the backdrop. Verified in a
+browser: opens from the Reference Library and from the stones section of
+intake, image loads, backdrop and Escape both dismiss.
+
+### Why neither was caught
+
+Both are browser behaviour, and this feature was built in a session where the
+sign-in route needed for a browser check was refused. It was verified with
+Livewire render tests and a storefront screenshot instead — which proves markup
+is produced, not that a page works. A render test cannot see a border-width of
+zero and cannot click anything.
+
+**Verify interactively before calling an interface done.** `view:cache`
+compiling and a render test passing mean the Blade is valid, nothing more.

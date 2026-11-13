@@ -25,7 +25,7 @@
     @disabled($disabled)
     {{ $attributes->class([
         $hasWidth ? '' : 'w-full',
-        'px-11 py-9 rounded-surface text-body outline-none transition-colors',
+        'border px-11 py-9 rounded-surface text-body outline-none transition-colors',
         $mono ? 'font-mono text-body-sm' : '',
         $palette ?? $statusTone,
     ]) }}
