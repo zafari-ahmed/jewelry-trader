@@ -805,3 +805,50 @@ zero and cannot click anything.
 
 **Verify interactively before calling an interface done.** `view:cache`
 compiling and a render test passing mean the Blade is valid, nothing more.
+
+---
+
+## 2026-11-13 (later) — Validation messages named our variables
+
+The customer form told people **"The form.name field is required."**
+`form.name` is the name of a property in our code, not of the box they are
+looking at.
+
+Livewire validates nested state — `form.name`, `state.restock_fee_percent`,
+`stones.0.treatment` — and Laravel, having no name for a dotted path, falls
+back to printing the path. Thirteen components validate that way. Exactly one,
+the payments page, had ever supplied names.
+
+### Derived, not listed
+
+`NamesFieldsInMessages` takes the last meaningful segment of the path, drops
+indices and wildcards, and turns underscores into spaces: `form.name` →
+"name", `state.restock_fee_percent` → "restock fee percent",
+`stones.0.stone_type` → "stone type". A component overrides `fieldNames()`
+where the derived word is poor, and any `validationAttributes()` already
+declared still wins over the derivation, so the payments page keeps its
+hand-written names.
+
+Listing every field by hand across thirteen components would have gone stale
+the first time somebody added a field. Deriving means a new field reads
+properly without anyone remembering anything.
+
+It overrides `validate()` rather than `validationAttributes()` because six of
+the thirteen pass their rules inline, and an inline `validate([...])` never
+consults the attributes a component declares.
+
+### Two things found while testing it
+
+**`variant="ghost"` did not exist.** The POS settings page used it and the
+button component looked it up in an array with no fallback, so the whole page
+died with "Undefined array key". Mine, from the restocking-fee work, and never
+seen because that page had not been opened in a browser.
+
+The button now falls back to its default for an unknown variant or size — a
+page should not die over a class name — and a test lists every variant used
+across the views and fails on one the component does not define. Checked by
+reintroducing the typo and watching it fail, rather than assuming.
+
+**Customer uniqueness on edit** is covered now too: saving a customer without
+changing their email must not collide with their own row. It already worked;
+there was no test holding it in place.

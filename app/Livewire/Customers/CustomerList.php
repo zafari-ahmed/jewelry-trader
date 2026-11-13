@@ -5,11 +5,14 @@ namespace App\Livewire\Customers;
 use App\Models\Customer;
 use Illuminate\Support\Facades\Gate;
 use Livewire\Attributes\Url;
+use App\Livewire\Concerns\NamesFieldsInMessages;
 use Livewire\Component;
 use Livewire\WithPagination;
 
 class CustomerList extends Component
 {
+    use NamesFieldsInMessages;
+
     use WithPagination;
 
     #[Url] public string $search = '';

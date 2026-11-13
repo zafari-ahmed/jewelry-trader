@@ -6,10 +6,13 @@ use App\Models\Location;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
+use App\Livewire\Concerns\NamesFieldsInMessages;
 use Livewire\Component;
 
 class Locations extends Component
 {
+    use NamesFieldsInMessages;
+
     public ?int $editingId = null;
 
     public array $form = [

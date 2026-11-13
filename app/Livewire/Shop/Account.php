@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Computed;
+use App\Livewire\Concerns\NamesFieldsInMessages;
 use Livewire\Component;
 
 /**
@@ -16,6 +17,8 @@ use Livewire\Component;
  */
 class Account extends Component
 {
+    use NamesFieldsInMessages;
+
     public string $mode = 'login';       // login | register
 
     public array $form = ['email' => '', 'password' => '', 'name' => '', 'password_confirmation' => ''];

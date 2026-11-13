@@ -61,7 +61,7 @@
                             <x-ui.input wire:model="state.restock_fee_waiver_reasons.{{ $i }}" />
                             @error("state.restock_fee_waiver_reasons.{$i}")<div class="mt-4 text-caption text-status-required">{{ $message }}</div>@enderror
                         </div>
-                        <x-ui.button type="button" variant="ghost" size="sm" wire:click="removeWaiverReason({{ $i }})">Remove</x-ui.button>
+                        <x-ui.button type="button" variant="discard" size="sm" wire:click="removeWaiverReason({{ $i }})">Remove</x-ui.button>
                     </div>
                 @endforeach
                 <x-ui.button type="button" variant="secondary" size="sm" wire:click="addWaiverReason">Add a reason</x-ui.button>

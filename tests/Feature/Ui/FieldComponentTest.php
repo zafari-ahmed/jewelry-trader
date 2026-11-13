@@ -105,6 +105,49 @@ class FieldComponentTest extends TestCase
         $this->assertSame([], $offenders, "Write a plain & in component props:\n".implode("\n", $offenders));
     }
 
+    /**
+     * The button falls back to its default rather than crashing on an unknown
+     * variant, so a typo would otherwise be silent — a "ghost" button that
+     * quietly rendered as a secondary one. This is where it gets caught.
+     *
+     * Found the hard way: `variant="ghost"` existed in the POS settings page
+     * and took the whole page down with an undefined-key error.
+     */
+    public function test_every_button_variant_and_size_used_in_a_view_exists(): void
+    {
+        $component = file_get_contents(resource_path('views/components/ui/button.blade.php'));
+
+        preg_match('/\$variants = \[(.*?)\];/s', $component, $variantBlock);
+        preg_match('/\$sizes = \[(.*?)\];/s', $component, $sizeBlock);
+
+        preg_match_all("/'([a-z-]+)' =>/", $variantBlock[1] ?? '', $m);
+        $variants = $m[1];
+
+        preg_match_all("/'([a-z-]+)' =>/", $sizeBlock[1] ?? '', $m);
+        $sizes = $m[1];
+
+        $this->assertNotEmpty($variants, 'Could not read the variant list out of the button component.');
+
+        $offenders = [];
+
+        foreach ($this->bladeFiles() as $file) {
+            $contents = file_get_contents($file);
+            $short = str_replace(resource_path('views').'/', '', $file);
+
+            foreach ([['variant', $variants], ['size', $sizes]] as [$prop, $known]) {
+                preg_match_all('/<x-ui\.button[^>]*?'.$prop.'="([a-z-]+)"/s', $contents, $used);
+
+                foreach (array_unique($used[1]) as $value) {
+                    if (! in_array($value, $known, true)) {
+                        $offenders[] = "{$short}: {$prop}=\"{$value}\"";
+                    }
+                }
+            }
+        }
+
+        $this->assertSame([], $offenders, "Unknown button variant or size:\n".implode("\n", $offenders));
+    }
+
     /** @return \Generator<string> */
     private function bladeFiles(): \Generator
     {

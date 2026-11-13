@@ -10,6 +10,7 @@ use App\Services\Storefront\StorefrontCart;
 use App\Models\Location;
 use App\Models\Setting;
 use Livewire\Attributes\Computed;
+use App\Livewire\Concerns\NamesFieldsInMessages;
 use Livewire\Component;
 
 /**
@@ -23,6 +24,8 @@ use Livewire\Component;
  */
 class Checkout extends Component
 {
+    use NamesFieldsInMessages;
+
     public array $form = [
         'email' => '', 'name' => '', 'phone' => '',
         'street' => '', 'city' => '', 'state' => '', 'postal_code' => '',

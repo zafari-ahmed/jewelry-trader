@@ -32,9 +32,15 @@
         default => 'border-disabled-border bg-disabled-ground text-disabled cursor-not-allowed',
     };
 
+    // An unrecognised variant or size falls back rather than taking the whole
+    // page down with an undefined-key error. A typo is caught by the suite
+    // instead, which lists every variant used across the views.
+    $variantClasses = $variants[$variant] ?? $variants['secondary'];
+    $sizeClasses = $sizes[$size] ?? $sizes['md'];
+
     $classes = $disabled
-        ? $base . ' ' . $sizes[$size] . ' ' . $disabledClasses . ' ' . ($variant === 'primary' || $variant === 'approve' || $variant === 'danger' || $variant === 'pos-primary' ? 'font-semibold' : '')
-        : $base . ' ' . $sizes[$size] . ' ' . $variants[$variant] . ' cursor-pointer';
+        ? $base . ' ' . $sizeClasses . ' ' . $disabledClasses . ' ' . ($variant === 'primary' || $variant === 'approve' || $variant === 'danger' || $variant === 'pos-primary' ? 'font-semibold' : '')
+        : $base . ' ' . $sizeClasses . ' ' . $variantClasses . ' cursor-pointer';
 @endphp
 
 @if ($href && ! $disabled)

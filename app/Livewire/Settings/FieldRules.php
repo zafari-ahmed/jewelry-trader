@@ -6,6 +6,7 @@ use App\Models\Category;
 use App\Models\FieldColorRule;
 use App\Services\Inventory\FieldColorResolver;
 use Illuminate\Support\Facades\Gate;
+use App\Livewire\Concerns\NamesFieldsInMessages;
 use Livewire\Component;
 
 /**
@@ -15,6 +16,8 @@ use Livewire\Component;
  */
 class FieldRules extends Component
 {
+    use NamesFieldsInMessages;
+
     public string $category = '';
 
     public ?int $editingId = null;

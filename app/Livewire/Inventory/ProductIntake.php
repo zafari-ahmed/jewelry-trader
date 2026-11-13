@@ -13,6 +13,7 @@ use App\Services\Inventory\ProductIntakeService;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Gate;
 use Livewire\Attributes\Computed;
+use App\Livewire\Concerns\NamesFieldsInMessages;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 
@@ -26,6 +27,8 @@ use Livewire\WithFileUploads;
  */
 class ProductIntake extends Component
 {
+    use NamesFieldsInMessages;
+
     use WithFileUploads;
 
     /** The columns a stone row carries, in the order they are entered. */

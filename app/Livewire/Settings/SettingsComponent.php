@@ -6,6 +6,7 @@ use App\Models\Setting;
 use App\Support\SettingsRegistry;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
+use App\Livewire\Concerns\NamesFieldsInMessages;
 use Livewire\Component;
 
 /**
@@ -14,6 +15,8 @@ use Livewire\Component;
  */
 abstract class SettingsComponent extends Component
 {
+    use NamesFieldsInMessages;
+
     public array $state = [];
 
     public ?string $saved = null;
